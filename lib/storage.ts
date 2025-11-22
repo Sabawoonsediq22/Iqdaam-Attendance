@@ -16,12 +16,18 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { eq, and, SQL } from "drizzle-orm";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is required");
-}
+let db: ReturnType<typeof drizzle> | null = null;
 
-const sql = neon(process.env.DATABASE_URL);
-export const db = drizzle(sql);
+function getDb() {
+  if (!db) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is required");
+    }
+    const sql = neon(process.env.DATABASE_URL);
+    db = drizzle(sql);
+  }
+  return db;
+}
 
 export interface IStorage {
   getClass(id: string): Promise<Class | undefined>;
@@ -61,40 +67,40 @@ export interface IStorage {
 
 export class DrizzleStorage implements IStorage {
   async getClass(id: string): Promise<Class | undefined> {
-    const result = await db.select().from(classes).where(eq(classes.id, id)).limit(1);
+    const result = await getDb().select().from(classes).where(eq(classes.id, id)).limit(1);
     return result[0];
   }
 
   async getAllClasses(): Promise<Class[]> {
-    return await db.select().from(classes);
+    return await getDb().select().from(classes);
   }
 
   async createClass(cls: InsertClass): Promise<Class> {
-    const result = await db.insert(classes).values(cls).returning();
+    const result = await getDb().insert(classes).values(cls).returning();
     return result[0];
   }
 
   async updateClass(id: string, cls: Partial<InsertClass>): Promise<Class | undefined> {
-    const result = await db.update(classes).set(cls).where(eq(classes.id, id)).returning();
+    const result = await getDb().update(classes).set(cls).where(eq(classes.id, id)).returning();
     return result[0];
   }
 
   async deleteClass(id: string): Promise<boolean> {
-    const result = await db.delete(classes).where(eq(classes.id, id));
+    const result = await getDb().delete(classes).where(eq(classes.id, id));
     return result.rowCount > 0;
   }
 
   async getStudent(id: string): Promise<Student | undefined> {
-    const result = await db.select().from(students).where(eq(students.id, id)).limit(1);
+    const result = await getDb().select().from(students).where(eq(students.id, id)).limit(1);
     return result[0];
   }
 
   async getStudentsByClass(classId: string): Promise<Student[]> {
-    return await db.select().from(students).where(eq(students.classId, classId));
+    return await getDb().select().from(students).where(eq(students.classId, classId));
   }
 
   async getAllStudents(): Promise<Student[]> {
-    return await db.select().from(students);
+    return await getDb().select().from(students);
   }
 
   async createStudent(student: InsertStudent): Promise<Student> {
@@ -103,38 +109,38 @@ export class DrizzleStorage implements IStorage {
     if (!studentData.studentId || studentData.studentId.trim() === '') {
       delete studentData.studentId;
     }
-    const result = await db.insert(students).values(studentData).returning();
+    const result = await getDb().insert(students).values(studentData).returning();
     return result[0];
   }
 
   async updateStudent(id: string, student: Partial<InsertStudent>): Promise<Student | undefined> {
-    const result = await db.update(students).set(student).where(eq(students.id, id)).returning();
+    const result = await getDb().update(students).set(student).where(eq(students.id, id)).returning();
     return result[0];
   }
 
   async deleteStudent(id: string): Promise<boolean> {
-    const result = await db.delete(students).where(eq(students.id, id));
+    const result = await getDb().delete(students).where(eq(students.id, id));
     return result.rowCount > 0;
   }
 
   async deleteStudentsByClass(classId: string): Promise<boolean> {
-    const result = await db.delete(students).where(eq(students.classId, classId));
+    const result = await getDb().delete(students).where(eq(students.classId, classId));
     return result.rowCount >= 0; // Always true since it can delete 0 or more
   }
 
   async getAttendance(id: string): Promise<Attendance | undefined> {
-    const result = await db.select().from(attendance).where(eq(attendance.id, id)).limit(1);
+    const result = await getDb().select().from(attendance).where(eq(attendance.id, id)).limit(1);
     return result[0];
   }
 
   async getAttendanceByClassAndDate(classId: string, date: string): Promise<Attendance[]> {
-    return await db.select().from(attendance).where(
+    return await getDb().select().from(attendance).where(
       and(eq(attendance.classId, classId), eq(attendance.date, date))
     );
   }
 
   async getAttendanceByClassAndDateParts(classId: string, day: string, month: string, year: string): Promise<Attendance[]> {
-    return await db.select().from(attendance).where(
+    return await getDb().select().from(attendance).where(
       and(
         eq(attendance.classId, classId),
         eq(attendance.day, day),
@@ -145,40 +151,40 @@ export class DrizzleStorage implements IStorage {
   }
 
   async getAttendanceByStudent(studentId: string): Promise<Attendance[]> {
-    return await db.select().from(attendance).where(eq(attendance.studentId, studentId));
+    return await getDb().select().from(attendance).where(eq(attendance.studentId, studentId));
   }
 
   async getFilteredAttendance(conditions: SQL[]): Promise<Attendance[]> {
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-    return await db.select().from(attendance).where(whereClause);
+    return await getDb().select().from(attendance).where(whereClause);
   }
 
   async getAllAttendance(): Promise<Attendance[]> {
-    return await db.select().from(attendance);
+    return await getDb().select().from(attendance);
   }
 
   async createAttendance(attendanceData: InsertAttendance): Promise<Attendance> {
-    const result = await db.insert(attendance).values(attendanceData).returning();
+    const result = await getDb().insert(attendance).values(attendanceData).returning();
     return result[0];
   }
 
   async updateAttendance(id: string, attendanceData: Partial<InsertAttendance>): Promise<Attendance | undefined> {
-    const result = await db.update(attendance).set(attendanceData).where(eq(attendance.id, id)).returning();
+    const result = await getDb().update(attendance).set(attendanceData).where(eq(attendance.id, id)).returning();
     return result[0];
   }
 
   async deleteAttendance(id: string): Promise<boolean> {
-    const result = await db.delete(attendance).where(eq(attendance.id, id));
+    const result = await getDb().delete(attendance).where(eq(attendance.id, id));
     return result.rowCount > 0;
   }
 
   async deleteAttendanceByClass(classId: string): Promise<boolean> {
-    const result = await db.delete(attendance).where(eq(attendance.classId, classId));
+    const result = await getDb().delete(attendance).where(eq(attendance.classId, classId));
     return result.rowCount >= 0; // Always true since it can delete 0 or more
   }
 
   async bulkCreateAttendance(attendances: InsertAttendance[]): Promise<Attendance[]> {
-    return await db.insert(attendance).values(attendances).returning();
+    return await getDb().insert(attendance).values(attendances).returning();
   }
 
   async bulkUpsertAttendance(attendances: InsertAttendance[]): Promise<Attendance[]> {
@@ -188,7 +194,7 @@ export class DrizzleStorage implements IStorage {
     const { classId, day, month, year } = attendances[0];
 
     // Delete existing attendance records for this class/date combination
-    await db.delete(attendance).where(
+    await getDb().delete(attendance).where(
       and(
         eq(attendance.classId, classId),
         eq(attendance.day, day),
@@ -198,15 +204,15 @@ export class DrizzleStorage implements IStorage {
     );
 
     // Insert the new attendance records
-    return await db.insert(attendance).values(attendances).returning();
+    return await getDb().insert(attendance).values(attendances).returning();
   }
 
   async getAllNotifications(): Promise<Notification[]> {
-    return await db.select().from(notifications).orderBy(notifications.createdAt).limit(100);
+    return await getDb().select().from(notifications).orderBy(notifications.createdAt).limit(100);
   }
 
   async getUnreadNotificationsCount(): Promise<number> {
-    const result = await db
+    const result = await getDb()
       .select()
       .from(notifications)
       .where(eq(notifications.isRead, false));
@@ -214,12 +220,12 @@ export class DrizzleStorage implements IStorage {
   }
 
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    const result = await db.insert(notifications).values(notification).returning();
+    const result = await getDb().insert(notifications).values(notification).returning();
     return result[0];
   }
 
   async markNotificationAsRead(id: string): Promise<boolean> {
-    const result = await db
+    const result = await getDb()
       .update(notifications)
       .set({ isRead: true })
       .where(eq(notifications.id, id));
@@ -227,7 +233,7 @@ export class DrizzleStorage implements IStorage {
   }
 
   async markAllNotificationsAsRead(): Promise<boolean> {
-    const result = await db
+    const result = await getDb()
       .update(notifications)
       .set({ isRead: true })
       .where(eq(notifications.isRead, false));
@@ -235,7 +241,7 @@ export class DrizzleStorage implements IStorage {
   }
 
   async deleteNotification(id: string): Promise<boolean> {
-    const result = await db.delete(notifications).where(eq(notifications.id, id));
+    const result = await getDb().delete(notifications).where(eq(notifications.id, id));
     return result.rowCount > 0;
   }
 }
