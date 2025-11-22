@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -85,9 +85,11 @@ export default function AuthPage() {
         return;
       }
 
-      // Redirect will be handled by middleware, but we can force a redirect here
-      // The middleware will handle the proper routing based on user role and approval status
-      window.location.href = "/dashboard";
+      // Ensure session is updated immediately
+      await getSession();
+
+      // Use router.push for instant navigation without full page reload
+      router.push("/dashboard");
     } catch {
       toast.error("An error occurred. Please try again.");
       setIsLoading(false);

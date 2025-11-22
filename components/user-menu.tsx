@@ -28,7 +28,7 @@ import { useState } from "react";
 
 export function UserMenu() {
   const { data: session } = useSession();
-  const { avatar, userData } = useUser();
+  const { avatar } = useUser(); // Only use avatar from useUser, rest from session
   const { theme, setTheme } = useTheme();
   const [changeIcon, setChangeIcon] = useState(true);
   const router = useRouter();
@@ -67,7 +67,7 @@ export function UserMenu() {
         >
           <Avatar className="h-10 w-10 rounded-full ring-2 ring-background shadow-lg">
             <AvatarImage
-              src={avatar || undefined}
+              src={avatar || (session.user as ExtendedUser).image || undefined}
               alt={session.user.name || ""}
               className="rounded-full"
             />
@@ -92,24 +92,24 @@ export function UserMenu() {
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12 rounded-full ring-2 ring-primary/20">
                 <AvatarImage
-                  src={avatar || undefined}
-                  alt={userData?.name || session?.user?.name || ""}
+                  src={avatar || (session.user as ExtendedUser).image || undefined}
+                  alt={session.user.name || ""}
                   className="rounded-full"
                 />
                 <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/10 text-primary font-bold rounded-full">
-                  {getInitials(userData?.name || session?.user?.name || "U")}
+                  {getInitials(session.user.name || "U")}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col space-y-1 min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-none truncate">{userData?.name || session?.user?.name}</p>
+                <p className="text-sm font-semibold leading-none truncate">{session.user.name}</p>
                 <p className="text-xs leading-none text-muted-foreground truncate">
-                  {userData?.email || session?.user?.email}
+                  {session.user.email}
                 </p>
                 <div className="flex items-center space-x-1">
                   <span className="text-xs leading-none text-muted-foreground capitalize">
-                    {userData?.role || (session?.user as ExtendedUser)?.role}
+                    {(session.user as ExtendedUser).role}
                   </span>
-                  {(userData?.role === "admin" || (session?.user as ExtendedUser)?.role === "admin") && (
+                  {(session.user as ExtendedUser).role === "admin" && (
                     <Crown className="h-3 w-3 text-yellow-500" />
                   )}
                 </div>
