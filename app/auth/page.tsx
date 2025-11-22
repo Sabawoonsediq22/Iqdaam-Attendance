@@ -1,6 +1,15 @@
 "use client";
 
 import { useState } from "react";
+
+interface ExtendedUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  isApproved: boolean;
+  image?: string;
+}
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
@@ -86,10 +95,14 @@ export default function AuthPage() {
       }
 
       // Ensure session is updated immediately
-      await getSession();
+      const updatedSession = await getSession();
 
-      // Use router.push for instant navigation without full page reload
-      router.push("/dashboard");
+      // Redirect based on role
+      if ((updatedSession?.user as ExtendedUser)?.role === "admin") {
+        router.push("/attendance");
+      } else {
+        router.push("/attendance"); // Teachers also go to attendance
+      }
     } catch {
       toast.error("An error occurred. Please try again.");
       setIsLoading(false);
