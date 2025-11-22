@@ -1,0 +1,390 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Lock, User, Mail, UserCheck } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+export default function AuthPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Sign-up states
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [signupRole, setSignupRole] = useState("");
+  const [signupIsLoading, setSignupIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  const router = useRouter();
+
+  // Check if this is the first user
+  const { data: userCount = 0 } = useQuery({
+    queryKey: ["/api/users/count"],
+    queryFn: async () => {
+      const res = await fetch("/api/users/count");
+      if (!res.ok) return 0;
+      const data = await res.json();
+      return data.count || 0;
+    },
+  });
+
+  const isFirstUser = userCount === 0;
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // First check if user exists and is approved
+      const checkResponse = await fetch("/api/auth/check-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const userCheck = await checkResponse.json();
+
+      if (!checkResponse.ok) {
+        toast.error(userCheck.error || "An error occurred");
+        setIsLoading(false);
+        return;
+      }
+
+      // If user exists but is not approved, show specific message
+      if (userCheck.exists && !userCheck.approved) {
+        toast.error(userCheck.message || "Your account is pending approval. Please contact an administrator.");
+        setIsLoading(false);
+        return;
+      }
+
+      // If user doesn't exist or is approved, proceed with authentication
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("Invalid email or password");
+        setIsLoading(false);
+        return;
+      }
+
+      // Redirect will be handled by middleware, but we can force a redirect here
+      // The middleware will handle the proper routing based on user role and approval status
+      window.location.href = "/dashboard";
+    } catch {
+      toast.error("An error occurred. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignupIsLoading(true);
+
+    // Basic validation
+    if (signupPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      setSignupIsLoading(false);
+      return;
+    }
+
+    if (signupPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      setSignupIsLoading(false);
+      return;
+    }
+
+    if (!isFirstUser && !signupRole) {
+      toast.error("Please select a role");
+      setSignupIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: signupName,
+          email: signupEmail,
+          password: signupPassword,
+          role: isFirstUser ? "admin" : signupRole,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+
+      // Success
+      toast.success(data.message || "Account created successfully!");
+
+      // Store email for status checking
+      localStorage.setItem('pendingUserEmail', signupEmail);
+
+      if (isFirstUser) {
+        router.push("/dashboard"); // Redirect first user to dashboard
+      } else {
+        router.push("/pending-approval"); // Redirect to pending approval page
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Registration failed");
+    } finally {
+      setSignupIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 border border-primary/20">
+              <Image src="/logo.svg" alt="Logo" width={32} height={32} className="text-primary" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            {isSignUp ? "Create Account" : "Welcome Back"}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            {isSignUp ? "Sign up to get started with StudentTracker" : "Sign in to access StudentTracker"}
+          </p>
+        </div>
+
+        {/* Auth Forms */}
+        <Card className="shadow-xl border-0">
+          <CardContent className="p-6">
+            {isSignUp ? (
+              <form onSubmit={handleSignUp} className="space-y-4">
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name" className="text-sm font-medium">
+                    Full Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={signupName}
+                      onChange={(e) => setSignupName(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email" className="text-sm font-medium">
+                    Email
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password" className="text-sm font-medium">
+                    Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Create a password"
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password" className="text-sm font-medium">
+                    Confirm Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {isFirstUser ? (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Role
+                    </Label>
+                    <div className="relative">
+                      <UserCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                      <div className="pl-10 pr-3 py-2 border border-input bg-background rounded-md text-sm">
+                        Admin (First user is automatically admin)
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-role" className="text-sm font-medium">
+                      Role
+                    </Label>
+                    <div className="relative">
+                      <UserCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                      <Select value={signupRole} onValueChange={setSignupRole}>
+                        <SelectTrigger className="pl-10">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="teacher">Teacher</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={signupIsLoading}
+                >
+                  {signupIsLoading ? "Creating Account..." : "Sign Up"}
+                </Button>
+
+                <div className="text-center mt-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setIsSignUp(false)}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Sign in
+                    </button>
+                  </p>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSignIn} className="space-y-4">
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-sm font-medium">
+                      Password
+                    </Label>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end mt-1">
+                  <Link
+                      href="/auth/forgot-password"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing In..." : "Sign In"}
+                </Button>
+
+                <div className="text-center mt-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Don&apos;t have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setIsSignUp(true)}
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                </div>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Student Attendance Tracking System
+          </p>
+        </div>
+      </div>
+      </div>
+  );
+}

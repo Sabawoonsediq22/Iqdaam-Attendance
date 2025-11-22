@@ -1,0 +1,823 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface ExtendedUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  isApproved: boolean;
+  image?: string;
+}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { AttendanceBadge } from "@/components/attendance-badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Download, Calendar as CalendarIcon, Filter, RefreshCw, Mail } from "lucide-react";
+import { Loader } from "@/components/loader";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { format, subWeeks } from "date-fns";
+import { cn } from "@/lib/utils";
+import jsPDF from "jspdf";
+import { autoTable } from "jspdf-autotable";
+import * as XLSX from "xlsx";
+import type { Student, Class } from "@/lib/schema";
+
+interface ReportStudent {
+  id: string;
+  name: string;
+  studentId: string | null;
+  avatar: string | null;
+}
+
+interface AttendanceRecord {
+  id: string;
+  studentId: string;
+  classId: string;
+  date: string;
+  status: string;
+  student?: ReportStudent;
+  class?: {
+    id: string;
+    name: string;
+  };
+}
+
+interface ChartData {
+  date?: string;
+  class?: string;
+  student?: string;
+  present: number;
+  absent: number;
+  late: number;
+  total: number;
+}
+
+interface ReportData {
+  type: string;
+  startDate: string;
+  endDate: string;
+  summary: {
+    totalRecords: number;
+    presentCount: number;
+    absentCount: number;
+    lateCount: number;
+    attendanceRate: number;
+  };
+  attendance: AttendanceRecord[];
+  charts: {
+    byDate: ChartData[];
+    byClass: ChartData[];
+    byStudent: ChartData[];
+  };
+}
+
+
+interface Props {
+  students: Student[];
+  classes: Class[];
+}
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+export default function ReportsClient({ students, classes }: Props) {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  // Redirect teachers to attendance page
+  useEffect(() => {
+    if ((session?.user as ExtendedUser)?.role === "teacher") {
+      router.push("/attendance");
+    }
+  }, [session, router]);
+
+  const [reportType, setReportType] = useState("daily");
+  const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filters
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
+  const [selectedClass, setSelectedClass] = useState<string>("all");
+  const [selectedStudent, setSelectedStudent] = useState<string>("all");
+
+  // Scheduling
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [scheduleEmail, setScheduleEmail] = useState("");
+  const [scheduleType, setScheduleType] = useState<"weekly" | "monthly">("weekly");
+  const [scheduling, setScheduling] = useState(false);
+
+  const fetchReport = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams({
+        type: reportType,
+        ...(startDate && { startDate: format(startDate, "yyyy-MM-dd") }),
+        ...(endDate && { endDate: format(endDate, "yyyy-MM-dd") }),
+        ...(selectedClass && selectedClass !== "all" && { classId: selectedClass }),
+        ...(selectedStudent && selectedStudent !== "all" && { studentId: selectedStudent }),
+      });
+
+      const response = await fetch(`/api/reports?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch report");
+
+      const data = await response.json();
+      setReportData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReport();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportType, startDate, endDate, selectedClass, selectedStudent]);
+
+  const getInitials = (name?: string) => {
+    return (
+      (name || "")
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "U"
+    );
+  };
+
+  const exportToCSV = () => {
+    if (!reportData) return;
+
+    const csvContent = [
+      ["Date", "Student", "Student ID", "Class", "Status"],
+      ...reportData.attendance.map((record) => [
+        record.date,
+        record.student?.name || "Unknown",
+        record.student?.studentId || "Unknown",
+        record.class?.name || "Unknown",
+        record.status,
+      ]),
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const exportToExcel = () => {
+    if (!reportData) return;
+
+    const data = reportData.attendance.map((record) => ({
+      Date: record.date,
+      Student: record.student?.name || "Unknown",
+      "Student ID": record.student?.studentId || "Unknown",
+      Class: record.class?.name || "Unknown",
+      Status: record.status,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
+    XLSX.writeFile(wb, `attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
+  };
+
+  const exportToPDF = () => {
+    if (!reportData) return;
+
+    const doc = new jsPDF();
+    doc.text(`Attendance Report - ${reportType.toUpperCase()}`, 20, 10);
+
+    const tableData = reportData.attendance.map((record) => [
+      record.date,
+      record.student?.name || "Unknown",
+      record.student?.studentId || "Unknown",
+      record.class?.name || "Unknown",
+      record.status,
+    ]);
+
+    autoTable(doc, {
+      head: [["Date", "Student", "Student ID", "Class", "Status"]],
+      body: tableData,
+      startY: 20,
+    });
+
+    doc.save(`attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+  };
+
+  const clearFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setSelectedClass("all");
+    setSelectedStudent("all");
+  };
+
+  const scheduleReport = async () => {
+    if (!scheduleEmail || !scheduleType) return;
+
+    setScheduling(true);
+    try {
+      const response = await fetch("/api/reports/schedule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: scheduleType,
+          email: scheduleEmail,
+          classId: selectedClass !== "all" ? selectedClass : undefined,
+          studentId: selectedStudent !== "all" ? selectedStudent : undefined,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to schedule report");
+
+      const result = await response.json();
+      console.log("Report scheduled:", result);
+      setScheduleDialogOpen(false);
+      setScheduleEmail("");
+      // You could show a success toast here
+    } catch (error) {
+      console.error("Error scheduling report:", error);
+      // You could show an error toast here
+    } finally {
+      setScheduling(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <p className="text-muted-foreground mt-1">
+            View and analyze attendance data with comprehensive reports
+          </p>
+        </div>
+        <div className="flex gap-2 flex-wrap ml-auto">
+          <Button variant="outline" onClick={fetchReport} disabled={loading}>
+            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+            Refresh
+          </Button>
+          <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Mail className="h-4 w-4 mr-2" />
+                Schedule Email
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Schedule Email Report</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={scheduleEmail}
+                    onChange={(e) => setScheduleEmail(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="schedule-type">Report Frequency</Label>
+                  <Select value={scheduleType} onValueChange={(value: "weekly" | "monthly") => setScheduleType(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Reports will be sent automatically based on current filters.
+                  Weekly reports are sent every Sunday at 9 AM.
+                  Monthly reports are sent on the 1st of each month at 9 AM.
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => setScheduleDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={scheduleReport} disabled={scheduling || !scheduleEmail}>
+                    {scheduling ? "Scheduling..." : "Schedule Report"}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="cursor-pointer">
+                <Download className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={exportToCSV}>
+                <Download className="h-4 w-4 mr-2" />
+                CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToExcel}>
+                <Download className="h-4 w-4 mr-2" />
+                Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToPDF}>
+                <Download className="h-4 w-4 mr-2" />
+                PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filters
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div>
+              <label className="text-sm font-medium">Report Type</label>
+              <Select value={reportType} onValueChange={setReportType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Start Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 shadow-xl border-2" align="start">
+                  <div className="p-3 bg-background rounded-lg">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      fromDate={subWeeks(new Date(), 4)}
+                      toDate={new Date()}
+                      initialFocus
+                      className="rounded-md border-0 bg-transparent"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4 relative",
+                        caption: "flex justify-center pt-1 relative items-center",
+                        caption_label: "text-sm font-medium",
+                        nav: "absolute top-0 left-0 right-0 flex items-center justify-between px-2",
+                        nav_button: "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
+                        nav_button_previous: "",
+                        nav_button_next: "",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex",
+                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                        row: "flex w-full mt-2",
+                        cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today: "bg-accent text-accent-foreground",
+                        day_outside: "text-muted-foreground opacity-50",
+                        day_disabled: "text-muted-foreground opacity-50",
+                        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                        day_hidden: "invisible",
+                      }}
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">End Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 shadow-xl border-2" align="start">
+                  <div className="p-3 bg-background rounded-lg">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      fromDate={subWeeks(new Date(), 4)}
+                      toDate={new Date()}
+                      initialFocus
+                      className="rounded-md border-0 bg-transparent"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4 relative",
+                        caption: "flex justify-center pt-1 relative items-center",
+                        caption_label: "text-sm font-medium",
+                        nav: "absolute top-0 left-0 right-0 flex items-center justify-between px-2",
+                        nav_button: "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
+                        nav_button_previous: "",
+                        nav_button_next: "",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex",
+                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                        row: "flex w-full mt-2",
+                        cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
+                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_today: "bg-accent text-accent-foreground",
+                        day_outside: "text-muted-foreground opacity-50",
+                        day_disabled: "text-muted-foreground opacity-50",
+                        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                        day_hidden: "invisible",
+                      }}
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Class</label>
+              <Select value={selectedClass} onValueChange={setSelectedClass}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Classes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Classes</SelectItem>
+                  {classes.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Student</label>
+              <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Students" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Students</SelectItem>
+                  {students.map((student) => (
+                    <SelectItem key={student.id} value={student.id}>
+                      {student.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-4">
+            <Button variant="outline" onClick={clearFilters}>
+              Clear Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <p className="text-destructive">{error}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {loading && (
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <Loader variant="spinner" size="lg" text="Loading report..." />
+          </CardContent>
+        </Card>
+      )}
+
+      {reportData && !loading && (
+        <>
+          {/* Summary Statistics */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium text-muted-foreground">
+                  Total Records
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-semibold text-primary">
+                  {reportData.summary.totalRecords}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {reportData.startDate} to {reportData.endDate}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium text-muted-foreground">
+                  Attendance Rate
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-semibold text-primary">
+                  {reportData.summary.attendanceRate.toFixed(1)}%
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Present + Late / Total
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium text-muted-foreground">
+                  Total Present
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-semibold text-attendance-present">
+                  {reportData.summary.presentCount}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">Student days</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium text-muted-foreground">
+                  Total Absent
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-semibold text-attendance-absent">
+                  {reportData.summary.absentCount}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">Student days</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Charts */}
+          <Tabs defaultValue="trends" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="trends">Trends</TabsTrigger>
+              <TabsTrigger value="distribution">Distribution</TabsTrigger>
+              <TabsTrigger value="data">Data Table</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="trends" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Attendance Trends by Date</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={reportData.charts.byDate}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="present" stackId="a" fill="#00C49F" />
+                      <Bar dataKey="late" stackId="a" fill="#FFBB28" />
+                      <Bar dataKey="absent" stackId="a" fill="#FF8042" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="distribution" className="space-y-4">
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Present Students by Class</CardTitle>
+                    <p className="text-sm text-muted-foreground">Number of students marked present in each class</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-center">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={classes.map((cls, index) => {
+                              const chartData = reportData.charts.byClass.find(c => c.class === cls.name);
+                              return {
+                                name: cls.name,
+                                present: chartData?.present || 0,
+                                absent: chartData?.absent || 0,
+                                late: chartData?.late || 0,
+                                total: chartData?.total || 0,
+                                fill: COLORS[index % COLORS.length]
+                              };
+                            }).filter(item => item.present > 0 || item.absent > 0 || item.late > 0)}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="present"
+                          >
+                            {classes.map((cls, index) => {
+                              const chartData = reportData.charts.byClass.find(c => c.class === cls.name);
+                              const hasData = (chartData?.present || 0) > 0 || (chartData?.absent || 0) > 0 || (chartData?.late || 0) > 0;
+                              return hasData ? <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} /> : null;
+                            }).filter(Boolean)}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value: number, name: string) => [
+                              `${value} students present`,
+                              `Class: ${name}`
+                            ]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    {/* Legend at bottom left */}
+                    <div className="mt-4 flex justify-start">
+                      {(() => {
+                        const classesWithData = classes.filter((cls) => {
+                          const chartData = reportData.charts.byClass.find(c => c.class === cls.name);
+                          const present = chartData?.present || 0;
+                          const absent = chartData?.absent || 0;
+                          const late = chartData?.late || 0;
+                          return present > 0 || absent > 0 || late > 0;
+                        });
+
+                        // Group into chunks of 4
+                        const chunks = [];
+                        for (let i = 0; i < classesWithData.length; i += 4) {
+                          chunks.push(classesWithData.slice(i, i + 4));
+                        }
+
+                        return (
+                          <div className="flex gap-3">
+                            {chunks.map((chunk, chunkIndex) => (
+                              <div key={chunkIndex} className="flex flex-col">
+                                {chunk.map((cls) => {
+                                  const globalIndex = classes.findIndex(c => c.id === cls.id);
+                                  return (
+                                    <div key={cls.id} className="flex items-center gap-1.5">
+                                      <div
+                                        className="w-2 h-2 rounded-full shrink-0"
+                                        style={{ backgroundColor: COLORS[globalIndex % COLORS.length] }}
+                                      />
+                                      <span className="text-[0.60rem] font-medium">{cls.name}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Status Distribution</CardTitle>
+                    <p className="text-sm text-muted-foreground">Overall attendance status breakdown across all records</p>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: "Present", value: reportData.summary.presentCount, color: "#00C49F" },
+                            { name: "Late", value: reportData.summary.lateCount, color: "#FFBB28" },
+                            { name: "Absent", value: reportData.summary.absentCount, color: "#FF8042" },
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {[
+                            { name: "Present", value: reportData.summary.presentCount, color: "#00C49F" },
+                            { name: "Late", value: reportData.summary.lateCount, color: "#FFBB28" },
+                            { name: "Absent", value: reportData.summary.absentCount, color: "#FF8042" },
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            <TabsContent value="data">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Attendance Records</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {reportData.attendance.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No attendance records found for the selected filters
+                    </p>
+                  ) : (
+                    <div className="rounded-md border border-card-border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Student</TableHead>
+                            <TableHead className="hidden sm:table-cell">Class</TableHead>
+                            <TableHead>Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {reportData.attendance.map((record, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                                  {record.date}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8 hidden md:block">
+                                    <AvatarImage
+                                      src={record.student?.avatar || undefined}
+                                      alt={record.student?.name}
+                                    />
+                                    <AvatarFallback>
+                                      {getInitials(record.student?.name || "U")}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>{record.student?.name || "Unknown Student"}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-muted-foreground hidden sm:table-cell">
+                                {record.class?.name || "Unknown Class"}
+                              </TableCell>
+                              <TableCell>
+                                <AttendanceBadge
+                                  status={record.status as "present" | "absent" | "late"}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
+    </div>
+  );
+}

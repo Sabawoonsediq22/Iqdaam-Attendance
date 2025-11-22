@@ -1,0 +1,25 @@
+<svg width="300" height="200" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="feature3Bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FEF3C7"/>
+      <stop offset="100%" style="stop-color:#FDE68A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="300" height="200" fill="url(#feature3Bg)" rx="12"/>
+
+  <!-- Report/Document -->
+  <rect x="40" y="40" width="220" height="140" rx="8" fill="white" stroke="#FCD34D" stroke-width="2"/>
+  <rect x="55" y="55" width="190" height="15" rx="7" fill="#F1F5F9"/>
+  <rect x="55" y="80" width="160" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="55" y="95" width="140" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="55" y="110" width="180" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="55" y="125" width="120" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="55" y="140" width="150" height="8" rx="4" fill="#CBD5E1"/>
+
+  <!-- Charts in report -->
+  <rect x="60" y="160" width="80" height="12" rx="2" fill="#FCD34D" opacity="0.5"/>
+  <rect x="150" y="160" width="60" height="12" rx="2" fill="#F59E0B" opacity="0.5"/>
+  <rect x="220" y="160" width="40" height="12" rx="2" fill="#D97706" opacity="0.5"/>
+</svg>

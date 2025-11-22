@@ -1,0 +1,26 @@
+import { NextRequest, NextResponse } from "next/server";
+import { storage } from "@/lib/storage";
+import { insertNotificationSchema } from "@/lib/schema";
+
+export async function GET() {
+   try {
+     const notifications = await storage.getAllNotifications();
+     return NextResponse.json(notifications);
+   } catch {
+     return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 });
+   }
+ }
+
+export async function POST(request: NextRequest) {
+   try {
+     const body = await request.json();
+     const result = insertNotificationSchema.safeParse(body);
+     if (!result.success) {
+       return NextResponse.json({ error: result.error.message }, { status: 400 });
+     }
+     const notification = await storage.createNotification(result.data);
+     return NextResponse.json(notification, { status: 201 });
+   } catch {
+     return NextResponse.json({ error: "Failed to create notification" }, { status: 500 });
+   }
+ }
