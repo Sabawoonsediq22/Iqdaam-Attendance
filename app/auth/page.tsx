@@ -99,7 +99,7 @@ export default function AuthPage() {
 
       // Redirect based on role
       if ((updatedSession?.user as ExtendedUser)?.role === "admin") {
-        router.push("/attendance");
+        router.push("/dashboard");
       } else {
         router.push("/attendance"); // Teachers also go to attendance
       }
