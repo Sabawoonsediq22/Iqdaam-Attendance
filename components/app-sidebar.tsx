@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import type { Session } from "next-auth";
 
 const menuItems = [
   {
@@ -95,10 +96,15 @@ const hoverVariants = {
   },
 };
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  session?: Session;
+}
+
+export function AppSidebar({ session: propSession }: AppSidebarProps) {
   const location = usePathname();
   const { setOpenMobile, isMobile, state } = useSidebar();
   const { data: session } = useSession();
+  const effectiveSession = propSession || session;
 
   // Get unread notifications count
   const { data: unreadCount = 0 } = useQuery({
@@ -177,7 +183,7 @@ export function AppSidebar() {
               <SidebarMenu className="space-y-1">
                 <div>
                   {menuItems
-                    .filter((item) => session?.user && (session.user as ExtendedUser).role && item.roles.includes((session.user as ExtendedUser).role))
+                    .filter((item) => effectiveSession?.user && (effectiveSession.user as ExtendedUser).role && item.roles.includes((effectiveSession.user as ExtendedUser).role))
                     .map((item) => {
                     const isActive = location === item.url;
                     return (

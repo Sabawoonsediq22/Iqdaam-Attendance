@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useUser } from "@/components/client-providers";
+import type { Session } from "next-auth";
 
 interface ExtendedUser {
   id: string;
@@ -26,8 +27,13 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/hooks/use-theme";
 import { useState } from "react";
 
-export function UserMenu() {
+interface UserMenuProps {
+  session?: Session;
+}
+
+export function UserMenu({ session: propSession }: UserMenuProps) {
   const { data: session } = useSession();
+  const effectiveSession = propSession || session;
   const { avatar } = useUser(); // Only use avatar from useUser, rest from session
   const { theme, setTheme } = useTheme();
   const [changeIcon, setChangeIcon] = useState(true);
@@ -56,7 +62,7 @@ export function UserMenu() {
       .slice(0, 2);
   };
 
-  if (!session?.user) return null;
+  if (!effectiveSession?.user) return null;
 
   return (
     <DropdownMenu>
@@ -67,15 +73,15 @@ export function UserMenu() {
         >
           <Avatar className="h-10 w-10 rounded-full ring-2 ring-background shadow-lg">
             <AvatarImage
-              src={avatar || (session.user as ExtendedUser).image || undefined}
-              alt={session.user.name || ""}
+              src={avatar || (effectiveSession.user as ExtendedUser).image || undefined}
+              alt={effectiveSession.user.name || ""}
               className="rounded-full"
             />
             <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/10 text-primary font-bold text-sm rounded-full">
-              {getInitials(session.user.name || "U")}
+              {getInitials(effectiveSession.user.name || "U")}
             </AvatarFallback>
           </Avatar>
-          {(session.user as ExtendedUser).role === "admin" && (
+          {(effectiveSession.user as ExtendedUser).role === "admin" && (
             <div className="absolute -top-1 -right-1 h-4 w-4 bg-yellow-500 rounded-full flex items-center justify-center ring-2 ring-background">
               <Crown className="h-2.5 w-2.5 text-white" />
             </div>
@@ -92,24 +98,24 @@ export function UserMenu() {
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12 rounded-full ring-2 ring-primary/20">
                 <AvatarImage
-                  src={avatar || (session.user as ExtendedUser).image || undefined}
-                  alt={session.user.name || ""}
+                  src={avatar || (effectiveSession.user as ExtendedUser).image || undefined}
+                  alt={effectiveSession.user.name || ""}
                   className="rounded-full"
                 />
                 <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/10 text-primary font-bold rounded-full">
-                  {getInitials(session.user.name || "U")}
+                  {getInitials(effectiveSession.user.name || "U")}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col space-y-1 min-w-0 flex-1">
-                <p className="text-sm font-semibold leading-none truncate">{session.user.name}</p>
+                <p className="text-sm font-semibold leading-none truncate">{effectiveSession.user.name}</p>
                 <p className="text-xs leading-none text-muted-foreground truncate">
-                  {session.user.email}
+                  {effectiveSession.user.email}
                 </p>
                 <div className="flex items-center space-x-1">
                   <span className="text-xs leading-none text-muted-foreground capitalize">
-                    {(session.user as ExtendedUser).role}
+                    {(effectiveSession.user as ExtendedUser).role}
                   </span>
-                  {(session.user as ExtendedUser).role === "admin" && (
+                  {(effectiveSession.user as ExtendedUser).role === "admin" && (
                     <Crown className="h-3 w-3 text-yellow-500" />
                   )}
                 </div>

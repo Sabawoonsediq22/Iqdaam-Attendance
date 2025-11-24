@@ -9,6 +9,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { UserMenu } from "@/components/user-menu";
 import { usePathname } from "next/navigation";
+import type { Session } from "next-auth";
 
 function PageTitle() {
   const pathname = usePathname();
@@ -43,7 +44,12 @@ function PageTitle() {
   );
 }
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
+interface AppShellProps {
+  children: React.ReactNode;
+  session?: Session;
+}
+
+export default function AppShell({ children, session }: AppShellProps) {
   const style = {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",
@@ -55,7 +61,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <TooltipProvider>
           <SidebarProvider style={style}>
             <div className="flex h-screen w-full overflow-x-hidden">
-              <AppSidebar />
+              <AppSidebar session={session} />
               <div className="flex flex-col flex-1 min-w-0">
                 <header className="flex items-center justify-between p-4 border-b border-border">
                   <div className="flex items-center gap-4 min-w-0">
@@ -63,7 +69,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <PageTitle />
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <UserMenu />
+                    <UserMenu session={session} />
                   </div>
                 </header>
                 <main className="flex-1 overflow-auto p-4 sm:p-6">

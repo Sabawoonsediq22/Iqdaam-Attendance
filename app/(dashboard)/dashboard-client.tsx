@@ -35,7 +35,7 @@ export default function DashboardClient({ session, children }: DashboardClientPr
 
   return (
     <SessionProvider session={session}>
-      <AppShell>{children}</AppShell>
+      <AppShell session={session}>{children}</AppShell>
     </SessionProvider>
   );
 }
