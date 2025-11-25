@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -60,6 +60,7 @@ export default function DeleteConfirmationModal({
             disabled={isDeleting}
             className="cursor-pointer"
           >
+            {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </div>
