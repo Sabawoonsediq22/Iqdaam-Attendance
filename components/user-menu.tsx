@@ -44,9 +44,8 @@ export function UserMenu({ session: propSession }: UserMenuProps) {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
-    router.push("/");
+  const handleSignOut = () => {
+    signOut({ callbackUrl: "/" });
   };
 
   const handleSettings = () => {

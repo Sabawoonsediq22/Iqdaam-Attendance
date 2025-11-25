@@ -18,7 +18,8 @@ import {
   MoreVertical,
   AlertTriangle,
   Info,
-  Check
+  Check,
+  Loader2
 } from "lucide-react";
 import type { Notification } from "@/lib/schema";
 import { toast } from "sonner";
@@ -466,7 +467,7 @@ export default function NotificationsPage() {
                               className="cursor-pointer"
                             >
                               {approveUserMutation.isPending ? (
-                                <Loader size="sm" className="w-4 h-4 mr-2" />
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                               ) : (
                                 <CheckCircle className="w-4 h-4 mr-2" />
                               )}
@@ -480,7 +481,7 @@ export default function NotificationsPage() {
                               className="cursor-pointer"
                             >
                               {rejectUserMutation.isPending ? (
-                                <Loader size="sm" className="w-4 h-4 mr-2" />
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                               ) : (
                                 <XCircle className="w-4 h-4 mr-2" />
                               )}

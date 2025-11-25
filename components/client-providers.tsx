@@ -19,6 +19,8 @@ const UserContext = createContext<{
   setAvatar: (avatar: string) => void;
   userData: UserData | null;
   setUserData: (userData: UserData | null) => void;
+  isLoadingUserData: boolean;
+  userDataError: string | null;
 } | null>(null);
 
 export const useUser = () => {
@@ -31,6 +33,8 @@ function UserProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const [avatar, setAvatar] = useState<string>("");
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
+  const [userDataError, setUserDataError] = useState<string | null>(null);
 
   // Fetch user data from database when session changes
   React.useEffect(() => {
@@ -38,18 +42,27 @@ function UserProvider({ children }: { children: React.ReactNode }) {
       if (!session?.user?.id) {
         setAvatar("");
         setUserData(null);
+        setIsLoadingUserData(false);
+        setUserDataError(null);
         return;
       }
 
+      setIsLoadingUserData(true);
+      setUserDataError(null);
       try {
         const response = await fetch(`/api/users/${session.user.id}`);
         if (response.ok) {
           const data = await response.json();
           setUserData(data.user);
           setAvatar(data.user.avatar || "");
+        } else {
+          setUserDataError("Failed to load user data");
         }
       } catch (error) {
         console.error("Failed to fetch user data:", error);
+        setUserDataError("Network error while loading user data");
+      } finally {
+        setIsLoadingUserData(false);
       }
     };
 
@@ -57,7 +70,7 @@ function UserProvider({ children }: { children: React.ReactNode }) {
   }, [session?.user?.id]);
 
   return (
-    <UserContext.Provider value={{ avatar, setAvatar, userData, setUserData }}>
+    <UserContext.Provider value={{ avatar, setAvatar, userData, setUserData, isLoadingUserData, userDataError }}>
       {children}
     </UserContext.Provider>
   );

@@ -34,7 +34,7 @@ const { useUploadThing } = generateReactHelpers();
 export default function SettingsPage() {
   const { data: session, update } = useSession();
   const { theme, setTheme } = useTheme();
-  const { setAvatar, userData, setUserData } = useUser();
+  const { setAvatar, userData, setUserData, isLoadingUserData, userDataError } = useUser();
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -231,7 +231,7 @@ export default function SettingsPage() {
 
       toast.success("Account deleted successfully. You will be signed out.");
       // Sign out and redirect to home page
-      await signOut({ callbackUrl: "/" });
+      signOut({ callbackUrl: "/" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to delete account");
     } finally {
@@ -340,9 +340,38 @@ export default function SettingsPage() {
     return <Loader text="Loading settings..." />;
   }
 
+  // Wait for userData to load
+  if (isLoadingUserData) {
+    return <Loader text="Loading user data..." />;
+  }
+
+  // Show error if userData failed to load
+  if (userDataError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-2">Failed to load settings</p>
+          <p className="text-sm text-muted-foreground">{userDataError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback: if no userData but no error, use session data
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-muted-foreground">Unable to load user data. Please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
+        <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground mt-2">
           Manage your account settings and preferences
         </p>
