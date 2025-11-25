@@ -12,14 +12,13 @@ interface ExtendedUser {
 }
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock, User, Mail, UserCheck, Loader, Loader2 } from "lucide-react";
+import { Lock, User, Mail, UserCheck, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -39,18 +38,6 @@ export default function AuthPage() {
 
   const router = useRouter();
 
-  // Check if this is the first user
-  const { data: userCount = 0 } = useQuery({
-    queryKey: ["/api/users/count"],
-    queryFn: async () => {
-      const res = await fetch("/api/users/count");
-      if (!res.ok) return 0;
-      const data = await res.json();
-      return data.count || 0;
-    },
-  });
-
-  const isFirstUser = userCount === 0;
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +113,7 @@ export default function AuthPage() {
       return;
     }
 
-    if (!isFirstUser && !signupRole) {
+    if (!signupRole) {
       toast.error("Please select a role");
       setSignupIsLoading(false);
       return;
@@ -142,7 +129,7 @@ export default function AuthPage() {
           name: signupName,
           email: signupEmail,
           password: signupPassword,
-          role: isFirstUser ? "admin" : signupRole,
+          role: signupRole,
         }),
       });
 
@@ -158,11 +145,7 @@ export default function AuthPage() {
       // Store email for status checking
       localStorage.setItem('pendingUserEmail', signupEmail);
 
-      if (isFirstUser) {
-        router.push("/dashboard"); // Redirect first user to dashboard
-      } else {
-        router.push("/pending-approval"); // Redirect to pending approval page
-      }
+      router.push("/pending-approval"); // Redirect to pending approval page
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Registration failed");
     } finally {
@@ -266,44 +249,30 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                {isFirstUser ? (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">
-                      Role
-                    </Label>
-                    <div className="relative">
-                      <UserCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
-                      <div className="pl-10 pr-3 py-2 border border-input bg-background rounded-md text-sm">
-                        Admin (First user is automatically admin)
-                      </div>
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-role" className="text-sm font-medium">
+                    Role
+                  </Label>
+                  <div className="relative">
+                    <UserCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                    <Select value={signupRole} onValueChange={setSignupRole}>
+                      <SelectTrigger className="pl-10">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="teacher">Teacher</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-role" className="text-sm font-medium">
-                      Role
-                    </Label>
-                    <div className="relative">
-                      <UserCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
-                      <Select value={signupRole} onValueChange={setSignupRole}>
-                        <SelectTrigger className="pl-10">
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="teacher">Teacher</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
+                </div>
 
                 <Button
                   type="submit"
                   className="w-full"
                   disabled={signupIsLoading}
                 >
-                  {signupIsLoading && <Loader className="h-4 w-4 mr-2 animate-spin" />}
+                  {signupIsLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   {signupIsLoading ? "Creating Account..." : "Sign Up"}
                 </Button>
 

@@ -24,21 +24,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if this is the very first user ever created OR if there are no existing admins
-    // This ensures only the first user is auto-appointed as admin, and provides fallback if all admins are deleted
-    const totalUsers = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(users);
-
+    // Check if there are no existing admins
+    // This provides fallback if all admins are deleted
     const adminUsers = await db
       .select({ count: sql<number>`count(*)` })
       .from(users)
       .where(eq(users.role, "admin"));
 
-    const isFirstUserOrNoAdmins = totalUsers[0].count === 0 || adminUsers[0].count === 0;
-    const isFirstUser = totalUsers[0].count === 0;
-    const userRole = isFirstUserOrNoAdmins ? "admin" : validatedData.role;
-    const isApproved = isFirstUserOrNoAdmins;
+    const isNoAdmins = adminUsers[0].count === 0;
+    const userRole = isNoAdmins ? "admin" : validatedData.role;
+    const isApproved = isNoAdmins;
 
     // Hash password
     const hashedPassword = await hash(validatedData.password, 12);
@@ -70,7 +65,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message: isApproved
-          ? (isFirstUser ? "Account created successfully! You are the first admin." : "Account created successfully!")
+          ? "Account created successfully!"
           : "Account created successfully! Please wait for admin approval.",
         user: {
           id: newUser[0].id,
