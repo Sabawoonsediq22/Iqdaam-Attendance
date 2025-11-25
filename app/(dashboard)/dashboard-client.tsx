@@ -26,7 +26,7 @@ export default function DashboardClient({ session, children }: DashboardClientPr
 
   useEffect(() => {
     // Redirect teachers to attendance page if they're trying to access other dashboard routes
-    if ((session.user as ExtendedUser)?.role === "teacher" && !pathname.startsWith('/attendance')) {
+    if ((session.user as ExtendedUser)?.role === "teacher" && !pathname.startsWith('/attendance') && pathname !== '/settings') {
       router.push('/attendance');
     }
   }, [session, pathname, router]);
