@@ -29,7 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertClassSchema } from "@/lib/schema";
 import { toast } from "sonner";
 import type { InsertClass } from "@/lib/schema";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
 
@@ -214,6 +214,7 @@ function AddClassForm({ onSuccess }: { onSuccess: () => void }) {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {isSubmitting ? "Creating..." : "Create Class"}
               </Button>
             </div>

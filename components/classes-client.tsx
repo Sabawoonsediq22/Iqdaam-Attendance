@@ -16,7 +16,8 @@ import {
   Users,
   WifiOff,
   PlayCircle,
-  BookOpenCheck
+  BookOpenCheck,
+  Loader2
 } from "lucide-react";
 import type { Class, Student } from "@/lib/schema";
 import { Input } from "./ui/input";
@@ -394,6 +395,7 @@ function EditClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void 
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {isSubmitting ? "Updating..." : "Update Class"}
               </Button>
             </div>
@@ -746,7 +748,7 @@ export default function ClassesClient() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {classesLoading ? (
           <div className="col-span-full flex justify-center py-12">
-            <Loader size="lg" variant="spinner" text="Loading classes..." />
+            <Loader text="Loading classes..." />
           </div>
         ) : (
           <>

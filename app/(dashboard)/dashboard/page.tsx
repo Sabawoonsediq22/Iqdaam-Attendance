@@ -204,7 +204,7 @@ export default function Dashboard() {
   if (statsLoading && !stats) {
     return (
       <div className="col-span-full flex justify-center py-12">
-        <Loader size="lg" variant="spinner" text="Loading dashboard..." />
+        <Loader size="md" text="Loading dashboard..." />
       </div>
     );
   }

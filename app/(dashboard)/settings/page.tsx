@@ -337,7 +337,7 @@ export default function SettingsPage() {
   };
 
   if (!session?.user) {
-    return <Loader variant="dots" text="Loading..." />;
+    return <Loader text="Loading settings..." />;
   }
 
   return (

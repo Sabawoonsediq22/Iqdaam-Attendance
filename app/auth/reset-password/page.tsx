@@ -99,7 +99,7 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-green-50 via-white to-blue-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -124,7 +124,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
@@ -210,7 +210,7 @@ function ResetPasswordForm() {
             >
               {isLoading ? (
                 <>
-                  <Loader variant="dots" className="w-4 h-4 mr-2" />
+                  <Loader className="w-4 h-4 mr-2" />
                   Resetting Password...
                 </>
               ) : (
@@ -236,10 +236,10 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center p-8">
-            <Loader variant="dots" className="w-6 h-6" />
+            <Loader className="w-6 h-6" />
           </CardContent>
         </Card>
       </div>

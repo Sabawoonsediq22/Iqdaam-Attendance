@@ -136,7 +136,7 @@ export default function ForgotPasswordPage() {
             >
               {isLoading ? (
                 <>
-                  <Loader variant="dots" className="w-4 h-4 mr-2" />
+                  <Loader className="w-4 h-4 mr-2" />
                   Sending Code...
                 </>
               ) : (

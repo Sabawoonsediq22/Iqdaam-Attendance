@@ -415,7 +415,7 @@ export default function NotificationsPage() {
         {isLoading ? (
           <Card>
             <CardContent className="flex items-center justify-center py-12 min-h-[200px]">
-              <Loader variant="spinner" size="lg" text="Loading notifications..." />
+              <Loader size="md" text="Loading notifications..." />
             </CardContent>
           </Card>
         ) : filteredNotifications.length === 0 ? (
@@ -466,7 +466,7 @@ export default function NotificationsPage() {
                               className="cursor-pointer"
                             >
                               {approveUserMutation.isPending ? (
-                                <Loader variant="spinner" size="sm" className="w-4 h-4 mr-2" />
+                                <Loader size="sm" className="w-4 h-4 mr-2" />
                               ) : (
                                 <CheckCircle className="w-4 h-4 mr-2" />
                               )}
@@ -480,7 +480,7 @@ export default function NotificationsPage() {
                               className="cursor-pointer"
                             >
                               {rejectUserMutation.isPending ? (
-                                <Loader variant="spinner" size="sm" className="w-4 h-4 mr-2" />
+                                <Loader size="sm" className="w-4 h-4 mr-2" />
                               ) : (
                                 <XCircle className="w-4 h-4 mr-2" />
                               )}

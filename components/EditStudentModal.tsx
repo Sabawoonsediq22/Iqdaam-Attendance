@@ -45,7 +45,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Clock, Calendar } from "lucide-react";
+import { Check, ChevronsUpDown, Clock, Calendar, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface EditStudentModalProps {
@@ -402,6 +402,7 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {isSubmitting ? "Updating..." : "Update Student"}
               </Button>
             </div>

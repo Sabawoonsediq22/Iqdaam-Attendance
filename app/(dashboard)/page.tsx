@@ -204,7 +204,7 @@ export default function Dashboard() {
   if (statsLoading && !stats) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader variant="spinner" size="lg" text="Loading Dashboard..." />
+        <Loader size="md" text="Loading Dashboard..." />
       </div>
     );
   }

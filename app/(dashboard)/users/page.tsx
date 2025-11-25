@@ -235,7 +235,7 @@ export default function UsersPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader variant="spinner" size="md" text="Loading users..." />
+        <Loader size="md" text="Loading users..." />
       </div>
     );
   }

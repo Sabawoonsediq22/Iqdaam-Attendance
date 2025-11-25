@@ -28,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Download, Calendar as CalendarIcon, Filter, RefreshCw, Mail } from "lucide-react";
+import { Download, Calendar as CalendarIcon, Filter, RefreshCw, Mail, Loader2 } from "lucide-react";
 import { Loader } from "@/components/loader";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,6 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { format, subWeeks } from "date-fns";
-import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -283,7 +282,7 @@ export default function ReportsClient({ students, classes }: Props) {
         </div>
         <div className="flex gap-2 flex-wrap ml-auto">
           <Button variant="outline" onClick={fetchReport} disabled={loading}>
-            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
             Refresh
           </Button>
           <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
@@ -330,6 +329,7 @@ export default function ReportsClient({ students, classes }: Props) {
                     Cancel
                   </Button>
                   <Button onClick={scheduleReport} disabled={scheduling || !scheduleEmail}>
+                    {scheduling && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     {scheduling ? "Scheduling..." : "Schedule Report"}
                   </Button>
                 </div>
@@ -532,7 +532,7 @@ export default function ReportsClient({ students, classes }: Props) {
       {loading && (
         <Card>
           <CardContent className="flex items-center justify-center py-12">
-            <Loader variant="spinner" size="lg" text="Loading report..." />
+            <Loader text="Loading report..." />
           </CardContent>
         </Card>
       )}

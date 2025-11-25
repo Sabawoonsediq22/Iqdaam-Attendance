@@ -46,7 +46,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown, User, Clock, Calendar, Info } from "lucide-react";
+import { Check, ChevronsUpDown, User, Clock, Calendar, Info, Loader2 } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -368,6 +368,7 @@ export default function AddStudentModal({ cls, onSuccess, trigger }: AddStudentM
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {isSubmitting ? "Adding..." : "Add Student"}
               </Button>
             </div>

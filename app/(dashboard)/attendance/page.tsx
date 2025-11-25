@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, CheckCircle, XCircle, Clock, MoreVertical, Save } from "lucide-react";
+import { Users, CheckCircle, XCircle, Clock, MoreVertical, Save, Loader2 } from "lucide-react";
 import type { Class, Student, Attendance } from "@/lib/schema";
 import AttendanceClassSelector from "@/components/AttendanceClassSelector";
 import StudentDetailsModal from "@/components/StudentDetailsModal";
@@ -509,7 +509,7 @@ function AttendancePageContent() {
           <CardContent>
             {isStudentsLoading ? (
               <div className="text-center py-12">
-                <Loader size="md" variant="spinner" text="Loading students..." />
+                <Loader size="md" text="Loading students..." />
               </div>
             ) : students.length === 0 ? (
               <div className="text-center py-12">
@@ -633,9 +633,7 @@ function AttendancePageContent() {
               size="lg"
             >
               {isSavingAttendance ? (
-                <div className="w-4 h-4 mr-2 relative">
-                  <div className="absolute inset-0 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                </div>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Save className="h-4 w-4 mr-2" />
               )}
@@ -653,7 +651,7 @@ function AttendancePageContent() {
       ) : selectedClass ? (
         <Card>
           <CardContent className="flex items-center justify-center py-12">
-            <Loader size="lg" variant="dots" text="Loading attendance data..." />
+            <Loader size="md" text="Loading attendance data..." />
           </CardContent>
         </Card>
       ) : null}
@@ -694,7 +692,7 @@ function AttendancePageContent() {
 
 export default function AttendancePage() {
   return (
-    <Suspense fallback={<Loader variant="dots" text="Loading..." />}>
+    <Suspense fallback={<Loader size="md" text="Loading..." />}>
       <AttendancePageContent />
     </Suspense>
   );

@@ -175,7 +175,7 @@ function VerifyCodeForm() {
             >
               {isLoading ? (
                 <>
-                  <Loader variant="dots" className="w-4 h-4 mr-2" />
+                  <Loader className="w-4 h-4 mr-2" />
                   Verifying...
                 </>
               ) : (
@@ -219,7 +219,7 @@ export default function VerifyCodePage() {
       <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center p-8">
-            <Loader variant="dots" className="w-6 h-6" />
+            <Loader className="w-6 h-6" />
           </CardContent>
         </Card>
       </div>

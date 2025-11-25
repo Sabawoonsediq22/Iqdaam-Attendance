@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock, User, Mail, UserCheck } from "lucide-react";
+import { Lock, User, Mail, UserCheck, Loader, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -303,6 +303,7 @@ export default function AuthPage() {
                   className="w-full"
                   disabled={signupIsLoading}
                 >
+                  {signupIsLoading && <Loader className="h-4 w-4 mr-2 animate-spin" />}
                   {signupIsLoading ? "Creating Account..." : "Sign Up"}
                 </Button>
 
@@ -373,7 +374,14 @@ export default function AuthPage() {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Signing In..." : "Sign In"}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Signing In...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
 
                 <div className="text-center mt-4">

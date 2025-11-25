@@ -87,7 +87,7 @@ export default function StudentsPage() {
       <OfflineIndicator />
       {(studentsLoading || classesLoading) ? (
         <div className="flex justify-center py-12">
-          <Loader size="lg" variant="spinner" text="Loading students..." />
+          <Loader size="md" text="Loading students..." />
         </div>
       ) : (
         <>

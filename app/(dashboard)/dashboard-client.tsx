@@ -4,9 +4,7 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Session } from "next-auth";
 import AppShell from "@/components/app-shell";
-import { Loader } from "@/components/loader";
 import { SessionProvider } from "next-auth/react";
-import type { Session as NextAuthSession } from "next-auth";
 
 interface ExtendedUser {
   id: string;
