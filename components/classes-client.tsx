@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -112,20 +113,17 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
   const studentCount = (students || []).filter((s) => s.classId === cls.id).length;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
-          <Info className="h-4 w-4 mr-2" />
-          View Details
-        </DropdownMenuItem>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <BookOpen className="h-6 w-6 text-primary" />
-            Class Details
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => setOpen(true)} className="cursor-pointer">
+        <Info className="h-4 w-4 mr-2" />
+        View Details
+      </DropdownMenuItem>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Class Details"
+        contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
+      >
         <div className="space-y-6">
           {/* Class Header */}
           <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-4 border">
@@ -224,8 +222,8 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialog>
+    </>
   );
 }
 

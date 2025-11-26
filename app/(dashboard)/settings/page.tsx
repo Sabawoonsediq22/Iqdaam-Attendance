@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useUser } from "@/components/client-providers";
 
 interface ExtendedUser {
   id: string;
@@ -34,7 +33,6 @@ const { useUploadThing } = generateReactHelpers();
 export default function SettingsPage() {
   const { data: session, update } = useSession();
   const { theme, setTheme } = useTheme();
-  const { setAvatar, userData, setUserData, isLoadingUserData, userDataError } = useUser();
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -54,12 +52,6 @@ export default function SettingsPage() {
 
   const { startUpload } = useUploadThing("imageUploader");
 
-  // Sync name state with userData updates
-  useEffect(() => {
-    if (userData?.name) {
-      setName(userData.name);
-    }
-  }, [userData?.name]);
 
   // Load user preferences on mount
   useEffect(() => {
@@ -133,10 +125,6 @@ export default function SettingsPage() {
       // Update session with new name
       await update({ name });
 
-      // Update userData in context
-      if (userData) {
-        setUserData({ ...userData, name });
-      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save profile");
     } finally {
@@ -314,12 +302,6 @@ export default function SettingsPage() {
       // Update session
       await update({ image: avatarUrl });
 
-      // Update global avatar state and userData
-      setAvatar(avatarUrl);
-      if (userData) {
-        setUserData({ ...userData, avatar: avatarUrl });
-      }
-
       toast.success("Avatar updated successfully!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update avatar");
@@ -340,38 +322,10 @@ export default function SettingsPage() {
     return <Loader text="Loading settings..." />;
   }
 
-  // Wait for userData to load
-  if (isLoadingUserData) {
-    return <Loader text="Loading user data..." />;
-  }
-
-  // Show error if userData failed to load
-  if (userDataError) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-destructive mb-2">Failed to load settings</p>
-          <p className="text-sm text-muted-foreground">{userDataError}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Fallback: if no userData but no error, use session data
-  if (!userData) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-muted-foreground">Unable to load user data. Please try refreshing the page.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground mt-2">
           Manage your account settings and preferences
         </p>
@@ -393,7 +347,7 @@ export default function SettingsPage() {
             <div className="flex items-center space-x-6 p-4 rounded-lg bg-muted/30 border">
               <Avatar className="h-20 w-20 ring-4 ring-primary/10">
                 <AvatarImage
-                  src={selectedImage || userData?.avatar || undefined}
+                  src={selectedImage || session?.user?.image || undefined}
                   alt={name || session?.user?.name || ""}
                 />
                 <AvatarFallback className="text-lg bg-primary/10 text-primary">
@@ -461,10 +415,10 @@ export default function SettingsPage() {
                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 border">
                   <Shield className="h-4 w-4 text-muted-foreground" />
                   <Badge
-                    variant={userData?.role === "admin" ? "default" : "secondary"}
+                    variant={(session?.user as ExtendedUser)?.role === "admin" ? "default" : "secondary"}
                     className="capitalize"
                   >
-                    {userData?.role || (session?.user as ExtendedUser)?.role}
+                    {(session?.user as ExtendedUser)?.role}
                   </Badge>
                 </div>
               </div>
@@ -521,7 +475,7 @@ export default function SettingsPage() {
 
               <Separator />
 
-              {userData?.role === "admin" && (
+              {(session?.user as ExtendedUser)?.role === "admin" && (
                 <>
                   <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border">
                     <div className="space-y-0.5">
@@ -576,7 +530,7 @@ export default function SettingsPage() {
               )}
             </div>
 
-            {userData?.role === "admin" && (
+            {(session?.user as ExtendedUser)?.role === "admin" && (
               <Button
                 onClick={handleSavePreferences}
                 disabled={isSavingPreferences || !preferencesLoaded}

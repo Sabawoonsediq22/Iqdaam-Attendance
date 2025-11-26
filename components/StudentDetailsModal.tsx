@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Student, Class, Attendance } from "@/lib/schema";
-import { User, Mail, Phone, BookOpen, TrendingUp, CheckCircle, XCircle, Clock, CalendarIcon, Edit, Trash2, MoreVertical } from "lucide-react";
+import { User, Mail, Phone, BookOpen, TrendingUp, CheckCircle, XCircle, Clock, CalendarIcon, Edit, Trash2, MoreHorizontal } from "lucide-react";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { format, startOfWeek, addDays, subWeeks, addWeeks } from "date-fns";
 import {
@@ -195,11 +195,11 @@ export default function StudentDetailsModal({ student, isOpen, onClose, onEdit, 
                 <p className="text-sm text-muted-foreground">Student Details</p>
               </div>
             </DialogTitle>
-            <div className="flex items-center gap-2 mr-6">
+            <div className="flex items-center gap-2 mr-8">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild className="cursor-pointer rounded-full">
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors">
-                    <MoreVertical className="h-4 w-4" />
+                    <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
