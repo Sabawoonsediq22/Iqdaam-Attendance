@@ -25,7 +25,7 @@ import { AttendanceBadge } from "@/components/attendance-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Download, Calendar as CalendarIcon, Filter, RefreshCw, Mail, Loader2 } from "lucide-react";
@@ -336,25 +336,28 @@ export default function ReportsClient({ students, classes }: Props) {
               </div>
             </DialogContent>
           </Dialog>
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="cursor-pointer">
                 <Download className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={exportToCSV}>
-                <Download className="h-4 w-4 mr-2" />
-                CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportToExcel}>
-                <Download className="h-4 w-4 mr-2" />
-                Excel
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportToPDF}>
-                <Download className="h-4 w-4 mr-2" />
-                PDF
-              </DropdownMenuItem>
+            <DropdownMenuContent className="w-40" align="end">
+              <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onSelect={exportToCSV}>
+                  <Download className="h-4 w-4 mr-2" />
+                  CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={exportToExcel}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={exportToPDF}>
+                  <Download className="h-4 w-4 mr-2" />
+                  PDF
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

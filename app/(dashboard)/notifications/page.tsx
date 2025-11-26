@@ -499,14 +499,14 @@ export default function NotificationsPage() {
                             Unread
                           </Badge>
                         )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" side="bottom">
-                            {!notification.isRead && (
+                        {!notification.isRead && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" side="bottom">
                               <DropdownMenuItem
                                 onClick={() => handleMarkAsRead(notification.id)}
                                 className="cursor-pointer"
@@ -515,9 +515,9 @@ export default function NotificationsPage() {
                                 <Check className="w-4 h-4 mr-2" />
                                 Mark as Read
                               </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
                     </div>
                   </div>

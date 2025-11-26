@@ -101,8 +101,8 @@ export default function StudentsPage() {
           onSuccess={handleStudentAdded}
           trigger={
             <Button className="cursor-pointer">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Student
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <p className="hidden sm:block">Add Student</p>
             </Button>
           }
         />
