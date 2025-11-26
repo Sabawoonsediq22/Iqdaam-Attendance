@@ -7,7 +7,7 @@ import type { User, Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
 export const config = {
-  trustHost: true,
+  secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
       name: "credentials",

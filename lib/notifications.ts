@@ -78,7 +78,7 @@ export const notificationTemplates = {
   }),
 
   userPendingApproval: (userName: string, userEmail: string) => ({
-    title: "New User Pending Approval",
+    title: "User Approval",
     message: `${userName} (${userEmail}) has registered and is waiting for approval.`,
     type: "warning" as const,
     entityType: "user" as const,

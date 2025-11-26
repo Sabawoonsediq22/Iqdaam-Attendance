@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider, useSession } from "next-auth/react";
 
@@ -81,6 +81,8 @@ export default function ClientProviders({
 }: {
   children: React.ReactNode;
 }) {
+  const [baseUrl] = useState<string>(() => typeof window !== 'undefined' ? window.location.origin : '');
+
   // Create QueryClient on the client to avoid passing class instances from server -> client
   const [queryClient] = useState(
     () =>
@@ -106,7 +108,7 @@ export default function ClientProviders({
   );
 
   return (
-    <SessionProvider>
+    <SessionProvider basePath="/api/auth" baseUrl={baseUrl}>
       <QueryClientProvider client={queryClient}>
         <UserProvider>{children}</UserProvider>
       </QueryClientProvider>

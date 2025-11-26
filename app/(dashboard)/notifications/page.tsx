@@ -458,6 +458,9 @@ export default function NotificationsPage() {
                             index % 2 === 1 ? <strong key={index}>{part}</strong> : part
                           )}
                         </p>
+                        <p className="text-xs text-muted-foreground mt-3">
+                          {formatDate(notification.createdAt)}
+                        </p>
                         {notification.entityType === "user" && notification.action === "pending" && notification.entityId && !notification.isRead && (
                           <div className="flex gap-2 mt-3">
                             <Button
@@ -489,11 +492,8 @@ export default function NotificationsPage() {
                             </Button>
                           </div>
                         )}
-                        <p className="text-xs text-muted-foreground mt-3">
-                          {formatDate(notification.createdAt)}
-                        </p>
                       </div>
-                      <div className="flex items-center gap-2 ml-4">
+                      <div className="flex items-center gap-2 ml-0 md:ml-4">
                         {!notification.isRead && (
                           <Badge variant="destructive" className="text-xs">
                             Unread
@@ -505,7 +505,7 @@ export default function NotificationsPage() {
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" side="bottom">
                             {!notification.isRead && (
                               <DropdownMenuItem
                                 onClick={() => handleMarkAsRead(notification.id)}
