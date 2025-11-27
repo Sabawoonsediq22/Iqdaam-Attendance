@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { useUser } from "@/components/client-providers";
 
 interface ExtendedUser {
   id: string;
@@ -21,7 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import { useTheme } from "@/hooks/use-theme";
 import { useState, useRef, useEffect } from "react";
-import { User, Mail, Shield, Moon, Sun, Bell, Camera, AlertTriangle, Trash2 } from "lucide-react";
+import { User, Mail, Shield, Moon, Sun, Bell, Camera, AlertTriangle, Trash2, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
 import { Loader } from "@/components/loader";
@@ -32,6 +33,7 @@ const { useUploadThing } = generateReactHelpers();
 
 export default function SettingsPage() {
   const { data: session, update } = useSession();
+  const { avatar, setAvatar, userData } = useUser();
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
@@ -44,10 +46,12 @@ export default function SettingsPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [name, setName] = useState(session?.user?.name || "");
+  const [name, setName] = useState(userData?.name || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { startUpload } = useUploadThing("imageUploader");
@@ -75,6 +79,13 @@ export default function SettingsPage() {
 
     loadPreferences();
   }, [session?.user?.id]);
+
+  // Update name when userData loads
+  useEffect(() => {
+    if (userData?.name) {
+      setName(userData.name);
+    }
+  }, [userData?.name]);
 
   // Cleanup object URL on unmount or when selectedImage changes
   useEffect(() => {
@@ -302,6 +313,9 @@ export default function SettingsPage() {
       // Update session
       await update({ image: avatarUrl });
 
+      // Update local avatar state
+      setAvatar(avatarUrl);
+
       toast.success("Avatar updated successfully!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update avatar");
@@ -347,11 +361,11 @@ export default function SettingsPage() {
             <div className="flex items-center space-x-6 p-4 rounded-lg bg-muted/30 border">
               <Avatar className="h-20 w-20 ring-4 ring-primary/10">
                 <AvatarImage
-                  src={selectedImage || session?.user?.image || undefined}
-                  alt={name || session?.user?.name || ""}
+                  src={selectedImage || avatar || undefined}
+                  alt={name || userData?.name || ""}
                 />
                 <AvatarFallback className="text-lg bg-primary/10 text-primary">
-                  {getInitials(name || session?.user?.name || "U")}
+                  {getInitials(name || userData?.name || "U")}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-3">
@@ -382,14 +396,18 @@ export default function SettingsPage() {
                   className="transition-colors focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-              
+               
               <Button
               onClick={handleSaveProfile}
               disabled={isUploading}
               className="bg-primary hover:bg-primary/90 transition-all duration-200 hover:shadow-lg"
             >
               <User className="h-4 w-4 mr-2" />
-              {isUploading ? "updating..." : "Update name"}
+              {isUploading ? (
+                <><Loader2 className="h-4 w-4 animate-spin" />
+              updating...
+              </>
+            ) : "Update name"}
             </Button>
 
               <div className="space-y-2">
@@ -561,26 +579,52 @@ export default function SettingsPage() {
           <div className="grid gap-4 md:grid-cols-2">
            <div className="space-y-2">
              <Label htmlFor="current-password" className="text-sm font-medium">Current Password</Label>
-             <Input
-               id="current-password"
-               type="password"
-               value={currentPassword}
-               onChange={(e) => setCurrentPassword(e.target.value)}
-               placeholder="Enter current password"
-               className="transition-colors focus:ring-2 focus:ring-amber-500/20"
-             />
+             <div className="relative">
+               <Input
+                 id="current-password"
+                 type={showCurrentPassword ? "text" : "password"}
+                 value={currentPassword}
+                 onChange={(e) => setCurrentPassword(e.target.value)}
+                 placeholder="Enter current password"
+                 className="pr-10 transition-colors focus:ring-2 focus:ring-amber-500/20"
+               />
+               <button
+                 type="button"
+                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+               >
+                 {showCurrentPassword ? (
+                   <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                 ) : (
+                   <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                 )}
+               </button>
+             </div>
            </div>
 
            <div className="space-y-2">
              <Label htmlFor="new-password" className="text-sm font-medium">New Password</Label>
-             <Input
-               id="new-password"
-               type="password"
-               value={newPassword}
-               onChange={(e) => setNewPassword(e.target.value)}
-               placeholder="Enter new password"
-               className="transition-colors focus:ring-2 focus:ring-amber-500/20"
-             />
+             <div className="relative">
+               <Input
+                 id="new-password"
+                 type={showNewPassword ? "text" : "password"}
+                 value={newPassword}
+                 onChange={(e) => setNewPassword(e.target.value)}
+                 placeholder="Enter new password"
+                 className="pr-10 transition-colors focus:ring-2 focus:ring-amber-500/20"
+               />
+               <button
+                 type="button"
+                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                 onClick={() => setShowNewPassword(!showNewPassword)}
+               >
+                 {showNewPassword ? (
+                   <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                 ) : (
+                   <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                 )}
+               </button>
+             </div>
            </div>
          </div>
 
@@ -591,7 +635,9 @@ export default function SettingsPage() {
             disabled={isChangingPassword}
           >
             <Shield className="h-4 w-4 mr-2" />
-            {isChangingPassword ? "Changing..." : "Change Password"}
+            {isChangingPassword ? (
+              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Changing...</>
+            ) : "Change Password"}
           </Button>
         </CardContent>
       </Card>

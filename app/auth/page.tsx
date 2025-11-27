@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock, User, Mail, UserCheck, Loader2 } from "lucide-react";
+import { Lock, User, Mail, UserCheck, Loader2, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -35,6 +35,11 @@ export default function AuthPage() {
   const [signupRole, setSignupRole] = useState("");
   const [signupIsLoading, setSignupIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+
+  // Password visibility states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const router = useRouter();
 
@@ -221,13 +226,24 @@ export default function AuthPage() {
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="signup-password"
-                      type="password"
+                      type={showSignupPassword ? "text" : "password"}
                       placeholder="Create a password"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                    >
+                      {showSignupPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
                   </div>
                 </div>
 
@@ -239,13 +255,24 @@ export default function AuthPage() {
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="confirm-password"
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
                   </div>
                 </div>
 
@@ -276,16 +303,17 @@ export default function AuthPage() {
                   {signupIsLoading ? "Creating Account..." : "Sign Up"}
                 </Button>
 
-                <div className="text-center mt-4">
+                <div className="text-center mt-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Already have an account?{" "}
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
                       onClick={() => setIsSignUp(false)}
-                      className="text-primary hover:underline font-medium"
+                      className="block w-full mt-2"
                     >
-                      Sign in
-                    </button>
+                      Sign In to your account
+                    </Button>
                   </p>
                 </div>
               </form>
@@ -320,13 +348,24 @@ export default function AuthPage() {
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
                   </div>
                   <div className="flex justify-end mt-1">
                   <Link
@@ -353,16 +392,17 @@ export default function AuthPage() {
                   )}
                 </Button>
 
-                <div className="text-center mt-4">
+                <div className="text-center mt-2">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Don&apos;t have an account?{" "}
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
                       onClick={() => setIsSignUp(true)}
-                      className="text-primary hover:underline font-medium"
+                      className="block w-full mt-2"
                     >
-                      Sign up
-                    </button>
+                      Create account
+                    </Button>
                   </p>
                 </div>
               </form>

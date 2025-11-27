@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, createContext, useContext, useEffect } from "react";
+import React, { useState, createContext, useContext } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider, useSession } from "next-auth/react";
 

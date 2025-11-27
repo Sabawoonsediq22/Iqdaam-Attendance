@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Session } from "next-auth";
 import AppShell from "@/components/app-shell";
-import { SessionProvider } from "next-auth/react";
 
 interface ExtendedUser {
   id: string;
@@ -32,8 +31,6 @@ export default function DashboardClient({ session, children }: DashboardClientPr
   }, [session, pathname, router]);
 
   return (
-    <SessionProvider session={session}>
-      <AppShell session={session}>{children}</AppShell>
-    </SessionProvider>
+    <AppShell session={session}>{children}</AppShell>
   );
 }

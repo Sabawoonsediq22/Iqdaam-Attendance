@@ -58,6 +58,7 @@ export const config = {
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
+        token.name = user.name;
         token.role = user.role;
         token.isApproved = user.isApproved;
         token.image = user.image;
@@ -66,7 +67,8 @@ export const config = {
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
-        session.user.id = token.sub!;
+        session.user.id = token.sub;
+        session.user.name = token.name;
         session.user.role = token.role;
         session.user.isApproved = token.isApproved;
         session.user.image = token.image;
