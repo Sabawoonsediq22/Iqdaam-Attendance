@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { classes, insertClassSchema } from "@/lib/schema";
+import { classes, users, insertClassSchema } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import { createNotification, notificationTemplates } from "@/lib/notifications";
 
 export async function GET() {
@@ -42,12 +43,19 @@ export async function POST(request: NextRequest) {
       .values(result.data)
       .returning();
 
-    // Create notification
+    // Create notification for all admin users
     try {
+      const adminUsers = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.role, "admin"));
+
+      const adminUserIds = adminUsers.map(user => user.id);
+
       await createNotification({
         ...notificationTemplates.classAdded(newClass[0].name, session.user.name),
         entityId: newClass[0].id,
-      });
+      }, adminUserIds);
     } catch (error) {
       console.error("Failed to create notification for class creation:", error);
     }

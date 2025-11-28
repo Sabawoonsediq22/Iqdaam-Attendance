@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { storage } from "@/lib/storage";
-import { insertNotificationSchema } from "@/lib/schema";
+import { insertNotificationSchema, notifications } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET() {
    try {
-     const notifications = await storage.getAllNotifications();
-     return NextResponse.json(notifications);
+     const session = await auth();
+
+     if (!session?.user?.id) {
+       return NextResponse.json(
+         { error: "Unauthorized" },
+         { status: 401 }
+       );
+     }
+
+     // Get notifications for the current user
+     const userNotifications = await storage.getNotificationsForUser(session.user.id);
+     return NextResponse.json(userNotifications);
    } catch {
      return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 });
    }
- }
+}
 
 export async function POST(request: NextRequest) {
    try {

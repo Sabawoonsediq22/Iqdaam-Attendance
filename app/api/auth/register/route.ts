@@ -52,10 +52,18 @@ export async function POST(request: NextRequest) {
     // Create notification for pending approval
     if (!isApproved) {
       try {
+        // Get all admin user IDs
+        const adminUsers = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.role, "admin"));
+
+        const adminUserIds = adminUsers.map(user => user.id);
+
         await createNotification({
           ...notificationTemplates.userPendingApproval(newUser[0].name, newUser[0].email),
           entityId: newUser[0].id,
-        });
+        }, adminUserIds);
       } catch (error) {
         console.error("Failed to create notification for pending user:", error);
         // Continue with registration even if notification fails

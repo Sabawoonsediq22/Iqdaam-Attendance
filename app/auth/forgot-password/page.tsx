@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader } from "@/components/loader";
-import { Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
@@ -131,12 +131,12 @@ export default function ForgotPasswordPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full cursor-pointer"
               disabled={isLoading || !email.trim()}
             >
               {isLoading ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Sending Code...
                 </>
               ) : (

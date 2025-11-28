@@ -1,4 +1,8 @@
 import { storage } from "./storage";
+import { db } from "./db";
+import { userPreferences, users } from "./schema";
+import { eq } from "drizzle-orm";
+import { sendNotificationEmail } from "./email";
 
 export interface NotificationData {
   title: string;
@@ -10,12 +14,62 @@ export interface NotificationData {
   action?: string;
 }
 
-export const createNotification = async (data: NotificationData) => {
+export const createNotification = async (data: NotificationData, userIds?: string[]) => {
   try {
-    await storage.createNotification({
-      ...data,
-      userId: undefined, // For future multi-user support
-    });
+    // If no specific users provided, create notification for all users (legacy behavior)
+    if (!userIds || userIds.length === 0) {
+      await storage.createNotification({
+        ...data,
+        userId: undefined,
+      });
+      return;
+    }
+
+    // Create notification for each specified user, checking their preferences
+    for (const userId of userIds) {
+      // Get user preferences
+      const preferences = await db
+        .select()
+        .from(userPreferences)
+        .where(eq(userPreferences.userId, userId))
+        .limit(1);
+
+      // Get user email for sending emails
+      const user = await db
+        .select({ email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (user.length === 0) continue;
+
+      // Default preferences: push notifications enabled, email updates disabled
+      const pushNotificationsEnabled = preferences.length === 0 || preferences[0].pushNotifications;
+      const emailUpdatesEnabled = preferences.length > 0 && preferences[0].emailUpdates;
+
+      // Create push notification if enabled
+      if (pushNotificationsEnabled) {
+        await storage.createNotification({
+          ...data,
+          userId,
+        });
+      }
+
+      // Send email notification if enabled
+      if (emailUpdatesEnabled) {
+        try {
+          await sendNotificationEmail({
+            email: user[0].email,
+            title: data.title,
+            message: data.message,
+            type: data.type,
+          });
+        } catch (emailError) {
+          console.error("Failed to send notification email:", emailError);
+          // Continue with other notifications even if email fails
+        }
+      }
+    }
   } catch (error) {
     console.error("Failed to create notification:", error);
   }

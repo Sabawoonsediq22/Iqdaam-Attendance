@@ -58,6 +58,7 @@ export interface IStorage {
   bulkUpsertAttendance(attendances: InsertAttendance[]): Promise<Attendance[]>;
 
   getAllNotifications(): Promise<Notification[]>;
+  getNotificationsForUser(userId: string): Promise<Notification[]>;
   getUnreadNotificationsCount(): Promise<number>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: string): Promise<boolean>;
@@ -209,6 +210,15 @@ export class DrizzleStorage implements IStorage {
 
   async getAllNotifications(): Promise<Notification[]> {
     return await getDb().select().from(notifications).orderBy(notifications.createdAt).limit(100);
+  }
+
+  async getNotificationsForUser(userId: string): Promise<Notification[]> {
+    return await getDb()
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(notifications.createdAt)
+      .limit(100);
   }
 
   async getUnreadNotificationsCount(): Promise<number> {

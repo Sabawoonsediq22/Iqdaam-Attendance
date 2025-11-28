@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader } from "@/components/loader";
-import { Shield, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Shield, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 function VerifyCodeForm() {
@@ -150,7 +150,7 @@ function VerifyCodeForm() {
                   const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                   setCode(value);
                 }}
-                className="text-center text-2xl font-mono tracking-widest"
+                className="text-center text-2xl font-mono tracking-widest mt-2"
                 maxLength={6}
                 required
                 disabled={isLoading}
@@ -175,7 +175,7 @@ function VerifyCodeForm() {
             >
               {isLoading ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
                   Verifying...
                 </>
               ) : (
@@ -191,7 +191,7 @@ function VerifyCodeForm() {
                 <button
                   onClick={handleResendCode}
                   disabled={isLoading}
-                  className="text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50"
+                  className="text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50 cursor-pointer"
                 >
                   Resend Code
                 </button>

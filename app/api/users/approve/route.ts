@@ -58,11 +58,18 @@ export async function POST(request: NextRequest) {
         // Continue with the approval process
       }
 
-      // Create notification
+      // Create notification for all admin users
       try {
+        const adminUsers = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.role, "admin"));
+
+        const adminUserIds = adminUsers.map(user => user.id);
+
         await createNotification({
           ...notificationTemplates.userApproved(updatedUser[0].name, session.user.name),
-        });
+        }, adminUserIds);
       } catch (error) {
         console.error("Failed to create notification for user approval:", error);
       }
@@ -130,11 +137,18 @@ export async function POST(request: NextRequest) {
         // Continue
       }
 
-      // Create notification
+      // Create notification for all admin users
       try {
+        const adminUsers = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.role, "admin"));
+
+        const adminUserIds = adminUsers.map(user => user.id);
+
         await createNotification({
           ...notificationTemplates.userRejected(userToDelete[0].name, session.user.name),
-        });
+        }, adminUserIds);
       } catch (error) {
         console.error("Failed to create notification for user rejection:", error);
       }
