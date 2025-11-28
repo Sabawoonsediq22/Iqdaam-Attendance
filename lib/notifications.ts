@@ -166,6 +166,15 @@ export const notificationTemplates = {
     action: "deleted",
   }),
 
+  userUpgradedToAdmin: (userName: string, actorName: string) => ({
+    title: "User Upgraded to Admin",
+    message: `**${actorName}** upgraded ${userName} to admin.`,
+    type: "success" as const,
+    entityType: "user" as const,
+    actorName,
+    action: "upgraded",
+  }),
+
   syncCompleted: (itemsSynced: number) => ({
     title: "Sync Completed",
     message: `Successfully synced ${itemsSynced} items when connection was restored.`,

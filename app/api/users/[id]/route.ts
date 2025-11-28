@@ -68,7 +68,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const { avatar, name, currentPassword, newPassword } = await request.json();
+    const { avatar, name, currentPassword, newPassword, role } = await request.json();
 
     // Get the currently logged-in user from NextAuth (v5)
     const session = await auth();
@@ -81,11 +81,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const userId = session.user.id;
+    const isAdmin = session.user.role === "admin";
 
-    // Prevent updating someone else's avatar
-    if (userId !== id) {
+    // Allow admins to update any user, others can only update themselves
+    if (!isAdmin && userId !== id) {
       return NextResponse.json(
-        { error: "Forbidden: You can only update your own avatar" },
+        { error: "Forbidden: You can only update your own profile" },
         { status: 403 }
       );
     }
@@ -117,7 +118,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     // Prepare update data
-    const updateData: { avatar?: string; name?: string; password?: string } = {};
+    const updateData: { avatar?: string; name?: string; password?: string; role?: string } = {};
 
     // Handle password change
     if (currentPassword && newPassword) {
@@ -143,6 +144,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     if (avatar !== undefined) updateData.avatar = avatar;
     if (name !== undefined) updateData.name = name;
+    if (role !== undefined && isAdmin) updateData.role = role;
 
     // Update the user
     await db

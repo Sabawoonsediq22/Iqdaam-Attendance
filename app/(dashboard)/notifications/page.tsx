@@ -50,6 +50,8 @@ export default function NotificationsPage() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterReadStatus, setFilterReadStatus] = useState<string>("all");
   const [filterDate, setFilterDate] = useState<string>("all");
+  const [approvingNotifications, setApprovingNotifications] = useState<Set<string>>(new Set());
+  const [rejectingNotifications, setRejectingNotifications] = useState<Set<string>>(new Set());
 
   const queryClient = useQueryClient();
 
@@ -113,6 +115,9 @@ export default function NotificationsPage() {
       const data = await res.json();
       return { data, notificationId };
     },
+    onMutate: ({ notificationId }) => {
+      setApprovingNotifications(prev => new Set(prev).add(notificationId));
+    },
     onSuccess: ({ data, notificationId }) => {
       // Mark notification as read
       markAsReadMutation.mutate(notificationId);
@@ -122,8 +127,15 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/users/pending"] });
       toast.success(`User ${data.user.name} approved successfully`);
     },
-    onError: (error) => {
+    onError: (error, { notificationId }) => {
       toast.error(error.message || "Failed to approve user");
+    },
+    onSettled: (data, error, { notificationId }) => {
+      setApprovingNotifications(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        return newSet;
+      });
     },
   });
 
@@ -141,6 +153,9 @@ export default function NotificationsPage() {
       const data = await res.json();
       return { data, notificationId };
     },
+    onMutate: ({ notificationId }) => {
+      setRejectingNotifications(prev => new Set(prev).add(notificationId));
+    },
     onSuccess: ({ notificationId }) => {
       // Mark notification as read
       markAsReadMutation.mutate(notificationId);
@@ -150,8 +165,15 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/users/pending"] });
       toast.success("User rejected and deleted");
     },
-    onError: (error) => {
+    onError: (error, { notificationId }) => {
       toast.error(error.message || "Failed to reject user");
+    },
+    onSettled: (data, error, { notificationId }) => {
+      setRejectingNotifications(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        return newSet;
+      });
     },
   });
 
@@ -466,29 +488,29 @@ export default function NotificationsPage() {
                             <Button
                               size="sm"
                               onClick={() => handleApproveUser(notification.entityId!, notification.id)}
-                              disabled={approveUserMutation.isPending}
+                              disabled={approvingNotifications.has(notification.id)}
                               className="cursor-pointer"
                             >
-                              {approveUserMutation.isPending ? (
+                              {approvingNotifications.has(notification.id) ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                               ) : (
                                 <CheckCircle className="w-4 h-4 mr-2" />
                               )}
-                              {approveUserMutation.isPending ? "Approving..." : "Approve"}
+                              {approvingNotifications.has(notification.id) ? "Approving..." : "Approve"}
                             </Button>
                             <Button
                               size="sm"
                               variant="destructive"
                               onClick={() => handleRejectUser(notification.entityId!, notification.id)}
-                              disabled={rejectUserMutation.isPending}
+                              disabled={rejectingNotifications.has(notification.id)}
                               className="cursor-pointer"
                             >
-                              {rejectUserMutation.isPending ? (
+                              {rejectingNotifications.has(notification.id) ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                               ) : (
                                 <XCircle className="w-4 h-4 mr-2" />
                               )}
-                              {rejectUserMutation.isPending ? "Rejecting..." : "Reject"}
+                              {rejectingNotifications.has(notification.id) ? "Rejecting..." : "Reject"}
                             </Button>
                           </div>
                         )}

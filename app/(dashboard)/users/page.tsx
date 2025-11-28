@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, MoreVertical, CheckCircle, XCircle, Trash2, Clock } from "lucide-react";
+import { Users, MoreVertical, CheckCircle, XCircle, Trash2, Clock, Crown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -124,6 +124,57 @@ export default function UsersPage() {
     },
   });
 
+  const upgradeMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role: "admin" }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to upgrade user");
+      }
+      return res.json();
+    },
+    onSuccess: async (data, userId) => {
+      toast.dismiss();
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+
+      const upgradedUser = users.find(u => u.id === userId);
+      const actorName = (session?.user as ExtendedUser)?.name || "Admin";
+      toast.success(`${actorName} upgraded ${upgradedUser?.name} to admin`);
+
+      // Create notification for all admins
+      try {
+        const adminUsers = users.filter(u => u.role === "admin").map(u => u.id);
+        await fetch("/api/notifications/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            data: {
+              title: "User Upgraded to Admin",
+              message: `**${actorName}** upgraded ${upgradedUser?.name || "User"} to admin.`,
+              type: "success" as const,
+              entityType: "user" as const,
+              actorName,
+              action: "upgraded",
+            },
+            userIds: adminUsers,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to create upgrade notification:", error);
+      }
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message || "Failed to upgrade user");
+    },
+  });
+
   const handleApprove = (userId: string) => {
     toast.loading("Approving user...");
     approveMutation.mutate({ userId, approved: true });
@@ -137,6 +188,11 @@ export default function UsersPage() {
   const handleDelete = (user: ExtendedUser) => {
     setSelectedUser(user);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleUpgrade = (userId: string) => {
+    toast.loading("Upgrading user to admin...");
+    upgradeMutation.mutate(userId);
   };
 
   const confirmDelete = async () => {
@@ -217,15 +273,25 @@ export default function UsersPage() {
         </>
       );
     } else if (user.role === "teacher") {
-      // Approved teachers: Delete
+      // Approved teachers: Upgrade to Admin and Delete
       return (
-        <DropdownMenuItem
-          onClick={() => handleDelete(user)}
-          className="cursor-pointer text-destructive"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Delete
-        </DropdownMenuItem>
+        <>
+          <DropdownMenuItem
+            onClick={() => handleUpgrade(user.id)}
+            disabled={upgradeMutation.isPending}
+            className="cursor-pointer"
+          >
+            <Crown className="h-4 w-4 mr-2 text-yellow-600" />
+            Upgrade to Admin
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => handleDelete(user)}
+            className="cursor-pointer text-destructive"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        </>
       );
     }
     // Approved admins: No actions

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader } from "@/components/loader";
-import { Lock, ArrowLeft, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, ArrowLeft, CheckCircle, AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 function ResetPasswordForm() {
@@ -210,7 +210,7 @@ function ResetPasswordForm() {
             >
               {isLoading ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Resetting Password...
                 </>
               ) : (
