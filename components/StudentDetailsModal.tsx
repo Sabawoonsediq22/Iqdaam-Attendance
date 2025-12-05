@@ -583,12 +583,6 @@ export default function StudentDetailsModal({ student, isOpen, onClose, onEdit, 
               fill
               className="object-contain rounded-b-lg"
             />
-            <button
-              onClick={() => setShowImageViewer(false)}
-              className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-2 hover:bg-black/70 transition-colors"
-            >
-              <XCircle className="h-6 w-6" />
-            </button>
           </div>
         </DialogContent>
       </Dialog>

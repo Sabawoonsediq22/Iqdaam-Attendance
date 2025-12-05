@@ -15,9 +15,9 @@ import {
   FileText,
   Users,
   WifiOff,
-  PlayCircle,
   BookOpenCheck,
-  Loader2
+  Loader2,
+  CheckCircle
 } from "lucide-react";
 import type { Class, Student } from "@/lib/schema";
 import { Input } from "./ui/input";
@@ -627,7 +627,7 @@ function ClassCard({
             className="w-full h-10 bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
             onClick={handleTakeAttendance}
           >
-            <PlayCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+            <CheckCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
             Take Attendance
           </Button>
         </div>

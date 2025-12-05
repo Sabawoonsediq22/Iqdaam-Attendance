@@ -7,22 +7,30 @@ import { sendNotificationEmail } from "./email";
 export interface NotificationData {
   title: string;
   message: string;
-  type: "success" | "error" | "warning" | "info" | "class" | "student" | "attendance";
+  type:
+    | "success"
+    | "error"
+    | "warning"
+    | "info"
+    | "class"
+    | "student"
+    | "attendance";
   entityType?: "class" | "student" | "attendance" | "user";
   entityId?: string;
   actorName?: string;
   action?: string;
 }
 
-export const createNotification = async (data: NotificationData, userIds?: string[]) => {
+export const createNotification = async (
+  data: NotificationData,
+  userIds?: string[]
+) => {
   try {
     // If no specific users provided, create notification for all users (legacy behavior)
     if (!userIds || userIds.length === 0) {
-      await storage.createNotification({
-        ...data,
-        userId: undefined,
-      });
-      return;
+      // Get all user IDs
+      const allUsers = await db.select({ id: users.id }).from(users);
+      userIds = allUsers.map((user) => user.id);
     }
 
     // Create notification for each specified user, checking their preferences
@@ -44,8 +52,10 @@ export const createNotification = async (data: NotificationData, userIds?: strin
       if (user.length === 0) continue;
 
       // Default preferences: push notifications enabled, email updates disabled
-      const pushNotificationsEnabled = preferences.length === 0 || preferences[0].pushNotifications;
-      const emailUpdatesEnabled = preferences.length > 0 && preferences[0].emailUpdates;
+      const pushNotificationsEnabled =
+        preferences.length === 0 || preferences[0].pushNotifications;
+      const emailUpdatesEnabled =
+        preferences.length > 0 && preferences[0].emailUpdates;
 
       // Create push notification if enabled
       if (pushNotificationsEnabled) {
@@ -86,6 +96,15 @@ export const notificationTemplates = {
     action: "created",
   }),
 
+  classUpdated: (className: string, actorName: string) => ({
+    title: "Class Updated",
+    message: `**${actorName}** updated the class "${className}".`,
+    type: "info" as const,
+    entityType: "class" as const,
+    actorName,
+    action: "updated",
+  }),
+
   classDeleted: (className: string, actorName: string) => ({
     title: "Class Deleted",
     message: `**${actorName}** deleted the class "${className}".`,
@@ -95,7 +114,11 @@ export const notificationTemplates = {
     action: "deleted",
   }),
 
-  studentAdded: (studentName: string, className: string, actorName: string) => ({
+  studentAdded: (
+    studentName: string,
+    className: string,
+    actorName: string
+  ) => ({
     title: "Student Added",
     message: `**${actorName}** added ${studentName} to class "${className}".`,
     type: "success" as const,
@@ -105,12 +128,12 @@ export const notificationTemplates = {
   }),
 
   studentDeleted: (studentName: string, actorName: string) => ({
-    title: "Student Removed",
-    message: `**${actorName}** removed ${studentName} from the attendance.`,
+    title: "Student Deleted",
+    message: `**${actorName}** deleted ${studentName} from the attendance.`,
     type: "warning" as const,
     entityType: "student" as const,
     actorName,
-    action: "removed",
+    action: "deleted",
   }),
 
   attendanceTaken: (className: string, date: string, actorName: string) => ({
@@ -159,7 +182,10 @@ export const notificationTemplates = {
 
   userDeleted: (userName: string, actorName: string) => ({
     title: "User Deleted",
-    message: userName === actorName ? `**${actorName}** deleted his/her account.` : `**${actorName}** deleted ${userName} from the system.`,
+    message:
+      userName === actorName
+        ? `**${actorName}** deleted his/her account.`
+        : `**${actorName}** deleted ${userName} from the system.`,
     type: "warning" as const,
     entityType: "user" as const,
     actorName,
@@ -183,13 +209,59 @@ export const notificationTemplates = {
 
   offlineMode: () => ({
     title: "Offline Mode",
-    message: "You are currently working offline. Changes will be synced when connection is restored.",
+    message:
+      "You are currently working offline. Changes will be synced when connection is restored.",
     type: "warning" as const,
   }),
 
   onlineRestored: () => ({
     title: "Connection Restored",
-    message: "Internet connection has been restored. Syncing pending changes...",
+    message:
+      "Internet connection has been restored. Syncing pending changes...",
     type: "success" as const,
+  }),
+
+  scheduledReportCreated: (email: string, type: string, actorName: string) => ({
+    title: "Scheduled Report Created",
+    message: `**${actorName}** scheduled a ${type} report to be sent to ${email}.`,
+    type: "success" as const,
+    entityType: "attendance" as const,
+    actorName,
+    action: "scheduled",
+  }),
+
+  scheduledReportStopped: (email: string, type: string, actorName: string) => ({
+    title: "Scheduled Report Stopped",
+    message: `**${actorName}** stopped the ${type} report scheduled for ${email}.`,
+    type: "warning" as const,
+    entityType: "attendance" as const,
+    actorName,
+    action: "stopped",
+  }),
+
+  scheduledReportResumed: (email: string, type: string, actorName: string) => ({
+    title: "Scheduled Report Resumed",
+    message: `**${actorName}** resumed the ${type} report scheduled for ${email}.`,
+    type: "success" as const,
+    entityType: "attendance" as const,
+    actorName,
+    action: "resumed",
+  }),
+
+  scheduledReportRemoved: (email: string, type: string, actorName: string) => ({
+    title: "Scheduled Report Removed",
+    message: `**${actorName}** removed the ${type} report scheduled for ${email}.`,
+    type: "warning" as const,
+    entityType: "attendance" as const,
+    actorName,
+    action: "removed",
+  }),
+
+  scheduledReportFailed: (email: string, type: string, error: string) => ({
+    title: "Scheduled Report Failed",
+    message: `Failed to send ${type} report to ${email}. Error: ${error}`,
+    type: "error" as const,
+    entityType: "attendance" as const,
+    action: "failed",
   }),
 };

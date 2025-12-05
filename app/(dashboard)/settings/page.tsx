@@ -657,7 +657,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
-            <div className="flex items-start justify-between">
+            <div className="md:flex flex-col items-start justify-between">
               <div className="space-y-1">
                 <h4 className="text-sm font-medium text-destructive">Delete Account</h4>
                 <p className="text-sm text-muted-foreground">
@@ -669,7 +669,7 @@ export default function SettingsPage() {
                 size="sm"
                 disabled={isDeleting}
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="cursor-pointer"
+                className="cursor-pointer mt-3 w-full md:w-auto hover:bg-destructive/90 transition-colors md:ml-auto"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 {isDeleting ? "Deleting..." : "Delete Account"}

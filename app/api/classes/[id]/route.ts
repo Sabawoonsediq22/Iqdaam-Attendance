@@ -5,7 +5,10 @@ import { classes } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { createNotification, notificationTemplates } from "@/lib/notifications";
 
-export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const { params } = context;
   const { id } = await params;
 
@@ -31,11 +34,17 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     return NextResponse.json(cls[0]);
   } catch (error) {
     console.error("Get class error:", error);
-    return NextResponse.json({ error: "Failed to fetch class" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch class" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const { params } = context;
   const { id } = await params;
 
@@ -64,14 +73,33 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       .where(eq(classes.id, id))
       .returning();
 
+    // Create notification
+    try {
+      await createNotification({
+        ...notificationTemplates.classUpdated(
+          updated[0].name,
+          session.user.name
+        ),
+        entityId: id,
+      });
+    } catch (error) {
+      console.error("Failed to create notification for class update:", error);
+    }
+
     return NextResponse.json(updated[0]);
   } catch (error) {
     console.error("Update class error:", error);
-    return NextResponse.json({ error: "Failed to update class" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update class" },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const { params } = context;
   const { id } = await params;
 
@@ -97,7 +125,10 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     // Create notification
     try {
       await createNotification({
-        ...notificationTemplates.classDeleted(existingClass[0].name, session.user.name),
+        ...notificationTemplates.classDeleted(
+          existingClass[0].name,
+          session.user.name
+        ),
         entityId: id,
       });
     } catch (error) {
@@ -107,6 +138,9 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     return new Response(null, { status: 204 });
   } catch (error) {
     console.error("Delete class error:", error);
-    return NextResponse.json({ error: "Failed to delete class" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete class" },
+      { status: 500 }
+    );
   }
 }

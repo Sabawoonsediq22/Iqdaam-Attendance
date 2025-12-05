@@ -1,6 +1,15 @@
 "use client";
 
-import { LayoutDashboard, Users, CheckSquare, FileText, BookOpen, Bell, UserCheck } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  CheckSquare,
+  FileText,
+  BookOpen,
+  Bell,
+  UserCheck,
+  Clock,
+} from "lucide-react";
 
 interface ExtendedUser {
   id: string;
@@ -80,7 +89,7 @@ const menuItems = [
     icon: Bell,
     description: "System Alerts",
     roles: ["admin"],
-  }
+  },
 ];
 
 // Animation variants
@@ -153,40 +162,47 @@ export function AppSidebar({ session: propSession }: AppSidebarProps) {
                 height={40}
               />
             </div>
-              {!isCollapsed && (
-                <div className="overflow-hidden">
-                  <h2 className="text-lg font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                    StudentTracker
-                  </h2>
-                </div>
-              )}
-          </div>
             {!isCollapsed && (
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Smart Attendance Management
-              </p>
+              <div className="overflow-hidden">
+                <h2 className="text-lg font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  StudentTracker
+                </h2>
+              </div>
             )}
+          </div>
+          {!isCollapsed && (
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Smart Attendance Management
+            </p>
+          )}
         </div>
 
         {/* Scrollable Navigation Content */}
         <div className="flex-1">
           <SidebarGroup className="space-y-2">
-              {!isCollapsed && (
-                <div>
-                  <SidebarGroupLabel className="text-lg font-semibold text-muted-foreground uppercase tracking-wider px-3">
-                    Navigation
-                  </SidebarGroupLabel>
-                </div>
-              )}
+            {!isCollapsed && (
+              <div>
+                <SidebarGroupLabel className="text-lg font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Navigation
+                </SidebarGroupLabel>
+              </div>
+            )}
 
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">
                 <div>
                   {menuItems
-                    .filter((item) => effectiveSession?.user && (effectiveSession.user as ExtendedUser).role && item.roles.includes((effectiveSession.user as ExtendedUser).role))
+                    .filter(
+                      (item) =>
+                        effectiveSession?.user &&
+                        (effectiveSession.user as ExtendedUser).role &&
+                        item.roles.includes(
+                          (effectiveSession.user as ExtendedUser).role
+                        )
+                    )
                     .map((item) => {
-                    const isActive = location === item.url;
-                    return (
+                      const isActive = location === item.url;
+                      return (
                         <SidebarMenuItem key={item.title}>
                           <motion.div
                             variants={hoverVariants}
@@ -204,10 +220,12 @@ export function AppSidebar({ session: propSession }: AppSidebarProps) {
                                 isActive && [
                                   "bg-linear-to-r from-primary/15 to-primary/10",
                                   "border-primary/30 shadow-lg shadow-primary/20",
-                                  "text-primary font-medium"
+                                  "text-primary font-medium",
                                 ]
                               )}
-                              data-testid={`nav-${item.title.toLowerCase().replace(' ', '-')}`}
+                              data-testid={`nav-${item.title
+                                .toLowerCase()
+                                .replace(" ", "-")}`}
                             >
                               <Link
                                 href={item.url}
@@ -231,38 +249,42 @@ export function AppSidebar({ session: propSession }: AppSidebarProps) {
                                 {/* Text content */}
                                 {!isCollapsed && (
                                   <div className="flex-1 min-w-0 overflow-hidden">
-                                      <div className="flex flex-col">
-                                        <span className="text-[1rem] font-medium truncate">
-                                          {item.title}
+                                    <div className="flex flex-col">
+                                      <span className="text-[1rem] font-medium truncate">
+                                        {item.title}
+                                      </span>
+                                      {!isCollapsed && (
+                                        <span className="text-xs text-muted-foreground truncate">
+                                          {item.description}
                                         </span>
-                                          {!isCollapsed && (
-                                            <span className="text-xs text-muted-foreground truncate">
-                                              {item.description}
-                                            </span>
-                                          )}
-                                      </div>
+                                      )}
                                     </div>
-                                  )}
+                                  </div>
+                                )}
 
                                 {/* Notification badge */}
-                                {item.title === "Notifications" && unreadCount > 0 && (
-                                  <Badge
-                                    variant="destructive"
-                                    className="h-5 min-w-5 text-xs px-1.5 flex items-center justify-center font-bold shadow-sm animate-pulse"
-                                  >
-                                    {unreadCount > 99 ? "99+" : unreadCount}
-                                  </Badge>
-                                )}
+                                {item.title === "Notifications" &&
+                                  unreadCount > 0 && (
+                                    <Badge
+                                      variant="destructive"
+                                      className="h-5 min-w-5 text-xs px-1.5 flex items-center justify-center font-bold shadow-sm animate-pulse"
+                                    >
+                                      {unreadCount > 99 ? "99+" : unreadCount}
+                                    </Badge>
+                                  )}
 
                                 {/* Pending users badge */}
-                                {item.title === "Users" && pendingUsersCount > 0 && (
-                                  <Badge
-                                    variant="destructive"
-                                    className="h-5 min-w-5 text-xs px-1.5 flex items-center justify-center font-bold shadow-sm animate-pulse"
-                                  >
-                                    {pendingUsersCount > 99 ? "99+" : pendingUsersCount}
-                                  </Badge>
-                                )}
+                                {item.title === "Users" &&
+                                  pendingUsersCount > 0 && (
+                                    <Badge
+                                      variant="destructive"
+                                      className="h-5 min-w-5 text-xs px-1.5 flex items-center justify-center font-bold shadow-sm animate-pulse"
+                                    >
+                                      {pendingUsersCount > 99
+                                        ? "99+"
+                                        : pendingUsersCount}
+                                    </Badge>
+                                  )}
 
                                 {/* Active indicator */}
                                 {isActive && (
@@ -272,8 +294,8 @@ export function AppSidebar({ session: propSession }: AppSidebarProps) {
                             </SidebarMenuButton>
                           </motion.div>
                         </SidebarMenuItem>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               </SidebarMenu>
             </SidebarGroupContent>

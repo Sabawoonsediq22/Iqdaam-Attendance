@@ -24,17 +24,63 @@ import {
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Download, Calendar as CalendarIcon, Filter, RefreshCw, Mail, Loader2 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Download,
+  Calendar as CalendarIcon,
+  Filter,
+  RefreshCw,
+  Mail,
+  Loader2,
+  Clock,
+  Play,
+  Square,
+  Trash2,
+} from "lucide-react";
 import { Loader } from "@/components/loader";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 import { format, subWeeks } from "date-fns";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
@@ -90,13 +136,23 @@ interface ReportData {
   };
 }
 
+interface ScheduledReport {
+  id: string;
+  type: "weekly" | "monthly";
+  email: string;
+  classId?: string;
+  studentId?: string;
+  createdAt: string;
+  nextRun: string;
+  isActive: boolean;
+}
 
 interface Props {
   students: Student[];
   classes: Class[];
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 export default function ReportsClient({ students, classes }: Props) {
   const router = useRouter();
@@ -122,9 +178,16 @@ export default function ReportsClient({ students, classes }: Props) {
 
   // Scheduling
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [scheduleEmail, setScheduleEmail] = useState("");
-  const [scheduleType, setScheduleType] = useState<"weekly" | "monthly">("weekly");
+  const [scheduleType, setScheduleType] = useState<"weekly" | "monthly">(
+    "weekly"
+  );
   const [scheduling, setScheduling] = useState(false);
+  const [managing, setManaging] = useState(false);
+  const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>(
+    []
+  );
 
   const fetchReport = async () => {
     setLoading(true);
@@ -135,8 +198,10 @@ export default function ReportsClient({ students, classes }: Props) {
         type: reportType,
         ...(startDate && { startDate: format(startDate, "yyyy-MM-dd") }),
         ...(endDate && { endDate: format(endDate, "yyyy-MM-dd") }),
-        ...(selectedClass && selectedClass !== "all" && { classId: selectedClass }),
-        ...(selectedStudent && selectedStudent !== "all" && { studentId: selectedStudent }),
+        ...(selectedClass &&
+          selectedClass !== "all" && { classId: selectedClass }),
+        ...(selectedStudent &&
+          selectedStudent !== "all" && { studentId: selectedStudent }),
       });
 
       const response = await fetch(`/api/reports?${params}`);
@@ -153,7 +218,7 @@ export default function ReportsClient({ students, classes }: Props) {
 
   useEffect(() => {
     fetchReport();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportType, startDate, endDate, selectedClass, selectedStudent]);
 
   const getInitials = (name?: string) => {
@@ -187,7 +252,10 @@ export default function ReportsClient({ students, classes }: Props) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `attendance-report-${reportType}-${format(
+      new Date(),
+      "yyyy-MM-dd"
+    )}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -206,7 +274,10 @@ export default function ReportsClient({ students, classes }: Props) {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Attendance Report");
-    XLSX.writeFile(wb, `attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
+    XLSX.writeFile(
+      wb,
+      `attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.xlsx`
+    );
   };
 
   const exportToPDF = () => {
@@ -229,7 +300,9 @@ export default function ReportsClient({ students, classes }: Props) {
       startY: 20,
     });
 
-    doc.save(`attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    doc.save(
+      `attendance-report-${reportType}-${format(new Date(), "yyyy-MM-dd")}.pdf`
+    );
   };
 
   const clearFilters = () => {
@@ -237,6 +310,58 @@ export default function ReportsClient({ students, classes }: Props) {
     setEndDate(undefined);
     setSelectedClass("all");
     setSelectedStudent("all");
+  };
+
+  const fetchScheduledReports = async () => {
+    setManaging(true);
+    try {
+      const response = await fetch("/api/reports/schedule");
+      if (!response.ok) throw new Error("Failed to fetch scheduled reports");
+
+      const data = await response.json();
+      setScheduledReports(data.scheduledReports || []);
+      setManageDialogOpen(true);
+    } catch (error) {
+      console.error("Error fetching scheduled reports:", error);
+      toast.error("Failed to load scheduled reports");
+    } finally {
+      setManaging(false);
+    }
+  };
+
+  const manageScheduledReport = async (
+    id: string,
+    action: "stop" | "resume" | "remove"
+  ) => {
+    try {
+      if (action === "remove") {
+        const response = await fetch(`/api/reports/schedule?id=${id}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) throw new Error("Failed to remove scheduled report");
+
+        toast.success("Scheduled report removed successfully!");
+      } else {
+        const response = await fetch(`/api/reports/schedule?id=${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action }),
+        });
+
+        if (!response.ok) throw new Error("Failed to update scheduled report");
+
+        toast.success(`Scheduled report ${action}d successfully!`);
+      }
+
+      // Refresh the list
+      await fetchScheduledReports();
+    } catch (error) {
+      console.error(`Error ${action}ing scheduled report:`, error);
+      toast.error(`Failed to ${action} scheduled report`);
+    }
   };
 
   const scheduleReport = async () => {
@@ -260,13 +385,12 @@ export default function ReportsClient({ students, classes }: Props) {
       if (!response.ok) throw new Error("Failed to schedule report");
 
       const result = await response.json();
-      console.log("Report scheduled:", result);
+      toast.success("Report scheduled successfully!");
       setScheduleDialogOpen(false);
       setScheduleEmail("");
-      // You could show a success toast here
     } catch (error) {
       console.error("Error scheduling report:", error);
-      // You could show an error toast here
+      toast.error("Failed to schedule report");
     } finally {
       setScheduling(false);
     }
@@ -282,16 +406,52 @@ export default function ReportsClient({ students, classes }: Props) {
         </div>
         <div className="flex gap-2 flex-wrap ml-auto">
           <Button variant="outline" onClick={fetchReport} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
             Refresh
           </Button>
-          <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
-            <DialogTrigger asChild>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                <Mail className="h-4 w-4 mr-2" />
-                Schedule Email
+                <Clock className="h-4 w-4 mr-2" />
+                Schedule Reports
               </Button>
-            </DialogTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuLabel>Schedule Options</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setScheduleType("weekly");
+                    setScheduleDialogOpen(true);
+                  }}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Schedule Weekly Report
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setScheduleType("monthly");
+                    setScheduleDialogOpen(true);
+                  }}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Schedule Monthly Report
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => fetchScheduledReports()}>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Manage Scheduled Reports
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Dialog
+            open={scheduleDialogOpen}
+            onOpenChange={setScheduleDialogOpen}
+          >
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Schedule Email Report</DialogTitle>
@@ -307,30 +467,232 @@ export default function ReportsClient({ students, classes }: Props) {
                     onChange={(e) => setScheduleEmail(e.target.value)}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="schedule-type">Report Frequency</Label>
-                  <Select value={scheduleType} onValueChange={(value: "weekly" | "monthly") => setScheduleType(value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div className="text-sm text-muted-foreground">
                   Reports will be sent automatically based on current filters.
-                  Weekly reports are sent every Sunday at 9 AM.
-                  Monthly reports are sent on the 1st of each month at 9 AM.
+                  {scheduleType === "weekly"
+                    ? "Weekly reports are sent every Sunday at 9 AM."
+                    : "Monthly reports are sent on the 1st of each month at 9 AM."}
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setScheduleDialogOpen(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setScheduleDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
-                  <Button onClick={scheduleReport} disabled={scheduling || !scheduleEmail}>
-                    {scheduling && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  <Button
+                    onClick={scheduleReport}
+                    disabled={scheduling || !scheduleEmail}
+                  >
+                    {scheduling && (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    )}
                     {scheduling ? "Scheduling..." : "Schedule Report"}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
+            <DialogContent className="w-[95vw] sm:w-full sm:max-w-4xl h-[95vh] max-h-[95vh] p-4 sm:p-6">
+              <DialogHeader className="pb-4">
+                <DialogTitle className="text-lg sm:text-xl">
+                  Manage Scheduled Reports
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 overflow-y-auto max-h-[calc(95vh-140px)]">
+                {scheduledReports.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    No scheduled reports found
+                  </p>
+                ) : (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block rounded-md border border-card-border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Next Run</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {scheduledReports.map((report: ScheduledReport) => (
+                            <TableRow key={report.id}>
+                              <TableCell
+                                className="font-medium max-w-[200px] truncate"
+                                title={report.email}
+                              >
+                                {report.email}
+                              </TableCell>
+                              <TableCell className="capitalize">
+                                {report.type}
+                              </TableCell>
+                              <TableCell>
+                                <span
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    report.isActive
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {report.isActive ? "Active" : "Stopped"}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {format(new Date(report.nextRun), "PPP 'at' p")}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-1">
+                                  {report.isActive ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        manageScheduledReport(report.id, "stop")
+                                      }
+                                      className="h-8 w-8 p-0"
+                                      title="Stop report"
+                                    >
+                                      <Square className="h-3 w-3" />
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        manageScheduledReport(
+                                          report.id,
+                                          "resume"
+                                        )
+                                      }
+                                      className="h-8 w-8 p-0"
+                                      title="Resume report"
+                                    >
+                                      <Play className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      manageScheduledReport(report.id, "remove")
+                                    }
+                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                    title="Remove report"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
+                      {scheduledReports.map((report: ScheduledReport) => (
+                        <Card key={report.id} className="p-4 shadow-sm">
+                          <div className="space-y-4">
+                            {/* Header with email and status */}
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p
+                                  className="font-semibold text-sm break-words leading-tight"
+                                  title={report.email}
+                                >
+                                  {report.email}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="capitalize text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
+                                    {report.type}
+                                  </span>
+                                  <span
+                                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                                      report.isActive
+                                        ? "bg-green-50 text-green-700 border border-green-200"
+                                        : "bg-red-50 text-red-700 border border-red-200"
+                                    }`}
+                                  >
+                                    {report.isActive ? "Active" : "Stopped"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Next run info */}
+                            <div className="bg-muted/50 rounded-lg p-3">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <div>
+                                  <p className="text-xs font-medium text-muted-foreground">Next Run</p>
+                                  <p className="text-sm font-semibold">
+                                    {format(
+                                      new Date(report.nextRun),
+                                      "MMM dd, yyyy 'at' HH:mm"
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action buttons */}
+                            <div className="flex gap-2 pt-3 border-t border-border/50">
+                              {report.isActive ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    manageScheduledReport(report.id, "stop")
+                                  }
+                                  className="flex-1 h-9 text-xs font-medium"
+                                >
+                                  <Square className="h-3 w-3 mr-1.5" />
+                                  Stop
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    manageScheduledReport(report.id, "resume")
+                                  }
+                                  className="flex-1 h-9 text-xs font-medium"
+                                >
+                                  <Play className="h-3 w-3 mr-1.5" />
+                                  Resume
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  manageScheduledReport(report.id, "remove")
+                                }
+                                className="flex-1 h-9 text-xs font-medium text-destructive hover:text-destructive border-destructive/20 hover:border-destructive/40"
+                              >
+                                <Trash2 className="h-3 w-3 mr-1.5" />
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
+                )}
+                <div className="flex gap-2 justify-end pt-4 border-t mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setManageDialogOpen(false)}
+                    className="w-full sm:w-auto"
+                  >
+                    Close
                   </Button>
                 </div>
               </div>
@@ -391,12 +753,18 @@ export default function ReportsClient({ students, classes }: Props) {
               <label className="text-sm font-medium">Start Date</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {startDate ? format(startDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 shadow-xl border-2" align="start">
+                <PopoverContent
+                  className="w-auto p-0 shadow-xl border-2"
+                  align="start"
+                >
                   <div className="p-3 bg-background rounded-lg">
                     <Calendar
                       mode="single"
@@ -407,25 +775,31 @@ export default function ReportsClient({ students, classes }: Props) {
                       initialFocus
                       className="rounded-md border-0 bg-transparent"
                       classNames={{
-                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        months:
+                          "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                         month: "space-y-4 relative",
-                        caption: "flex justify-center pt-1 relative items-center",
+                        caption:
+                          "flex justify-center pt-1 relative items-center",
                         caption_label: "text-sm font-medium",
                         nav: "absolute top-0 left-0 right-0 flex items-center justify-between px-2",
-                        nav_button: "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
+                        nav_button:
+                          "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
                         nav_button_previous: "",
                         nav_button_next: "",
                         table: "w-full border-collapse space-y-1",
                         head_row: "flex",
-                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                        head_cell:
+                          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
                         row: "flex w-full mt-2",
                         cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
                         day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
-                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_selected:
+                          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
                         day_today: "bg-accent text-accent-foreground",
                         day_outside: "text-muted-foreground opacity-50",
                         day_disabled: "text-muted-foreground opacity-50",
-                        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                        day_range_middle:
+                          "aria-selected:bg-accent aria-selected:text-accent-foreground",
                         day_hidden: "invisible",
                       }}
                     />
@@ -438,12 +812,18 @@ export default function ReportsClient({ students, classes }: Props) {
               <label className="text-sm font-medium">End Date</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {endDate ? format(endDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 shadow-xl border-2" align="start">
+                <PopoverContent
+                  className="w-auto p-0 shadow-xl border-2"
+                  align="start"
+                >
                   <div className="p-3 bg-background rounded-lg">
                     <Calendar
                       mode="single"
@@ -454,25 +834,31 @@ export default function ReportsClient({ students, classes }: Props) {
                       initialFocus
                       className="rounded-md border-0 bg-transparent"
                       classNames={{
-                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        months:
+                          "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                         month: "space-y-4 relative",
-                        caption: "flex justify-center pt-1 relative items-center",
+                        caption:
+                          "flex justify-center pt-1 relative items-center",
                         caption_label: "text-sm font-medium",
                         nav: "absolute top-0 left-0 right-0 flex items-center justify-between px-2",
-                        nav_button: "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
+                        nav_button:
+                          "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
                         nav_button_previous: "",
                         nav_button_next: "",
                         table: "w-full border-collapse space-y-1",
                         head_row: "flex",
-                        head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                        head_cell:
+                          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
                         row: "flex w-full mt-2",
                         cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
                         day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
-                        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                        day_selected:
+                          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
                         day_today: "bg-accent text-accent-foreground",
                         day_outside: "text-muted-foreground opacity-50",
                         day_disabled: "text-muted-foreground opacity-50",
-                        day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                        day_range_middle:
+                          "aria-selected:bg-accent aria-selected:text-accent-foreground",
                         day_hidden: "invisible",
                       }}
                     />
@@ -500,7 +886,10 @@ export default function ReportsClient({ students, classes }: Props) {
 
             <div>
               <label className="text-sm font-medium">Student</label>
-              <Select value={selectedStudent} onValueChange={setSelectedStudent}>
+              <Select
+                value={selectedStudent}
+                onValueChange={setSelectedStudent}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All Students" />
                 </SelectTrigger>
@@ -586,7 +975,9 @@ export default function ReportsClient({ students, classes }: Props) {
                 <div className="text-3xl font-semibold text-attendance-present">
                   {reportData.summary.presentCount}
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">Student days</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Student days
+                </p>
               </CardContent>
             </Card>
 
@@ -600,7 +991,9 @@ export default function ReportsClient({ students, classes }: Props) {
                 <div className="text-3xl font-semibold text-attendance-absent">
                   {reportData.summary.absentCount}
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">Student days</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Student days
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -639,40 +1032,65 @@ export default function ReportsClient({ students, classes }: Props) {
                 <Card>
                   <CardHeader>
                     <CardTitle>Present Students by Class</CardTitle>
-                    <p className="text-sm text-muted-foreground">Number of students marked present in each class</p>
+                    <p className="text-sm text-muted-foreground">
+                      Number of students marked present in each class
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-center">
                       <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                           <Pie
-                            data={classes.map((cls, index) => {
-                              const chartData = reportData.charts.byClass.find(c => c.class === cls.name);
-                              return {
-                                name: cls.name,
-                                present: chartData?.present || 0,
-                                absent: chartData?.absent || 0,
-                                late: chartData?.late || 0,
-                                total: chartData?.total || 0,
-                                fill: COLORS[index % COLORS.length]
-                              };
-                            }).filter(item => item.present > 0 || item.absent > 0 || item.late > 0)}
+                            data={classes
+                              .map((cls, index) => {
+                                const chartData =
+                                  reportData.charts.byClass.find(
+                                    (c) => c.class === cls.name
+                                  );
+                                return {
+                                  name: cls.name,
+                                  present: chartData?.present || 0,
+                                  absent: chartData?.absent || 0,
+                                  late: chartData?.late || 0,
+                                  total: chartData?.total || 0,
+                                  fill: COLORS[index % COLORS.length],
+                                };
+                              })
+                              .filter(
+                                (item) =>
+                                  item.present > 0 ||
+                                  item.absent > 0 ||
+                                  item.late > 0
+                              )}
                             cx="50%"
                             cy="50%"
                             outerRadius={80}
                             fill="#8884d8"
                             dataKey="present"
                           >
-                            {classes.map((cls, index) => {
-                              const chartData = reportData.charts.byClass.find(c => c.class === cls.name);
-                              const hasData = (chartData?.present || 0) > 0 || (chartData?.absent || 0) > 0 || (chartData?.late || 0) > 0;
-                              return hasData ? <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} /> : null;
-                            }).filter(Boolean)}
+                            {classes
+                              .map((cls, index) => {
+                                const chartData =
+                                  reportData.charts.byClass.find(
+                                    (c) => c.class === cls.name
+                                  );
+                                const hasData =
+                                  (chartData?.present || 0) > 0 ||
+                                  (chartData?.absent || 0) > 0 ||
+                                  (chartData?.late || 0) > 0;
+                                return hasData ? (
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={COLORS[index % COLORS.length]}
+                                  />
+                                ) : null;
+                              })
+                              .filter(Boolean)}
                           </Pie>
                           <Tooltip
                             formatter={(value: number, name: string) => [
                               `${value} students present`,
-                              `Class: ${name}`
+                              `Class: ${name}`,
                             ]}
                           />
                         </PieChart>
@@ -683,7 +1101,9 @@ export default function ReportsClient({ students, classes }: Props) {
                     <div className="mt-4 flex justify-start">
                       {(() => {
                         const classesWithData = classes.filter((cls) => {
-                          const chartData = reportData.charts.byClass.find(c => c.class === cls.name);
+                          const chartData = reportData.charts.byClass.find(
+                            (c) => c.class === cls.name
+                          );
                           const present = chartData?.present || 0;
                           const absent = chartData?.absent || 0;
                           const late = chartData?.late || 0;
@@ -701,14 +1121,24 @@ export default function ReportsClient({ students, classes }: Props) {
                             {chunks.map((chunk, chunkIndex) => (
                               <div key={chunkIndex} className="flex flex-col">
                                 {chunk.map((cls) => {
-                                  const globalIndex = classes.findIndex(c => c.id === cls.id);
+                                  const globalIndex = classes.findIndex(
+                                    (c) => c.id === cls.id
+                                  );
                                   return (
-                                    <div key={cls.id} className="flex items-center gap-1.5">
+                                    <div
+                                      key={cls.id}
+                                      className="flex items-center gap-1.5"
+                                    >
                                       <div
                                         className="w-2 h-2 rounded-full shrink-0"
-                                        style={{ backgroundColor: COLORS[globalIndex % COLORS.length] }}
+                                        style={{
+                                          backgroundColor:
+                                            COLORS[globalIndex % COLORS.length],
+                                        }}
                                       />
-                                      <span className="text-[0.60rem] font-medium">{cls.name}</span>
+                                      <span className="text-[0.60rem] font-medium">
+                                        {cls.name}
+                                      </span>
                                     </div>
                                   );
                                 })}
@@ -724,16 +1154,30 @@ export default function ReportsClient({ students, classes }: Props) {
                 <Card>
                   <CardHeader>
                     <CardTitle>Status Distribution</CardTitle>
-                    <p className="text-sm text-muted-foreground">Overall attendance status breakdown across all records</p>
+                    <p className="text-sm text-muted-foreground">
+                      Overall attendance status breakdown across all records
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
                         <Pie
                           data={[
-                            { name: "Present", value: reportData.summary.presentCount, color: "#00C49F" },
-                            { name: "Late", value: reportData.summary.lateCount, color: "#FFBB28" },
-                            { name: "Absent", value: reportData.summary.absentCount, color: "#FF8042" },
+                            {
+                              name: "Present",
+                              value: reportData.summary.presentCount,
+                              color: "#00C49F",
+                            },
+                            {
+                              name: "Late",
+                              value: reportData.summary.lateCount,
+                              color: "#FFBB28",
+                            },
+                            {
+                              name: "Absent",
+                              value: reportData.summary.absentCount,
+                              color: "#FF8042",
+                            },
                           ]}
                           cx="50%"
                           cy="50%"
@@ -742,15 +1186,31 @@ export default function ReportsClient({ students, classes }: Props) {
                           dataKey="value"
                         >
                           {[
-                            { name: "Present", value: reportData.summary.presentCount, color: "#00C49F" },
-                            { name: "Late", value: reportData.summary.lateCount, color: "#FFBB28" },
-                            { name: "Absent", value: reportData.summary.absentCount, color: "#FF8042" },
+                            {
+                              name: "Present",
+                              value: reportData.summary.presentCount,
+                              color: "#00C49F",
+                            },
+                            {
+                              name: "Late",
+                              value: reportData.summary.lateCount,
+                              color: "#FFBB28",
+                            },
+                            {
+                              name: "Absent",
+                              value: reportData.summary.absentCount,
+                              color: "#FF8042",
+                            },
                           ].map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
                         <Tooltip />
-                        <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                        <Legend
+                          layout="horizontal"
+                          verticalAlign="bottom"
+                          align="center"
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -774,7 +1234,9 @@ export default function ReportsClient({ students, classes }: Props) {
                           <TableRow>
                             <TableHead>Date</TableHead>
                             <TableHead>Student</TableHead>
-                            <TableHead className="hidden sm:table-cell">Class</TableHead>
+                            <TableHead className="hidden sm:table-cell">
+                              Class
+                            </TableHead>
                             <TableHead>Status</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -798,7 +1260,9 @@ export default function ReportsClient({ students, classes }: Props) {
                                       {getInitials(record.student?.name || "U")}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <span>{record.student?.name || "Unknown Student"}</span>
+                                  <span>
+                                    {record.student?.name || "Unknown Student"}
+                                  </span>
                                 </div>
                               </TableCell>
                               <TableCell className="text-muted-foreground hidden sm:table-cell">
@@ -806,7 +1270,12 @@ export default function ReportsClient({ students, classes }: Props) {
                               </TableCell>
                               <TableCell>
                                 <AttendanceBadge
-                                  status={record.status as "present" | "absent" | "late"}
+                                  status={
+                                    record.status as
+                                      | "present"
+                                      | "absent"
+                                      | "late"
+                                  }
                                 />
                               </TableCell>
                             </TableRow>
