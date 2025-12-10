@@ -8,7 +8,6 @@ import {
   BookOpen,
   Bell,
   UserCheck,
-  Clock,
 } from "lucide-react";
 
 interface ExtendedUser {

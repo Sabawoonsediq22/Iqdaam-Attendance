@@ -384,7 +384,6 @@ export default function ReportsClient({ students, classes }: Props) {
 
       if (!response.ok) throw new Error("Failed to schedule report");
 
-      const result = await response.json();
       toast.success("Report scheduled successfully!");
       setScheduleDialogOpen(false);
       setScheduleEmail("");

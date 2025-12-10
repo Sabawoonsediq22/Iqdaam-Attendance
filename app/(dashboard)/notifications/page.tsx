@@ -19,7 +19,7 @@ import {
   AlertTriangle,
   Info,
   Check,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import type { Notification } from "@/lib/schema";
 import { toast } from "sonner";
@@ -42,7 +42,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format, isToday, isYesterday, isThisWeek, isThisMonth } from "date-fns";
+import {
+  format,
+  isToday,
+  isYesterday,
+  isThisWeek,
+  isThisMonth,
+} from "date-fns";
 import { Loader } from "@/components/loader";
 
 export default function NotificationsPage() {
@@ -50,8 +56,12 @@ export default function NotificationsPage() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterReadStatus, setFilterReadStatus] = useState<string>("all");
   const [filterDate, setFilterDate] = useState<string>("all");
-  const [approvingNotifications, setApprovingNotifications] = useState<Set<string>>(new Set());
-  const [rejectingNotifications, setRejectingNotifications] = useState<Set<string>>(new Set());
+  const [approvingNotifications, setApprovingNotifications] = useState<
+    Set<string>
+  >(new Set());
+  const [rejectingNotifications, setRejectingNotifications] = useState<
+    Set<string>
+  >(new Set());
 
   const queryClient = useQueryClient();
 
@@ -76,7 +86,9 @@ export default function NotificationsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
     },
     onError: (error) => {
       toast.error(error.message || "Failed to mark notification as read");
@@ -93,7 +105,9 @@ export default function NotificationsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
       toast.success("All notifications marked as read");
     },
     onError: () => {
@@ -102,7 +116,13 @@ export default function NotificationsPage() {
   });
 
   const approveUserMutation = useMutation({
-    mutationFn: async ({ userId, notificationId }: { userId: string; notificationId: string }) => {
+    mutationFn: async ({
+      userId,
+      notificationId,
+    }: {
+      userId: string;
+      notificationId: string;
+    }) => {
       const res = await fetch("/api/users/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -116,22 +136,24 @@ export default function NotificationsPage() {
       return { data, notificationId };
     },
     onMutate: ({ notificationId }) => {
-      setApprovingNotifications(prev => new Set(prev).add(notificationId));
+      setApprovingNotifications((prev) => new Set(prev).add(notificationId));
     },
     onSuccess: ({ data, notificationId }) => {
       // Mark notification as read
       markAsReadMutation.mutate(notificationId);
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/pending"] });
       toast.success(`User ${data.user.name} approved successfully`);
     },
-    onError: (error, { notificationId }) => {
+    onError: (error) => {
       toast.error(error.message || "Failed to approve user");
     },
     onSettled: (data, error, { notificationId }) => {
-      setApprovingNotifications(prev => {
+      setApprovingNotifications((prev) => {
         const newSet = new Set(prev);
         newSet.delete(notificationId);
         return newSet;
@@ -140,7 +162,13 @@ export default function NotificationsPage() {
   });
 
   const rejectUserMutation = useMutation({
-    mutationFn: async ({ userId, notificationId }: { userId: string; notificationId: string }) => {
+    mutationFn: async ({
+      userId,
+      notificationId,
+    }: {
+      userId: string;
+      notificationId: string;
+    }) => {
       const res = await fetch("/api/users/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -154,13 +182,15 @@ export default function NotificationsPage() {
       return { data, notificationId };
     },
     onMutate: ({ notificationId }) => {
-      setRejectingNotifications(prev => new Set(prev).add(notificationId));
+      setRejectingNotifications((prev) => new Set(prev).add(notificationId));
     },
     onSuccess: ({ notificationId }) => {
       // Mark notification as read
       markAsReadMutation.mutate(notificationId);
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/pending"] });
       toast.success("User rejected and deleted");
@@ -169,7 +199,7 @@ export default function NotificationsPage() {
       toast.error(error.message || "Failed to reject user");
     },
     onSettled: (data, error, { notificationId }) => {
-      setRejectingNotifications(prev => {
+      setRejectingNotifications((prev) => {
         const newSet = new Set(prev);
         newSet.delete(notificationId);
         return newSet;
@@ -177,60 +207,62 @@ export default function NotificationsPage() {
     },
   });
 
-
   const filteredNotifications = useMemo(() => {
     return notifications
-      .filter(notification => {
-      // Search filter
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        if (
-          !notification.title.toLowerCase().includes(searchLower) &&
-          !notification.message.toLowerCase().includes(searchLower)
-        ) {
+      .filter((notification) => {
+        // Search filter
+        if (searchTerm) {
+          const searchLower = searchTerm.toLowerCase();
+          if (
+            !notification.title.toLowerCase().includes(searchLower) &&
+            !notification.message.toLowerCase().includes(searchLower)
+          ) {
+            return false;
+          }
+        }
+
+        // Type filter
+        if (filterType !== "all" && notification.type !== filterType) {
           return false;
         }
-      }
 
-      // Type filter
-      if (filterType !== "all" && notification.type !== filterType) {
-        return false;
-      }
-
-      // Read status filter
-      if (filterReadStatus === "read" && !notification.isRead) {
-        return false;
-      }
-      if (filterReadStatus === "unread" && notification.isRead) {
-        return false;
-      }
-
-      // Date filter
-      if (filterDate !== "all") {
-        const notificationDate = new Date(notification.createdAt);
-
-        switch (filterDate) {
-          case "today":
-            if (!isToday(notificationDate)) return false;
-            break;
-          case "yesterday":
-            if (!isYesterday(notificationDate)) return false;
-            break;
-          case "week":
-            if (!isThisWeek(notificationDate)) return false;
-            break;
-          case "month":
-            if (!isThisMonth(notificationDate)) return false;
-            break;
+        // Read status filter
+        if (filterReadStatus === "read" && !notification.isRead) {
+          return false;
         }
-      }
+        if (filterReadStatus === "unread" && notification.isRead) {
+          return false;
+        }
 
-      return true;
-    })
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        // Date filter
+        if (filterDate !== "all") {
+          const notificationDate = new Date(notification.createdAt);
+
+          switch (filterDate) {
+            case "today":
+              if (!isToday(notificationDate)) return false;
+              break;
+            case "yesterday":
+              if (!isYesterday(notificationDate)) return false;
+              break;
+            case "week":
+              if (!isThisWeek(notificationDate)) return false;
+              break;
+            case "month":
+              if (!isThisMonth(notificationDate)) return false;
+              break;
+          }
+        }
+
+        return true;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
   }, [notifications, searchTerm, filterType, filterReadStatus, filterDate]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -302,7 +334,6 @@ export default function NotificationsPage() {
     rejectUserMutation.mutate({ userId, notificationId });
   };
 
-
   return (
     <div className="space-y-6">
       <OfflineIndicator />
@@ -337,10 +368,14 @@ export default function NotificationsPage() {
         <Card>
           <CardContent className="flex items-center p-6">
             <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
-              <span className="text-red-600 dark:text-red-400 font-bold text-sm">{unreadCount}</span>
+              <span className="text-red-600 dark:text-red-400 font-bold text-sm">
+                {unreadCount}
+              </span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">Unread</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Unread
+              </p>
               <p className="text-2xl font-bold">{unreadCount}</p>
             </div>
           </CardContent>
@@ -350,7 +385,9 @@ export default function NotificationsPage() {
             <CheckCircle className="w-8 h-8 text-green-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-muted-foreground">Read</p>
-              <p className="text-2xl font-bold">{notifications.length - unreadCount}</p>
+              <p className="text-2xl font-bold">
+                {notifications.length - unreadCount}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -358,9 +395,14 @@ export default function NotificationsPage() {
           <CardContent className="flex items-center p-6">
             <AlertTriangle className="w-8 h-8 text-amber-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">This Week</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                This Week
+              </p>
               <p className="text-2xl font-bold">
-                {notifications.filter(n => isThisWeek(new Date(n.createdAt))).length}
+                {
+                  notifications.filter((n) => isThisWeek(new Date(n.createdAt)))
+                    .length
+                }
               </p>
             </div>
           </CardContent>
@@ -394,7 +436,10 @@ export default function NotificationsPage() {
                 <SelectItem value="attendance">Attendance</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={filterReadStatus} onValueChange={setFilterReadStatus}>
+            <Select
+              value={filterReadStatus}
+              onValueChange={setFilterReadStatus}
+            >
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Read status" />
               </SelectTrigger>
@@ -450,8 +495,7 @@ export default function NotificationsPage() {
                 <p className="text-muted-foreground">
                   {notifications.length === 0
                     ? "You don't have any notifications yet."
-                    : "Try adjusting your filters to see more notifications."
-                  }
+                    : "Try adjusting your filters to see more notifications."}
                 </p>
               </div>
             </CardContent>
@@ -461,7 +505,9 @@ export default function NotificationsPage() {
             <Card
               key={notification.id}
               className={`transition-all duration-200 hover:shadow-md ${
-                !notification.isRead ? getNotificationColor(notification.type) : ""
+                !notification.isRead
+                  ? getNotificationColor(notification.type)
+                  : ""
               }`}
             >
               <CardContent className="p-6">
@@ -476,44 +522,71 @@ export default function NotificationsPage() {
                           {notification.title}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-2 dark:text-black">
-                          {notification.message.split('**').map((part, index) =>
-                            index % 2 === 1 ? <strong key={index}>{part}</strong> : part
-                          )}
+                          {notification.message
+                            .split("**")
+                            .map((part, index) =>
+                              index % 2 === 1 ? (
+                                <strong key={index}>{part}</strong>
+                              ) : (
+                                part
+                              )
+                            )}
                         </p>
                         <p className="text-xs text-muted-foreground mt-3">
                           {formatDate(notification.createdAt)}
                         </p>
-                        {notification.entityType === "user" && notification.action === "pending" && notification.entityId && !notification.isRead && (
-                          <div className="flex gap-2 mt-3">
-                            <Button
-                              size="sm"
-                              onClick={() => handleApproveUser(notification.entityId!, notification.id)}
-                              disabled={approvingNotifications.has(notification.id)}
-                              className="cursor-pointer"
-                            >
-                              {approvingNotifications.has(notification.id) ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              ) : (
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                              )}
-                              {approvingNotifications.has(notification.id) ? "Approving..." : "Approve"}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleRejectUser(notification.entityId!, notification.id)}
-                              disabled={rejectingNotifications.has(notification.id)}
-                              className="cursor-pointer"
-                            >
-                              {rejectingNotifications.has(notification.id) ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              ) : (
-                                <XCircle className="w-4 h-4 mr-2" />
-                              )}
-                              {rejectingNotifications.has(notification.id) ? "Rejecting..." : "Reject"}
-                            </Button>
-                          </div>
-                        )}
+                        {notification.entityType === "user" &&
+                          notification.action === "pending" &&
+                          notification.entityId &&
+                          !notification.isRead && (
+                            <div className="flex gap-2 mt-3">
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  handleApproveUser(
+                                    notification.entityId!,
+                                    notification.id
+                                  )
+                                }
+                                disabled={approvingNotifications.has(
+                                  notification.id
+                                )}
+                                className="cursor-pointer"
+                              >
+                                {approvingNotifications.has(notification.id) ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                )}
+                                {approvingNotifications.has(notification.id)
+                                  ? "Approving..."
+                                  : "Approve"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() =>
+                                  handleRejectUser(
+                                    notification.entityId!,
+                                    notification.id
+                                  )
+                                }
+                                disabled={rejectingNotifications.has(
+                                  notification.id
+                                )}
+                                className="cursor-pointer"
+                              >
+                                {rejectingNotifications.has(notification.id) ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                )}
+                                {rejectingNotifications.has(notification.id)
+                                  ? "Rejecting..."
+                                  : "Reject"}
+                              </Button>
+                            </div>
+                          )}
                       </div>
                       <div className="flex items-center gap-2 ml-0 md:ml-4">
                         {!notification.isRead && (
@@ -524,13 +597,19 @@ export default function NotificationsPage() {
                         {!notification.isRead && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" side="bottom">
                               <DropdownMenuItem
-                                onClick={() => handleMarkAsRead(notification.id)}
+                                onClick={() =>
+                                  handleMarkAsRead(notification.id)
+                                }
                                 className="cursor-pointer"
                                 disabled={markAsReadMutation.isPending}
                               >

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { storage } from "@/lib/storage";
-import { insertNotificationSchema, notifications } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { insertNotificationSchema } from "@/lib/schema";
 
 export async function GET() {
    try {

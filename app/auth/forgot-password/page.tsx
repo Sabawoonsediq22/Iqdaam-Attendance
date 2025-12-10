@@ -6,10 +6,21 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader } from "@/components/loader";
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import {
+  Mail,
+  ArrowLeft,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
@@ -57,7 +68,9 @@ export default function ForgotPasswordPage() {
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Check Your Email</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              Check Your Email
+            </CardTitle>
             <CardDescription className="text-gray-600">
               We&apos;ve sent a password reset code to <strong>{email}</strong>
             </CardDescription>
@@ -66,12 +79,17 @@ export default function ForgotPasswordPage() {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                The code will expire in 10 minutes. Check your spam folder if you don&apos;t see it.
+                The code will expire in 10 minutes. Check your spam folder if
+                you don&apos;t see it.
               </AlertDescription>
             </Alert>
 
             <Button
-              onClick={() => router.push(`/auth/verify-code?email=${encodeURIComponent(email)}`)}
+              onClick={() =>
+                router.push(
+                  `/auth/verify-code?email=${encodeURIComponent(email)}`
+                )
+              }
               className="w-full"
             >
               Continue to Verification
@@ -97,9 +115,12 @@ export default function ForgotPasswordPage() {
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <Mail className="w-8 h-8 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Forgot Password?</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            Forgot Password?
+          </CardTitle>
           <CardDescription className="text-gray-600">
-            Enter your email address and we&apos;ll send you a code to reset your password
+            Enter your email address and we&apos;ll send you a code to reset
+            your password
           </CardDescription>
         </CardHeader>
 
