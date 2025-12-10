@@ -381,7 +381,7 @@ function AttendancePageContent() {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors hover:border-ring/50"
                 >
                   <option value="">Year</option>
-                  {Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => 2020 + i).map((year) => (
+                  {Array.from({ length: new Date().getFullYear() - 2020 + 10 }, (_, i) => 2020 + i).map((year) => (
                     <option key={year} value={year.toString()}>{year}</option>
                   ))}
                 </select>
