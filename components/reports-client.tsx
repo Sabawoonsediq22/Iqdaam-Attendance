@@ -39,12 +39,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Download,
   Calendar as CalendarIcon,
@@ -81,7 +75,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { format, subWeeks } from "date-fns";
+import { format } from "date-fns";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -184,7 +178,6 @@ export default function ReportsClient({ students, classes }: Props) {
     "weekly"
   );
   const [scheduling, setScheduling] = useState(false);
-  const [managing, setManaging] = useState(false);
   const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>(
     []
   );
@@ -313,7 +306,6 @@ export default function ReportsClient({ students, classes }: Props) {
   };
 
   const fetchScheduledReports = async () => {
-    setManaging(true);
     try {
       const response = await fetch("/api/reports/schedule");
       if (!response.ok) throw new Error("Failed to fetch scheduled reports");
@@ -324,8 +316,6 @@ export default function ReportsClient({ students, classes }: Props) {
     } catch (error) {
       console.error("Error fetching scheduled reports:", error);
       toast.error("Failed to load scheduled reports");
-    } finally {
-      setManaging(false);
     }
   };
 
@@ -629,7 +619,9 @@ export default function ReportsClient({ students, classes }: Props) {
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                 <div>
-                                  <p className="text-xs font-medium text-muted-foreground">Next Run</p>
+                                  <p className="text-xs font-medium text-muted-foreground">
+                                    Next Run
+                                  </p>
                                   <p className="text-sm font-semibold">
                                     {format(
                                       new Date(report.nextRun),
@@ -699,7 +691,7 @@ export default function ReportsClient({ students, classes }: Props) {
           </Dialog>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="cursor-pointer">
+              <Button variant="ghost" className="cursor-pointer bg-gray-100">
                 <Download className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -750,120 +742,36 @@ export default function ReportsClient({ students, classes }: Props) {
 
             <div>
               <label className="text-sm font-medium">Start Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0 shadow-xl border-2"
-                  align="start"
-                >
-                  <div className="p-3 bg-background rounded-lg">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      fromDate={subWeeks(new Date(), 4)}
-                      toDate={new Date()}
-                      initialFocus
-                      className="rounded-md border-0 bg-transparent"
-                      classNames={{
-                        months:
-                          "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                        month: "space-y-4 relative",
-                        caption:
-                          "flex justify-center pt-1 relative items-center",
-                        caption_label: "text-sm font-medium",
-                        nav: "absolute top-0 left-0 right-0 flex items-center justify-between px-2",
-                        nav_button:
-                          "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
-                        nav_button_previous: "",
-                        nav_button_next: "",
-                        table: "w-full border-collapse space-y-1",
-                        head_row: "flex",
-                        head_cell:
-                          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-                        row: "flex w-full mt-2",
-                        cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
-                        day_selected:
-                          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                        day_today: "bg-accent text-accent-foreground",
-                        day_outside: "text-muted-foreground opacity-50",
-                        day_disabled: "text-muted-foreground opacity-50",
-                        day_range_middle:
-                          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                        day_hidden: "invisible",
-                      }}
-                    />
-                  </div>
-                </PopoverContent>
-              </Popover>
+              <Input
+                type="date"
+                value={startDate ? format(startDate, "yyyy-MM-dd") : ""}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+                  if (!isNaN(date.getTime())) {
+                    setStartDate(date);
+                  } else {
+                    setStartDate(undefined);
+                  }
+                }}
+                className="w-full"
+              />
             </div>
 
             <div>
               <label className="text-sm font-medium">End Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal hover:bg-accent hover:text-accent-foreground transition-colors"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0 shadow-xl border-2"
-                  align="start"
-                >
-                  <div className="p-3 bg-background rounded-lg">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      fromDate={subWeeks(new Date(), 4)}
-                      toDate={new Date()}
-                      initialFocus
-                      className="rounded-md border-0 bg-transparent"
-                      classNames={{
-                        months:
-                          "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                        month: "space-y-4 relative",
-                        caption:
-                          "flex justify-center pt-1 relative items-center",
-                        caption_label: "text-sm font-medium",
-                        nav: "absolute top-0 left-0 right-0 flex items-center justify-between px-2",
-                        nav_button:
-                          "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 border border-transparent hover:border-accent-foreground/20 flex items-center justify-center",
-                        nav_button_previous: "",
-                        nav_button_next: "",
-                        table: "w-full border-collapse space-y-1",
-                        head_row: "flex",
-                        head_cell:
-                          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-                        row: "flex w-full mt-2",
-                        cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-md transition-colors",
-                        day_selected:
-                          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                        day_today: "bg-accent text-accent-foreground",
-                        day_outside: "text-muted-foreground opacity-50",
-                        day_disabled: "text-muted-foreground opacity-50",
-                        day_range_middle:
-                          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                        day_hidden: "invisible",
-                      }}
-                    />
-                  </div>
-                </PopoverContent>
-              </Popover>
+              <Input
+                type="date"
+                value={endDate ? format(endDate, "yyyy-MM-dd") : ""}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+                  if (!isNaN(date.getTime())) {
+                    setEndDate(date);
+                  } else {
+                    setEndDate(undefined);
+                  }
+                }}
+                className="w-full"
+              />
             </div>
 
             <div>

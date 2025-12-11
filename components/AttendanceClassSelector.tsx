@@ -112,7 +112,7 @@ export default function AttendanceClassSelector({
   const selectedClassData = classes.find((cls) => cls.id === selectedClass);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <label className="text-sm font-medium block">Select Class</label>
       {isMobile ? (
         <Drawer open={open} onOpenChange={setOpen}>

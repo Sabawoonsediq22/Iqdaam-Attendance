@@ -55,12 +55,6 @@ export interface IStorage {
     classId: string,
     date: string
   ): Promise<Attendance[]>;
-  getAttendanceByClassAndDateParts(
-    classId: string,
-    day: string,
-    month: string,
-    year: string
-  ): Promise<Attendance[]>;
   getAttendanceByStudent(studentId: string): Promise<Attendance[]>;
   getFilteredAttendance(conditions: SQL[]): Promise<Attendance[]>;
   getAllAttendance(): Promise<Attendance[]>;
@@ -202,25 +196,6 @@ export class DrizzleStorage implements IStorage {
       .where(and(eq(attendance.classId, classId), eq(attendance.date, date)));
   }
 
-  async getAttendanceByClassAndDateParts(
-    classId: string,
-    day: string,
-    month: string,
-    year: string
-  ): Promise<Attendance[]> {
-    return await getDb()
-      .select()
-      .from(attendance)
-      .where(
-        and(
-          eq(attendance.classId, classId),
-          eq(attendance.day, day),
-          eq(attendance.month, month),
-          eq(attendance.year, year)
-        )
-      );
-  }
-
   async getAttendanceByStudent(studentId: string): Promise<Attendance[]> {
     return await getDb()
       .select()
@@ -286,20 +261,13 @@ export class DrizzleStorage implements IStorage {
   ): Promise<Attendance[]> {
     if (attendances.length === 0) return [];
 
-    // Get the classId, day, month, year from the first record (they should all be the same)
-    const { classId, day, month, year } = attendances[0];
+    // Get the classId and date from the first record (they should all be the same)
+    const { classId, date } = attendances[0];
 
     // Delete existing attendance records for this class/date combination
     await getDb()
       .delete(attendance)
-      .where(
-        and(
-          eq(attendance.classId, classId),
-          eq(attendance.day, day),
-          eq(attendance.month, month),
-          eq(attendance.year, year)
-        )
-      );
+      .where(and(eq(attendance.classId, classId), eq(attendance.date, date)));
 
     // Insert the new attendance records
     return await getDb().insert(attendance).values(attendances).returning();

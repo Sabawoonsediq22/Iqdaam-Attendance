@@ -149,7 +149,7 @@ export default function Footer() {
 
       <div className="border-t border-slate-800 pt-6 pb-4">
         <div className="text-center">
-          <p className="text-slate-500 text-sm font-medium">
+          <p className="text-slate-500 font-medium">
             Developed with ❤️ and lots of coffee☕ by
             <a
               href="https://sabawoonsediqi.netlify.app"

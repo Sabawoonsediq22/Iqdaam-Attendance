@@ -155,16 +155,16 @@ export function AppSidebar({ session: propSession }: AppSidebarProps) {
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10 border border-primary/20">
               <Image
-                src="/logo.svg"
-                alt="StudentTracker Logo"
+                src="/iqdaam.jpg"
+                alt="Iqdaam Logo"
                 width={40}
                 height={40}
               />
             </div>
             {!isCollapsed && (
               <div className="overflow-hidden">
-                <h2 className="text-lg font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  StudentTracker
+                <h2 className="text-xl font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  Iqdaam
                 </h2>
               </div>
             )}

@@ -19,7 +19,7 @@ export default function Navbar() {
     { name: "About", id: "about" },
     { name: "Programs", id: "programs" },
     { name: "Gallery", id: "gallery" },
-    { name: "Contact", id: "footer" },
+    { name: "Contact", id: "cta" },
   ];
 
   return (

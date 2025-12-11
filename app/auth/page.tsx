@@ -165,7 +165,7 @@ export default function AuthPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 border border-primary/20">
-              <Image src="/logo.svg" alt="Logo" width={32} height={32} className="text-primary" />
+              <Image src="/iqdaam.jpg" alt="Logo" width={66} height={66} className="text-primary" />
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

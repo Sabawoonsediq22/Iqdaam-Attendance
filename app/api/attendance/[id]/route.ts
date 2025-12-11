@@ -51,7 +51,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     // Get class name for notification
     const studentClass = await storage.getClass(updated.classId);
     const className = studentClass ? studentClass.name : "Unknown Class";
-    const date = `${updated.day}/${updated.month}/${updated.year}`;
+    const date = new Date(updated.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
 
     // Create notification for attendance update
     try {
@@ -99,7 +99,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     // Get class name for notification
     const studentClass = await storage.getClass(existingAttendance.classId);
     const className = studentClass ? studentClass.name : "Unknown Class";
-    const date = `${existingAttendance.day}/${existingAttendance.month}/${existingAttendance.year}`;
+    const date = new Date(existingAttendance.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
 
     // Create notification for attendance deletion
     try {

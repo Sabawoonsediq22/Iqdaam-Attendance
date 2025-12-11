@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { storage } from "@/lib/storage";
-import { insertAttendanceSchema } from "@/lib/schema";
+import { insertAttendanceSchema, type InsertAttendance } from "@/lib/schema";
 import { createNotification, notificationTemplates } from "@/lib/notifications";
 
 export async function GET(request: NextRequest) {
@@ -13,14 +13,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const classId = searchParams.get("classId");
-    const day = searchParams.get("day");
-    const month = searchParams.get("month");
-    const year = searchParams.get("year");
+    const date = searchParams.get("date");
     const studentId = searchParams.get("studentId");
 
     let attendance;
-    if (classId && day && month && year) {
-      attendance = await storage.getAttendanceByClassAndDateParts(classId, day, month, year);
+    if (classId && date) {
+      attendance = await storage.getAttendanceByClassAndDate(classId, date);
     } else if (studentId) {
       attendance = await storage.getAttendanceByStudent(studentId);
     } else {
@@ -28,9 +26,12 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(attendance);
-   } catch {
-     return NextResponse.json({ error: "Failed to fetch attendance" }, { status: 500 });
-   }
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to fetch attendance" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -43,29 +44,46 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const result = insertAttendanceSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json({ error: result.error.message }, { status: 400 });
+      return NextResponse.json(
+        { error: result.error.message },
+        { status: 400 }
+      );
     }
     const newAttendance = await storage.createAttendance(result.data);
 
     // Get class name for notification
     const studentClass = await storage.getClass(newAttendance.classId);
     const className = studentClass ? studentClass.name : "Unknown Class";
-    const date = `${newAttendance.day}/${newAttendance.month}/${newAttendance.year}`;
+    const date = new Date(newAttendance.date).toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    });
 
     // Create notification
     try {
       await createNotification({
-        ...notificationTemplates.attendanceTaken(className, date, session.user.name),
+        ...notificationTemplates.attendanceTaken(
+          className,
+          date,
+          session.user.name
+        ),
         entityId: newAttendance.id,
       });
     } catch (error) {
-      console.error("Failed to create notification for attendance taken:", error);
+      console.error(
+        "Failed to create notification for attendance taken:",
+        error
+      );
     }
 
     return NextResponse.json(newAttendance, { status: 201 });
-   } catch {
-     return NextResponse.json({ error: "Failed to create attendance" }, { status: 500 });
-   }
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to create attendance" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(request: NextRequest) {
@@ -77,38 +95,63 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     if (!Array.isArray(body)) {
-      return NextResponse.json({ error: "Expected an array of attendance records" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Expected an array of attendance records" },
+        { status: 400 }
+      );
     }
 
-    const validatedRecords = [];
+    const validatedRecords: InsertAttendance[] = [];
     for (const record of body) {
       const result = insertAttendanceSchema.safeParse(record);
       if (!result.success) {
-        return NextResponse.json({ error: `Invalid record: ${result.error.message}` }, { status: 400 });
+        return NextResponse.json(
+          { error: `Invalid record: ${result.error.message}` },
+          { status: 400 }
+        );
       }
-      validatedRecords.push(result.data);
+      validatedRecords.push(result.data as InsertAttendance);
     }
 
     const created = await storage.bulkUpsertAttendance(validatedRecords);
 
     // Get class name and date for notification
     const firstRecord = validatedRecords[0];
-    const studentClass = await storage.getClass(firstRecord.classId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const studentClass = await storage.getClass((firstRecord as any).classId);
     const className = studentClass ? studentClass.name : "Unknown Class";
-    const date = `${firstRecord.day}/${firstRecord.month}/${firstRecord.year}`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const date = new Date((firstRecord as any).date).toLocaleDateString(
+      "en-US",
+      {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      }
+    );
 
     // Create notification for bulk attendance update
     try {
       await createNotification({
-        ...notificationTemplates.attendanceUpdated(className, date, session.user.name),
+        ...notificationTemplates.attendanceUpdated(
+          className,
+          date,
+          session.user.name
+        ),
         entityId: created[0]?.id, // Assuming created has ids
       });
     } catch (error) {
-      console.error("Failed to create notification for attendance update:", error);
+      console.error(
+        "Failed to create notification for attendance update:",
+        error
+      );
     }
 
     return NextResponse.json(created, { status: 200 });
-   } catch {
-     return NextResponse.json({ error: "Failed to create attendance records" }, { status: 500 });
-   }
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to create attendance records" },
+      { status: 500 }
+    );
+  }
 }
