@@ -1,5 +1,4 @@
 import {
-  GraduationCap,
   MapPin,
   Phone,
   Mail,

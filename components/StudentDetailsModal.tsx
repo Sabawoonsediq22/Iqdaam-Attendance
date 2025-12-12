@@ -112,8 +112,7 @@ function DeleteStudentModal({
   return (
     <>
       <Button onClick={() => setIsOpen(true)} variant="destructive" size="sm">
-        <Trash2 className="h-4 w-4 mr-2" />
-        Delete Student
+        <Trash2/>
       </Button>
       <DeleteConfirmationModal
         isOpen={isOpen}
@@ -251,8 +250,7 @@ export default function StudentDetailsModal({
                   variant="outline"
                   size="sm"
                 >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Student
+                  <Edit/>
                 </Button>
               )}
               <DeleteStudentModal

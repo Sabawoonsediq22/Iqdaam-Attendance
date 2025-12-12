@@ -246,7 +246,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
               <FormMessage />
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 mb-6">
               <Button
                 type="button"
                 variant="outline"
