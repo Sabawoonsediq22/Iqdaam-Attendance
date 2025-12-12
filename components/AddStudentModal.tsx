@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -144,8 +145,16 @@ export default function AddStudentModal({ cls, onSuccess, trigger }: AddStudentM
           </DropdownMenuItem>
         )}
       </DialogTrigger>
+      <AnimatePresence>
+        {open && (
       <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+        <DialogHeader className="mb-2">
           <DialogTitle>Add New Student</DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -374,7 +383,10 @@ export default function AddStudentModal({ cls, onSuccess, trigger }: AddStudentM
             </div>
           </form>
         </Form>
+        </motion.div>
       </DialogContent>
+      )}
+      </AnimatePresence>
     </Dialog>
   );
 }

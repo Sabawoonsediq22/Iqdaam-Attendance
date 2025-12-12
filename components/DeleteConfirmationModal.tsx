@@ -9,6 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -29,7 +30,15 @@ export default function DeleteConfirmationModal({
 }: DeleteConfirmationModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+      <AnimatePresence>
+        {isOpen && (
       <DialogContent className="sm:max-w-[400px] max-w-[350px] rounded-lg">
+        <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -64,7 +73,10 @@ export default function DeleteConfirmationModal({
             {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </div>
+        </motion.div>
       </DialogContent>
+      )}
+      </AnimatePresence>
     </Dialog>
   );
 }

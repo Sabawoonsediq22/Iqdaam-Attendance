@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import {
@@ -53,7 +53,15 @@ export function ResponsiveDialog({
     return (
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+        <AnimatePresence>
+          {dialogOpen && (
         <DialogContent className={cn("sm:max-w-[425px]", contentClassName)}>
+          <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description && (
@@ -68,7 +76,10 @@ export function ResponsiveDialog({
               {footer}
             </div>
           )}
+          </motion.div>
         </DialogContent>
+        )}
+        </AnimatePresence>
       </Dialog>
     )
   }

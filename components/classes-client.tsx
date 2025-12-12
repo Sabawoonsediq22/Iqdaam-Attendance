@@ -22,6 +22,7 @@ import {
 import type { Class, Student } from "@/lib/schema";
 import { Input } from "./ui/input";
 import { useState, useMemo, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -332,7 +333,15 @@ function EditClassModal({
           Edit Class
         </DropdownMenuItem>
       </DialogTrigger>
+      <AnimatePresence>
+        {open && (
       <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
+        <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
         <DialogHeader>
           <DialogTitle>Edit Class</DialogTitle>
         </DialogHeader>
@@ -444,7 +453,10 @@ function EditClassModal({
             </div>
           </form>
         </Form>
+        </motion.div>
       </DialogContent>
+      )}
+      </AnimatePresence>
     </Dialog>
   );
 }
