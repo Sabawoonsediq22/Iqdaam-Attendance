@@ -18,6 +18,7 @@ import {
   MoreVertical,
   Save,
   Loader2,
+  User,
 } from "lucide-react";
 import type { Class, Student, Attendance } from "@/lib/schema";
 import AttendanceClassSelector from "@/components/AttendanceClassSelector";
@@ -40,6 +41,7 @@ import { toast } from "sonner";
 import { Loader } from "@/components/loader";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { isAfter, startOfDay, format } from "date-fns";
+import AddStudentModal from "@/components/AddStudentModal";
 
 function AttendancePageContent() {
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -361,13 +363,18 @@ function AttendancePageContent() {
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
                     {derivedDay ? derivedDay + ", " : ""}
-                    {selectedDate ? (() => {
-                      try {
-                        return format(new Date(selectedDate), "MMMM d, yyyy");
-                      } catch {
-                        return "Invalid date";
-                      }
-                    })() : "Select a date"}
+                    {selectedDate
+                      ? (() => {
+                          try {
+                            return format(
+                              new Date(selectedDate),
+                              "MMMM d, yyyy"
+                            );
+                          } catch {
+                            return "Invalid date";
+                          }
+                        })()
+                      : "Select a date"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -425,6 +432,32 @@ function AttendancePageContent() {
                   <p className="text-muted-foreground/70 text-sm mt-2">
                     Add students to this class to start taking attendance
                   </p>
+                  <AddStudentModal
+                    cls={selectedClassData}
+                    onSuccess={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["/api/classes"],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["/api/students"],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["/api/attendance"],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["/api/notifications"],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["/api/notifications/unread"],
+                      });
+                    }}
+                    trigger={
+                      <Button variant="outline" className="mt-4 cursor-pointer">
+                        <User className="h-4 w-4 mr-2" />
+                        Add Student
+                      </Button>
+                    }
+                  />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:gap-4">
