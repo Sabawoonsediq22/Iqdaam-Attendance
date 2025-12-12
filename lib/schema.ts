@@ -21,6 +21,9 @@ export const classes = pgTable("classes", {
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   description: text("description"),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql`now()`),
 });
 
 export const students = pgTable("students", {

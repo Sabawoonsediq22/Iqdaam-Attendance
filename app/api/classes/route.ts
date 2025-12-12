@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { classes, users, insertClassSchema } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { createNotification, notificationTemplates } from "@/lib/notifications";
 
 export async function GET() {
@@ -15,11 +15,17 @@ export async function GET() {
 
     // For now, show all classes to authenticated users
     // TODO: Implement class assignment system for teachers
-    const result = await db.select().from(classes);
+    const result = await db
+      .select()
+      .from(classes)
+      .orderBy(desc(classes.createdAt));
     return NextResponse.json(result);
   } catch (error) {
     console.error("Get classes error:", error);
-    return NextResponse.json({ error: "Failed to fetch classes" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch classes" },
+      { status: 500 }
+    );
   }
 }
 
@@ -35,13 +41,13 @@ export async function POST(request: NextRequest) {
     const result = insertClassSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error.message }, { status: 400 });
+      return NextResponse.json(
+        { error: result.error.message },
+        { status: 400 }
+      );
     }
 
-    const newClass = await db
-      .insert(classes)
-      .values(result.data)
-      .returning();
+    const newClass = await db.insert(classes).values(result.data).returning();
 
     // Create notification for all admin users
     try {
@@ -50,12 +56,18 @@ export async function POST(request: NextRequest) {
         .from(users)
         .where(eq(users.role, "admin"));
 
-      const adminUserIds = adminUsers.map(user => user.id);
+      const adminUserIds = adminUsers.map((user) => user.id);
 
-      await createNotification({
-        ...notificationTemplates.classAdded(newClass[0].name, session.user.name),
-        entityId: newClass[0].id,
-      }, adminUserIds);
+      await createNotification(
+        {
+          ...notificationTemplates.classAdded(
+            newClass[0].name,
+            session.user.name
+          ),
+          entityId: newClass[0].id,
+        },
+        adminUserIds
+      );
     } catch (error) {
       console.error("Failed to create notification for class creation:", error);
     }
@@ -63,6 +75,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(newClass[0], { status: 201 });
   } catch (error) {
     console.error("Create class error:", error);
-    return NextResponse.json({ error: "Failed to create class" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create class" },
+      { status: 500 }
+    );
   }
 }
