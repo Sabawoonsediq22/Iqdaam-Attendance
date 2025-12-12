@@ -113,10 +113,15 @@ export async function PUT(request: NextRequest) {
       validatedRecords.push(result.data as InsertAttendance);
     }
 
+    // Check if attendance already exists for this class and date
+    const firstRecord = validatedRecords[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existingAttendance = await storage.getAttendanceByClassAndDate((firstRecord as any).classId, (firstRecord as any).date);
+    const isFirstTime = existingAttendance.length === 0;
+
     const created = await storage.bulkUpsertAttendance(validatedRecords);
 
     // Get class name and date for notification
-    const firstRecord = validatedRecords[0];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const studentClass = await storage.getClass((firstRecord as any).classId);
     const className = studentClass ? studentClass.name : "Unknown Class";
@@ -130,19 +135,18 @@ export async function PUT(request: NextRequest) {
       }
     );
 
-    // Create notification for bulk attendance update
+    // Create notification for bulk attendance
     try {
       await createNotification({
-        ...notificationTemplates.attendanceUpdated(
-          className,
-          date,
-          session.user.name
+        ...(isFirstTime
+          ? notificationTemplates.attendanceTaken(className, date, session.user.name)
+          : notificationTemplates.attendanceUpdated(className, date, session.user.name)
         ),
         entityId: created[0]?.id, // Assuming created has ids
       });
     } catch (error) {
       console.error(
-        "Failed to create notification for attendance update:",
+        `Failed to create notification for attendance ${isFirstTime ? 'taken' : 'update'}:`,
         error
       );
     }

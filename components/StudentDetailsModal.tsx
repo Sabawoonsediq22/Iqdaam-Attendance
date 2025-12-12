@@ -28,7 +28,6 @@ import {
   CalendarIcon,
   Edit,
   Trash2,
-  MoreHorizontal,
 } from "lucide-react";
 import {
   XAxis,
@@ -43,12 +42,6 @@ import {
   Cell,
 } from "recharts";
 import { format, startOfWeek, addDays } from "date-fns";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface StudentDetailsModalProps {
@@ -118,14 +111,10 @@ function DeleteStudentModal({
 
   return (
     <>
-      <DropdownMenuItem
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setIsOpen(true)}
-        className="cursor-pointer text-destructive"
-      >
+      <Button onClick={() => setIsOpen(true)} variant="destructive" size="sm">
         <Trash2 className="h-4 w-4 mr-2" />
         Delete Student
-      </DropdownMenuItem>
+      </Button>
       <DeleteConfirmationModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -253,41 +242,25 @@ export default function StudentDetailsModal({
               </div>
             </DialogTitle>
             <div className="flex items-center gap-2 mr-8">
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  asChild
-                  className="cursor-pointer rounded-full"
+              {onEdit && (
+                <Button
+                  onClick={() => {
+                    onClose();
+                    onEdit();
+                  }}
+                  variant="outline"
+                  size="sm"
                 >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {onEdit && (
-                    <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      onClick={() => {
-                        onClose();
-                        onEdit();
-                      }}
-                      className="cursor-pointer"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Student
-                    </DropdownMenuItem>
-                  )}
-                  <DeleteStudentModal
-                    student={student!}
-                    onSuccess={() => {
-                      onStudentChange?.();
-                    }}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Student
+                </Button>
+              )}
+              <DeleteStudentModal
+                student={student!}
+                onSuccess={() => {
+                  onStudentChange?.();
+                }}
+              />
             </div>
           </div>
         </DialogHeader>

@@ -452,7 +452,7 @@ function AttendancePageContent() {
                       });
                     }}
                     trigger={
-                      <Button variant="outline" className="mt-4 cursor-pointer">
+                      <Button variant="default" className="mt-4 cursor-pointer">
                         <User className="h-4 w-4 mr-2" />
                         Add Student
                       </Button>

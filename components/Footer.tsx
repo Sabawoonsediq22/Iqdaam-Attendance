@@ -40,8 +40,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <div className="bg-linear-to-br from-blue-600 to-sky-600 p-2 rounded-xl">
-                <GraduationCap className="w-7 h-7 text-white" />
+              <div>
+                <Image src="/iqdaam.jpg" alt="Iqdaam Logo" width={40} height={40} />
               </div>
               <span className="font-bold text-2xl">Iqdaam</span>
             </div>
