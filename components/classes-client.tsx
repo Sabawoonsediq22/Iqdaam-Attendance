@@ -17,7 +17,7 @@ import {
   WifiOff,
   BookOpenCheck,
   Loader2,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import type { Class, Student } from "@/lib/schema";
 import { Input } from "./ui/input";
@@ -82,25 +82,30 @@ const extractHour = (timeString: string): number => {
   const match = timeString.match(/(\d{1,2}):(\d{2})/);
   if (!match) return 0;
   const hour = parseInt(match[1]);
-  const ampm = timeString.toLowerCase().includes('pm') && hour !== 12 ? hour + 12 : hour;
-  return ampm === 12 && timeString.toLowerCase().includes('am') ? 0 : ampm;
+  const ampm =
+    timeString.toLowerCase().includes("pm") && hour !== 12 ? hour + 12 : hour;
+  return ampm === 12 && timeString.toLowerCase().includes("am") ? 0 : ampm;
 };
 
-const getHourRange = (hourFilter: string): { min: number; max: number } | null => {
+const getHourRange = (
+  hourFilter: string
+): { min: number; max: number } | null => {
   switch (hourFilter) {
-    case 'morning':
+    case "morning":
       return { min: 8, max: 12 };
-    case 'afternoon':
+    case "afternoon":
       return { min: 12, max: 17 };
     default:
       return null;
   }
 };
 
-const getMonthRange = (monthFilter: string): { start: Date; end: Date } | null => {
+const getMonthRange = (
+  monthFilter: string
+): { start: Date; end: Date } | null => {
   const now = new Date();
   switch (monthFilter) {
-    case 'this-month':
+    case "this-month":
       return { start: startOfMonth(now), end: endOfMonth(now) };
     default:
       return null;
@@ -108,13 +113,25 @@ const getMonthRange = (monthFilter: string): { start: Date; end: Date } | null =
 };
 
 // View Details Modal Component
-function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }) {
+function ViewDetailsModal({
+  cls,
+  students,
+}: {
+  cls: Class;
+  students: Student[];
+}) {
   const [open, setOpen] = useState(false);
-  const studentCount = (students || []).filter((s) => s.classId === cls.id).length;
+  const studentCount = (students || []).filter(
+    (s) => s.classId === cls.id
+  ).length;
 
   return (
     <>
-      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => setOpen(true)} className="cursor-pointer">
+      <DropdownMenuItem
+        onSelect={(e) => e.preventDefault()}
+        onClick={() => setOpen(true)}
+        className="cursor-pointer"
+      >
         <Info className="h-4 w-4 mr-2" />
         View Details
       </DropdownMenuItem>
@@ -139,7 +156,9 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
                   <UserCheck className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Teacher</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Teacher
+                  </p>
                   <p className="font-semibold">{cls.teacher}</p>
                 </div>
               </div>
@@ -150,7 +169,9 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
                   <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Schedule</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Schedule
+                  </p>
                   <p className="font-semibold">{cls.time}</p>
                 </div>
               </div>
@@ -161,13 +182,15 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
                   <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Start Date</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Start Date
+                  </p>
                   <p className="font-semibold">
-                    {new Date(cls.startDate).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                    {new Date(cls.startDate).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </p>
                 </div>
@@ -179,17 +202,18 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
                   <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">End Date</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    End Date
+                  </p>
                   <p className="font-semibold">
                     {cls.endDate
-                      ? new Date(cls.endDate).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
+                      ? new Date(cls.endDate).toLocaleDateString("en-US", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
                         })
-                      : "Ongoing Class"
-                    }
+                      : "Ongoing Class"}
                   </p>
                 </div>
               </div>
@@ -200,8 +224,12 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Enrolled Students</p>
-                  <p className="font-semibold">{studentCount} student{studentCount !== 1 ? "s" : ""}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Enrolled Students
+                  </p>
+                  <p className="font-semibold">
+                    {studentCount} student{studentCount !== 1 ? "s" : ""}
+                  </p>
                 </div>
               </div>
             </div>
@@ -214,7 +242,9 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Description</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">
+                      Description
+                    </p>
                     <p className="text-sm leading-relaxed">{cls.description}</p>
                   </div>
                 </div>
@@ -228,7 +258,13 @@ function ViewDetailsModal({ cls, students }: { cls: Class; students: Student[] }
 }
 
 // Edit Class Modal Component
-function EditClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void }) {
+function EditClassModal({
+  cls,
+  onSuccess,
+}: {
+  cls: Class;
+  onSuccess: () => void;
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -263,12 +299,16 @@ function EditClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void 
 
       // Optimistically update the cache
       queryClient.setQueryData<Class[]>(["/api/classes"], (oldClasses) =>
-        oldClasses ? oldClasses.map((c) => (c.id === cls.id ? { ...c, ...data } : c)) : []
+        oldClasses
+          ? oldClasses.map((c) => (c.id === cls.id ? { ...c, ...data } : c))
+          : []
       );
 
       // Invalidate notifications
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
 
       toast.success("Class updated successfully");
 
@@ -284,7 +324,10 @@ function EditClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+        <DropdownMenuItem
+          onSelect={(e) => e.preventDefault()}
+          className="cursor-pointer"
+        >
           <PencilIcon className="h-4 w-4 mr-2" />
           Edit Class
         </DropdownMenuItem>
@@ -354,11 +397,7 @@ function EditClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void 
                 <FormItem>
                   <FormLabel>End Date (Optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      type="date"
-                      {...field}
-                      value={field.value || ""}
-                    />
+                    <Input type="date" {...field} value={field.value || ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -392,8 +431,14 @@ function EditClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void 
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
-                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="cursor-pointer"
+              >
+                {isSubmitting && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
                 {isSubmitting ? "Updating..." : "Update Class"}
               </Button>
             </div>
@@ -404,9 +449,14 @@ function EditClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void 
   );
 }
 
-
 // Delete Class Modal Component
-function DeleteClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => void }) {
+function DeleteClassModal({
+  cls,
+  onSuccess,
+}: {
+  cls: Class;
+  onSuccess: () => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
@@ -430,7 +480,9 @@ function DeleteClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => voi
 
       // Invalidate notifications
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
 
       toast.success("Class deleted successfully");
 
@@ -447,7 +499,11 @@ function DeleteClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => voi
 
   return (
     <>
-      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => setIsOpen(true)} className="cursor-pointer text-destructive">
+      <DropdownMenuItem
+        onSelect={(e) => e.preventDefault()}
+        onClick={() => setIsOpen(true)}
+        className="cursor-pointer text-destructive"
+      >
         <Delete className="h-4 w-4 mr-2" />
         Delete Class
       </DropdownMenuItem>
@@ -463,13 +519,12 @@ function DeleteClassModal({ cls, onSuccess }: { cls: Class; onSuccess: () => voi
   );
 }
 
-
 // Filtering logic
 const useClassFilters = (classes: Class[] | undefined) => {
   const [filters, setFilters] = useState<ClassFilters>({
-    search: '',
-    hour: 'all',
-    month: 'all'
+    search: "",
+    hour: "all",
+    month: "all",
   });
 
   const filteredClasses = useMemo(() => {
@@ -487,7 +542,7 @@ const useClassFilters = (classes: Class[] | undefined) => {
       }
 
       // Hour filter
-      if (filters.hour && filters.hour !== 'all') {
+      if (filters.hour && filters.hour !== "all") {
         const hourRange = getHourRange(filters.hour);
         if (hourRange) {
           const classHour = extractHour(cls.time);
@@ -496,7 +551,7 @@ const useClassFilters = (classes: Class[] | undefined) => {
           }
         } else {
           // Specific hour
-          const filterHour = parseInt(filters.hour.split(':')[0]);
+          const filterHour = parseInt(filters.hour.split(":")[0]);
           const classHour = extractHour(cls.time);
           if (classHour !== filterHour) {
             return false;
@@ -505,7 +560,7 @@ const useClassFilters = (classes: Class[] | undefined) => {
       }
 
       // Month filter
-      if (filters.month && filters.month !== 'all') {
+      if (filters.month && filters.month !== "all") {
         const monthRange = getMonthRange(filters.month);
         if (monthRange) {
           const classDate = parseISO(cls.startDate);
@@ -522,7 +577,6 @@ const useClassFilters = (classes: Class[] | undefined) => {
         }
       }
 
-
       return true;
     });
   }, [classes, filters]);
@@ -534,14 +588,16 @@ const useClassFilters = (classes: Class[] | undefined) => {
 function ClassCard({
   cls,
   students,
-  onClassChange
+  onClassChange,
 }: {
   cls: Class;
   students: Student[];
   onClassChange: () => void;
 }) {
   const router = useRouter();
-  const studentCount = (students || []).filter((s) => s.classId === cls.id).length;
+  const studentCount = (students || []).filter(
+    (s) => s.classId === cls.id
+  ).length;
 
   const handleTakeAttendance = () => {
     router.push(`/attendance?classId=${cls.id}`);
@@ -558,7 +614,7 @@ function ClassCard({
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10 border border-primary/20 shadow-sm">
-                <BookOpenCheck className="h-5 w-5 text-primary"/>
+                <BookOpenCheck className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="font-bold text-lg bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
@@ -568,7 +624,10 @@ function ClassCard({
                   <div className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/50">
                     <Users className="h-3 w-3 text-muted-foreground" />
                   </div>
-                  <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20">
+                  <Badge
+                    variant="secondary"
+                    className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
+                  >
                     {studentCount} student{studentCount !== 1 ? "s" : ""}
                   </Badge>
                 </div>
@@ -576,8 +635,15 @@ function ClassCard({
             </div>
             <div className="flex items-center gap-2">
               <DropdownMenu>
-                <DropdownMenuTrigger asChild className="cursor-pointer rounded-full">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors">
+                <DropdownMenuTrigger
+                  asChild
+                  className="cursor-pointer rounded-full"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+                  >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -597,14 +663,18 @@ function ClassCard({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-3 px-3 bg-muted/30 rounded-lg border border-border/50">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Teacher</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Teacher
+              </p>
               <p className="font-semibold text-sm truncate">{cls.teacher}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Schedule</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Schedule
+              </p>
               <p className="font-semibold text-sm truncate">{cls.time}</p>
             </div>
           </div>
@@ -612,10 +682,13 @@ function ClassCard({
 
         <div className="flex items-center justify-center gap-3 p-3 bg-muted/20 rounded-lg border border-border/40">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Duration</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Duration
+            </p>
             <p className="font-semibold text-sm">
               {new Date(cls.startDate).toLocaleDateString()}
-              {cls.endDate && ` - ${new Date(cls.endDate).toLocaleDateString()}`}
+              {cls.endDate &&
+                ` - ${new Date(cls.endDate).toLocaleDateString()}`}
             </p>
           </div>
         </div>
@@ -648,7 +721,8 @@ function EmptyState({ isOffline = false }: { isOffline?: boolean }) {
             </div>
             <h3 className="text-lg font-medium">No Internet Connection</h3>
             <p className="text-muted-foreground mb-4">
-              Unable to load classes. Please check your internet connection and try again.
+              Unable to load classes. Please check your internet connection and
+              try again.
             </p>
           </div>
         </CardContent>
@@ -686,7 +760,7 @@ export default function ClassesClient() {
 
   useEffect(() => {
     // Only run on client side
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Set initial state - eslint-disable-next-line react-hooks/exhaustive-deps
       setIsOffline(!navigator.onLine);
 
@@ -758,7 +832,9 @@ export default function ClassesClient() {
                 onClassChange={handleClassChange}
               />
             ))}
-            {filteredClasses.length === 0 && <EmptyState isOffline={isOffline} />}
+            {filteredClasses.length === 0 && (
+              <EmptyState isOffline={isOffline} />
+            )}
           </>
         )}
       </div>
