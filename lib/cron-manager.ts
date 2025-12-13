@@ -1,6 +1,7 @@
 import * as cron from "node-cron";
 import { processScheduledReports } from "@/app/api/reports/schedule/route";
 import { cleanupOldNotifications } from "./cleanup";
+import { checkCompletedClasses } from "./class-completion";
 
 interface CronJob {
   id: string;
@@ -43,9 +44,22 @@ class CronManager {
         await cleanupOldNotifications();
       },
     });
+
+    // Class completion checker - runs daily at midnight
+    this.addJob({
+      id: "class-completion-checker",
+      name: "Class Completion Checker",
+      schedule: "0 0 * * *", // Daily at midnight
+      task: async () => {
+        console.log("Checking for completed classes...");
+        await checkCompletedClasses();
+      },
+    });
   }
 
-  addJob(jobConfig: Omit<CronJob, "running" | "lastRun" | "nextRun" | "error">) {
+  addJob(
+    jobConfig: Omit<CronJob, "running" | "lastRun" | "nextRun" | "error">
+  ) {
     const job: CronJob = {
       ...jobConfig,
       running: false,

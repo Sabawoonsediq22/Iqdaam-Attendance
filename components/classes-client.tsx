@@ -335,129 +335,438 @@ function EditClassModal({
       </DialogTrigger>
       <AnimatePresence>
         {open && (
-      <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
-        <motion.div
+          <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
+            <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-        <DialogHeader>
-          <DialogTitle>Edit Class</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Class Name *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter class name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="teacher"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teacher *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter teacher name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="time"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Time *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., 9:00 AM - 10:30 AM" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="startDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Start Date *</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="endDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>End Date (Optional)</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} value={field.value || ""} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter class description (optional)"
-                      className="resize-none"
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isSubmitting}
-                className="cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="cursor-pointer"
-              >
-                {isSubmitting && (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                )}
-                {isSubmitting ? "Updating..." : "Update Class"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-        </motion.div>
-      </DialogContent>
-      )}
+              <DialogHeader>
+                <DialogTitle>Edit Class</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Class Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter class name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="teacher"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Teacher *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter teacher name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="time"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Time *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., 9:00 AM - 10:30 AM"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date *</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="endDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>End Date (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Enter class description (optional)"
+                            className="resize-none"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setOpen(false)}
+                      disabled={isSubmitting}
+                      className="cursor-pointer"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="cursor-pointer"
+                    >
+                      {isSubmitting && (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      )}
+                      {isSubmitting ? "Updating..." : "Update Class"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </motion.div>
+          </DialogContent>
+        )}
       </AnimatePresence>
     </Dialog>
+  );
+}
+
+// Upgrade Class Modal Component
+function UpgradeClassModal({
+  cls,
+  onSuccess,
+}: {
+  cls: Class;
+  onSuccess: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [showPromotionConfirm, setShowPromotionConfirm] = useState(false);
+  const [createdClass, setCreatedClass] = useState<Class | null>(null);
+
+  // Generate suggested name for next class
+  const generateNextClassName = (currentName: string): string => {
+    const match = currentName.match(/(\d+)/);
+    if (match) {
+      const num = parseInt(match[1]);
+      return currentName.replace(/\d+/, (num + 1).toString());
+    }
+    return `${currentName} - Next`;
+  };
+
+  const form = useForm<InsertClass>({
+    resolver: zodResolver(insertClassSchema),
+    defaultValues: {
+      name: generateNextClassName(cls.name),
+      teacher: cls.teacher,
+      time: cls.time,
+      startDate: new Date().toISOString().split("T")[0], // Today
+      endDate: undefined,
+      description: `Next level class following ${cls.name}`,
+    },
+  });
+
+  const onSubmit = async (data: InsertClass) => {
+    setIsCreating(true);
+    try {
+      const response = await fetch(`/api/classes/${cls.id}/upgrade`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ newClassData: data, createOnly: true }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create class");
+      }
+
+      const result = await response.json();
+      setCreatedClass(result.newClass);
+      setShowPromotionConfirm(true);
+      toast.success(`Created ${result.newClass.name} successfully`);
+    } catch (error) {
+      toast.error(humanizeError(error));
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handlePromotionConfirm = async () => {
+    if (!createdClass) return;
+
+    setIsCreating(true);
+    try {
+      const response = await fetch(`/api/classes/${cls.id}/upgrade`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ promoteToClassId: createdClass.id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to promote students");
+      }
+
+      toast.success(`Students promoted to ${createdClass.name}`);
+
+      setIsOpen(false);
+      setShowPromotionConfirm(false);
+      setCreatedClass(null);
+      form.reset();
+      onSuccess();
+    } catch (error) {
+      toast.error(humanizeError(error));
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handlePromotionCancel = () => {
+    setShowPromotionConfirm(false);
+    setCreatedClass(null);
+    setIsOpen(false);
+    form.reset();
+    onSuccess(); // Refresh the list to show the new class
+  };
+
+  return (
+    <>
+      <DropdownMenuItem
+        onSelect={(e) => e.preventDefault()}
+        onClick={() => setIsOpen(true)}
+        className="cursor-pointer"
+      >
+        <BookOpenCheck className="h-4 w-4 mr-2" />
+        Upgrade Class
+      </DropdownMenuItem>
+      <ResponsiveDialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title="Create Next Class & Promote Students"
+        contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
+      >
+        <div className="space-y-6">
+          <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                <BookOpenCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100">
+                Upgrade Class
+              </h3>
+            </div>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Create a new class for the next level and automatically promote
+              all students from <strong>{cls.name}</strong>. The original class
+              will remain unchanged for historical attendance records.
+            </p>
+          </div>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Class Name *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter new class name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="teacher"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teacher *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter teacher name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., 9:00 AM - 10:30 AM"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date (Optional)</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} value={field.value || ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter class description (optional)"
+                        className="resize-none"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsOpen(false)}
+                  disabled={isCreating}
+                  className="cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isCreating}
+                  className="cursor-pointer"
+                >
+                  {isCreating && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
+                  {isCreating ? "Creating Class..." : "Create Class"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </ResponsiveDialog>
+
+      {/* Promotion Confirmation Dialog */}
+      <ResponsiveDialog
+        open={showPromotionConfirm}
+        onOpenChange={setShowPromotionConfirm}
+        title="Promote Students"
+        contentClassName="sm:max-w-[400px] max-w-[350px] rounded-lg"
+      >
+        <div className="space-y-4">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-6 h-6 text-green-600" />
+            </div>
+            <h3 className="text-lg font-semibold">Promote Students</h3>
+            <p className="text-muted-foreground mt-2">
+              Would you like to promote all students from{" "}
+              <strong>{cls.name}</strong> to the newly created class{" "}
+              <strong>{createdClass?.name}</strong>?
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              The original class will remain unchanged for historical attendance
+              records.
+            </p>
+          </div>
+
+          <div className="flex justify-end space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePromotionCancel}
+              disabled={isCreating}
+              className="cursor-pointer"
+            >
+              Skip Promotion
+            </Button>
+            <Button
+              type="button"
+              onClick={handlePromotionConfirm}
+              disabled={isCreating}
+              className="cursor-pointer"
+            >
+              {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isCreating ? "Promoting..." : "Promote Students"}
+            </Button>
+          </div>
+        </div>
+      </ResponsiveDialog>
+    </>
   );
 }
 
@@ -615,8 +924,14 @@ function ClassCard({
     router.push(`/attendance?classId=${cls.id}`);
   };
 
+  const isCompleted = cls.status === "completed";
+
   return (
-    <Card className="relative overflow-hidden border-2 shadow-lg bg-linear-to-br from-card via-card/95 to-card/90 hover:shadow-xl group">
+    <Card
+      className={`relative overflow-hidden border-2 shadow-lg bg-linear-to-br from-card via-card/95 to-card/90 hover:shadow-xl group ${
+        isCompleted ? "border-green-500/50" : ""
+      }`}
+    >
       {/* Subtle background gradient */}
       <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-0" />
 
@@ -642,6 +957,14 @@ function ClassCard({
                   >
                     {studentCount} student{studentCount !== 1 ? "s" : ""}
                   </Badge>
+                  {isCompleted && (
+                    <Badge
+                      variant="secondary"
+                      className="text-xs px-2 py-0.5 bg-green-100 text-green-800 border-green-300"
+                    >
+                      Completed
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -663,6 +986,9 @@ function ClassCard({
                   <ViewDetailsModal cls={cls} students={students} />
                   <EditClassModal cls={cls} onSuccess={onClassChange} />
                   <AddStudentModal cls={cls} onSuccess={onClassChange} />
+                  {isCompleted && (
+                    <UpgradeClassModal cls={cls} onSuccess={onClassChange} />
+                  )}
                   <DeleteClassModal cls={cls} onSuccess={onClassChange} />
                 </DropdownMenuContent>
               </DropdownMenu>

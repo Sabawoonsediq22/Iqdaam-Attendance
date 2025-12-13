@@ -20,6 +20,7 @@ export const classes = pgTable("classes", {
   time: text("time").notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
+  status: text("status").notNull().default("active"), // 'active', 'completed', 'cancelled'
   description: text("description"),
   createdAt: timestamp("created_at")
     .notNull()

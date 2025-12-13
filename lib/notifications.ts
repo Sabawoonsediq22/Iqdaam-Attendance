@@ -114,6 +114,19 @@ export const notificationTemplates = {
     action: "deleted",
   }),
 
+  classUpgraded: (
+    fromClassName: string,
+    toClassName: string,
+    actorName: string
+  ) => ({
+    title: "Class Upgraded",
+    message: `**${actorName}** promoted students from "${fromClassName}" to "${toClassName}".`,
+    type: "success" as const,
+    entityType: "class" as const,
+    actorName,
+    action: "upgraded",
+  }),
+
   studentAdded: (
     studentName: string,
     className: string,
