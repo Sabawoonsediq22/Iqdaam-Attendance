@@ -1,0 +1,1 @@
+ALTER TABLE "fees" ADD COLUMN "fee_unpaid" numeric(10, 2);

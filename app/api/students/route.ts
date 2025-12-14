@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { students, studentClasses, classes } from "@/lib/schema";
+import { students, studentClasses, classes, fees } from "@/lib/schema";
 import { insertStudentWithClassSchema } from "@/lib/schema";
 import { createNotification, notificationTemplates } from "@/lib/notifications";
 import { eq } from "drizzle-orm";
@@ -84,17 +84,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Get class name for notification
+    // Get class name and fee for notification and fee record
     let className = "Unknown Class";
+    let classFee = "0";
     if (classId) {
       const cls = await db
-        .select({ name: classes.name })
+        .select({ name: classes.name, fee: classes.fee })
         .from(classes)
         .where(eq(classes.id, classId))
         .limit(1);
       if (cls.length > 0) {
         className = cls[0].name;
+        classFee = cls[0].fee;
       }
+    }
+
+    // Create fee record if enrolled in class
+    if (classId && classFee !== "0") {
+      await db.insert(fees).values({
+        studentId: newStudent[0].id,
+        classId,
+        feeToBePaid: classFee,
+      });
     }
 
     // Create notification

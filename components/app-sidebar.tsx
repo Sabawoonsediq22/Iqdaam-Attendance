@@ -8,6 +8,7 @@ import {
   BookOpen,
   Bell,
   UserCheck,
+  DollarSign,
 } from "lucide-react";
 
 interface ExtendedUser {
@@ -59,6 +60,13 @@ const menuItems = [
     url: "/students",
     icon: Users,
     description: "Student Management",
+    roles: ["admin"],
+  },
+  {
+    title: "Fees",
+    url: "/fees",
+    icon: DollarSign,
+    description: "Fee Management",
     roles: ["admin"],
   },
   {

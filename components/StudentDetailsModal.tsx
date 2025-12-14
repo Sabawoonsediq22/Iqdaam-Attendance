@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ import {
   CalendarIcon,
   Edit,
   Trash2,
+  Coins,
 } from "lucide-react";
 import {
   XAxis,
@@ -43,6 +45,21 @@ import {
 } from "recharts";
 import { format, startOfWeek, addDays } from "date-fns";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+
+type FeeWithDetails = {
+  id: string;
+  studentId: string;
+  classId: string;
+  feeToBePaid: string;
+  feePaid: string | null;
+  feeUnpaid: string | null;
+  paymentDate: string | null;
+  createdAt: string;
+  studentName: string;
+  fatherName: string;
+  className: string;
+  teacherName: string;
+};
 
 interface StudentDetailsModalProps {
   student: Student | null;
@@ -153,6 +170,17 @@ export default function StudentDetailsModal({
       if (!student?.id) return [];
       const res = await fetch(`/api/attendance?studentId=${student.id}`);
       if (!res.ok) throw new Error("Failed to fetch attendance");
+      return res.json();
+    },
+    enabled: !!student?.id && isOpen,
+  });
+
+  const { data: fees = [] } = useQuery<FeeWithDetails[]>({
+    queryKey: ["/api/fees", student?.id],
+    queryFn: async () => {
+      if (!student?.id) return [];
+      const res = await fetch(`/api/fees?studentId=${student.id}`);
+      if (!res.ok) throw new Error("Failed to fetch fees");
       return res.json();
     },
     enabled: !!student?.id && isOpen,
@@ -273,10 +301,11 @@ export default function StudentDetailsModal({
         </DialogHeader>
 
         <Tabs defaultValue="weekly" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="weekly">Weekly View</TabsTrigger>
             <TabsTrigger value="attendance">Analytics</TabsTrigger>
+            <TabsTrigger value="fees">Fees</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-6">
@@ -642,6 +671,53 @@ export default function StudentDetailsModal({
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="fees" className="space-y-6">
+            {/* Fee History */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Coins className="h-5 w-5" />
+                  Fee History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {fees.length === 0 ? (
+                  <p className="text-muted-foreground">No fee records found.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {fees.map((fee) => (
+                      <div
+                        key={fee.id}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{fee.className}</h4>
+                            <Badge variant="outline">{fee.teacherName}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Fee: {fee.feeToBePaid}؋ | Paid: {fee.feePaid || "0"}؋ | Unpaid: {fee.feeUnpaid || "0"}؋
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Created:{" "}
+                            {new Date(fee.createdAt).toLocaleDateString()}
+                            {fee.paymentDate &&
+                              ` | Paid: ${new Date(
+                                fee.paymentDate
+                              ).toLocaleDateString()}`}
+                          </p>
+                        </div>
+                        <Badge variant={fee.feePaid ? "default" : "secondary"}>
+                          {fee.feePaid ? "Paid" : "Pending"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </DialogContent>

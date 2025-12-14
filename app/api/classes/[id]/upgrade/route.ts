@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { classes, studentClasses } from "@/lib/schema";
+import { classes, studentClasses, fees } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { createNotification, notificationTemplates } from "@/lib/notifications";
 
@@ -72,6 +72,14 @@ export async function POST(
           }));
 
           await db.insert(studentClasses).values(newEnrollments);
+
+          // Create fee records for new enrollments
+          const feeRecords = enrolledStudents.map(({ studentId }) => ({
+            studentId,
+            classId: newClass[0].id,
+            feeToBePaid: newClass[0].fee,
+          }));
+          await db.insert(fees).values(feeRecords);
         }
 
         // Update the original class status to 'upgraded'
@@ -134,6 +142,14 @@ export async function POST(
         }));
 
         await db.insert(studentClasses).values(newEnrollments);
+
+        // Create fee records for new enrollments
+        const feeRecords = enrolledStudents.map(({ studentId }) => ({
+          studentId,
+          classId: promoteToClassId,
+          feeToBePaid: targetClass[0].fee,
+        }));
+        await db.insert(fees).values(feeRecords);
       }
 
       // Update the original class status to 'upgraded'

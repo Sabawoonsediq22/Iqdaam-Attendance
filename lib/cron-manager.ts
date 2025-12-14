@@ -190,6 +190,7 @@ class CronManager {
 
       if (parts.length !== 5) return undefined;
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [minute, hour, day, month, dayOfWeek] = parts;
 
       // For simplicity, we'll just add approximate times

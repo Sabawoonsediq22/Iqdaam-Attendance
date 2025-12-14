@@ -20,6 +20,7 @@ import {
   Info,
   Check,
   Loader2,
+  Coins,
 } from "lucide-react";
 import type { Notification } from "@/lib/schema";
 import { toast } from "sonner";
@@ -195,7 +196,7 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/users/pending"] });
       toast.success("User rejected and deleted");
     },
-    onError: (error, { notificationId }) => {
+    onError: (error) => {
       toast.error(error.message || "Failed to reject user");
     },
     onSettled: (data, error, { notificationId }) => {
@@ -278,6 +279,8 @@ export default function NotificationsPage() {
         return <Users className="w-5 h-5 text-purple-600" />;
       case "attendance":
         return <UserCheck className="w-5 h-5 text-indigo-600" />;
+      case "fee":
+        return <Coins className="w-5 h-5 text-green-600" />;
       default:
         return <Info className="w-5 h-5 text-gray-600" />;
     }
@@ -297,6 +300,8 @@ export default function NotificationsPage() {
         return "border-purple-200";
       case "attendance":
         return "border-indigo-200";
+      case "fee":
+        return "border-green-200";
       default:
         return "border-gray-200";
     }
@@ -434,6 +439,7 @@ export default function NotificationsPage() {
                 <SelectItem value="class">Class</SelectItem>
                 <SelectItem value="student">Student</SelectItem>
                 <SelectItem value="attendance">Attendance</SelectItem>
+                <SelectItem value="fee">Fee</SelectItem>
               </SelectContent>
             </Select>
             <Select

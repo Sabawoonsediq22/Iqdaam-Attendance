@@ -78,6 +78,20 @@
       "when": 1765713390596,
       "tag": "0010_talented_war_machine",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1765728529657,
+      "tag": "0011_furry_brood",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1765736436193,
+      "tag": "0012_clammy_raza",
+      "breakpoints": true
     }
   ]
 }

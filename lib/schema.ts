@@ -7,6 +7,7 @@ import {
   date,
   boolean,
   unique,
+  decimal,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -23,6 +24,7 @@ export const classes = pgTable("classes", {
   endDate: date("end_date"),
   status: text("status").notNull().default("active"), // 'active', 'completed', 'upgraded', 'cancelled'
   description: text("description"),
+  fee: decimal("fee", { precision: 10, scale: 2 }).notNull().default("0"),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
@@ -101,6 +103,44 @@ export const attendance = pgTable(
   })
 );
 
+// Relationships: Many-to-one with students, many-to-one with classes
+export const fees = pgTable(
+  "fees",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    studentId: varchar("student_id")
+      .notNull()
+      .references(() => students.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    classId: varchar("class_id")
+      .notNull()
+      .references(() => classes.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    feeToBePaid: decimal("fee_to_be_paid", {
+      precision: 10,
+      scale: 2,
+    }).notNull(),
+    feePaid: decimal("fee_paid", { precision: 10, scale: 2 }),
+    feeUnpaid: decimal("fee_unpaid", { precision: 10, scale: 2 }),
+    paymentDate: date("payment_date"),
+    createdAt: timestamp("created_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => ({
+    uniqueStudentClassFee: unique("unique_student_class_fee").on(
+      table.studentId,
+      table.classId
+    ),
+  })
+);
+
 // Relationships: One-to-many with reportAttendance, generatedBy references users.id
 export const reports = pgTable("reports", {
   id: varchar("id")
@@ -157,7 +197,7 @@ export const notifications = pgTable("notifications", {
     .default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   message: text("message").notNull(),
-  type: text("type").notNull(), // 'success', 'error', 'warning', 'info', 'class', 'student', 'attendance'
+  type: text("type").notNull(), // 'success', 'error', 'warning', 'info', 'class', 'student', 'attendance', 'fee'
   entityType: text("entity_type"), // 'class', 'student', 'attendance'
   entityId: varchar("entity_id"),
   actorName: text("actor_name"),
@@ -206,6 +246,7 @@ export const insertClassSchema = createInsertSchema(classes, {
   teacher: (schema) => schema.min(1, "Teacher is required"),
   time: (schema) => schema.min(1, "Time is required"),
   startDate: (schema) => schema.min(1, "Start date is required"),
+  fee: (schema) => schema.min(0, "Fee must be non-negative"),
 }).omit({
   id: true,
 });
@@ -270,6 +311,133 @@ export const insertUserPreferencesSchema = createInsertSchema(
   updatedAt: true,
 });
 
+export const insertFeeSchema = createInsertSchema(fees, {
+  studentId: (schema) =>
+    schema.min(1, "Student selection is required").uuid("Invalid student ID"),
+  classId: (schema) =>
+    schema.min(1, "Class selection is required").uuid("Invalid class ID"),
+  feeToBePaid: (schema) =>
+    schema
+      .min(0.01, "Fee amount must be greater than 0")
+      .max(99999999.99, "Fee amount is too large"),
+  feePaid: (schema) =>
+    schema
+      .optional()
+      .refine(
+        (val) => val === undefined || val === "" || parseFloat(val) >= 0,
+        {
+          message: "Amount paid must be non-negative",
+        }
+      )
+      .refine(
+        (val) =>
+          val === undefined || val === "" || parseFloat(val) <= 99999999.99,
+        {
+          message: "Amount paid is too large",
+        }
+      ),
+  feeUnpaid: (schema) =>
+    schema
+      .optional()
+      .refine(
+        (val) => val === undefined || val === "" || parseFloat(val) >= 0,
+        {
+          message: "Unpaid amount must be non-negative",
+        }
+      )
+      .refine(
+        (val) =>
+          val === undefined || val === "" || parseFloat(val) <= 99999999.99,
+        {
+          message: "Unpaid amount is too large",
+        }
+      ),
+  paymentDate: (schema) =>
+    schema.min(1, "Payment date is required").refine(
+      (val) => {
+        const paymentDate = new Date(val);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        return paymentDate <= today;
+      },
+      {
+        message: "Payment date cannot be in the future",
+      }
+    ),
+})
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .refine(
+    (data) => {
+      if (data.feePaid && data.feePaid !== "") {
+        const paid = parseFloat(data.feePaid);
+        const total = parseFloat(data.feeToBePaid);
+        return paid <= total;
+      }
+      return true;
+    },
+    {
+      message: "Amount paid cannot exceed the fee amount",
+      path: ["feePaid"],
+    }
+  );
+
+export const updateFeeSchema = createInsertSchema(fees, {
+  feePaid: (schema) =>
+    schema
+      .optional()
+      .refine(
+        (val) => val === undefined || val === "" || parseFloat(val) >= 0,
+        {
+          message: "Amount paid must be non-negative",
+        }
+      )
+      .refine(
+        (val) =>
+          val === undefined || val === "" || parseFloat(val) <= 99999999.99,
+        {
+          message: "Amount paid is too large",
+        }
+      ),
+  feeUnpaid: (schema) =>
+    schema
+      .optional()
+      .refine(
+        (val) => val === undefined || val === "" || parseFloat(val) >= 0,
+        {
+          message: "Unpaid amount must be non-negative",
+        }
+      )
+      .refine(
+        (val) =>
+          val === undefined || val === "" || parseFloat(val) <= 99999999.99,
+        {
+          message: "Unpaid amount is too large",
+        }
+      ),
+  paymentDate: (schema) =>
+    schema.optional().refine(
+      (val) => {
+        if (!val || val === "") return true;
+        const paymentDate = new Date(val);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        return paymentDate <= today;
+      },
+      {
+        message: "Payment date cannot be in the future",
+      }
+    ),
+}).omit({
+  id: true,
+  createdAt: true,
+  studentId: true,
+  classId: true,
+  feeToBePaid: true,
+});
+
 // Combined schema for creating students with class assignment
 export const insertStudentWithClassSchema = insertStudentSchema.extend({
   classId: z.string().min(1, "Class selection is required"),
@@ -312,3 +480,7 @@ export type PasswordResetCode = typeof passwordResetCodes.$inferSelect;
 
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
+
+export type InsertFee = z.infer<typeof insertFeeSchema>;
+export type UpdateFee = z.infer<typeof updateFeeSchema>;
+export type Fee = typeof fees.$inferSelect;

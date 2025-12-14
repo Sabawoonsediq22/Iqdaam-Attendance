@@ -32,6 +32,8 @@ function PageTitle() {
         return "Settings";
       case "/users":
         return "Users";
+      case "/fees":
+        return "Fee Management";
       default:
         return "Dashboard";
     }
