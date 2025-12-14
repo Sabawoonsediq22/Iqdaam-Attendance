@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertStudentSchema } from "@/lib/schema";
 import { toast } from "sonner";
 import type { Student, InsertStudent } from "@/lib/schema";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
 import ImageUploader from "./ImageUploader";
 import {
