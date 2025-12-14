@@ -11,6 +11,7 @@ import {
   students,
   attendance,
   notifications,
+  studentClasses,
 } from "./schema";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -126,10 +127,21 @@ export class DrizzleStorage implements IStorage {
   }
 
   async getStudentsByClass(classId: string): Promise<Student[]> {
-    return await getDb()
-      .select()
+    const result = await getDb()
+      .select({
+        id: students.id,
+        studentId: students.studentId,
+        name: students.name,
+        fatherName: students.fatherName,
+        phone: students.phone,
+        gender: students.gender,
+        email: students.email,
+        avatar: students.avatar,
+      })
       .from(students)
-      .where(eq(students.classId, classId));
+      .innerJoin(studentClasses, eq(students.id, studentClasses.studentId))
+      .where(eq(studentClasses.classId, classId));
+    return result;
   }
 
   async getAllStudents(): Promise<Student[]> {
@@ -171,8 +183,8 @@ export class DrizzleStorage implements IStorage {
 
   async deleteStudentsByClass(classId: string): Promise<boolean> {
     const result = await getDb()
-      .delete(students)
-      .where(eq(students.classId, classId))
+      .delete(studentClasses)
+      .where(eq(studentClasses.classId, classId))
       .returning();
     return result.length >= 0; // Always true since it can delete 0 or more
   }

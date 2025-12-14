@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertStudentSchema } from "@/lib/schema";
 import { toast } from "sonner";
-import type { Student, InsertStudent, Class } from "@/lib/schema";
+import type { Student, InsertStudent } from "@/lib/schema";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
 import ImageUploader from "./ImageUploader";
@@ -32,21 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Clock, Calendar, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 interface EditStudentModalProps {
   student: Student | null;
@@ -55,15 +41,15 @@ interface EditStudentModalProps {
   onSuccess: () => void;
 }
 
-export default function EditStudentModal({ student, isOpen, onClose, onSuccess }: EditStudentModalProps) {
+export default function EditStudentModal({
+  student,
+  isOpen,
+  onClose,
+  onSuccess,
+}: EditStudentModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [classOpen, setClassOpen] = useState(false);
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
-
-  const { data: classes = [] } = useQuery<Class[]>({
-    queryKey: ["/api/classes"],
-  });
 
   const form = useForm<InsertStudent>({
     resolver: zodResolver(insertStudentSchema),
@@ -75,7 +61,6 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
       fatherName: "",
       phone: "",
       avatar: "",
-      classId: "",
     },
   });
 
@@ -90,7 +75,6 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
         fatherName: student.fatherName,
         phone: student.phone || "",
         avatar: student.avatar || "",
-        classId: student.classId,
       });
       setCapturedFile(null); // Reset captured file when student changes
     }
@@ -106,7 +90,7 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
       // If there's an existing avatar and a new file is captured, delete the old one
       if (student.avatar && capturedFile) {
         try {
-          const urlParts = student.avatar.split('/');
+          const urlParts = student.avatar.split("/");
           const fileKey = urlParts[urlParts.length - 1];
           if (fileKey) {
             const deleteResponse = await fetch("/api/delete-avatar", {
@@ -167,7 +151,9 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
       await queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/students"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
 
       toast.success("Student updated successfully");
 
@@ -197,7 +183,11 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
                 <FormItem>
                   <FormLabel>Student ID (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter student ID" {...field} value={field.value || ""} />
+                    <Input
+                      placeholder="Enter student ID"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,7 +200,11 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
                 <FormItem>
                   <FormLabel>Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter student name" {...field} value={field.value || ""} />
+                    <Input
+                      placeholder="Enter student name"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -223,7 +217,11 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
                 <FormItem>
                   <FormLabel>Father&apos;s Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter father's name" {...field} value={field.value || ""} />
+                    <Input
+                      placeholder="Enter father's name"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -258,7 +256,11 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
                 <FormItem>
                   <FormLabel>Phone (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter phone number" {...field} value={field.value || ""} />
+                    <Input
+                      placeholder="Enter phone number"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -271,95 +273,13 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
                 <FormItem>
                   <FormLabel>Email (optional)</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Enter email" {...field} value={field.value || ""} />
+                    <Input
+                      type="email"
+                      placeholder="Enter email"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="classId"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Class *</FormLabel>
-                  <Popover open={classOpen} onOpenChange={setClassOpen}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={classOpen}
-                          className="w-full justify-between"
-                        >
-                          {field.value
-                            ? classes.find((classItem) => classItem.id === field.value)?.name || "Select class..."
-                            : "Select class..."}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0 shadow-lg border-0" align="start">
-                      <Command className="rounded-lg">
-                        <CommandInput
-                          placeholder="Search classes..."
-                          className="h-11 border-0 shadow-none focus:ring-0"
-                        />
-                        <CommandList className="max-h-64">
-                          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-                            No class found.
-                          </CommandEmpty>
-                          <CommandGroup className="p-2">
-                            {classes.map((classItem) => (
-                              <CommandItem
-                                key={classItem.id}
-                                value={`${classItem.name} ${classItem.teacher} ${classItem.time}`}
-                                onSelect={() => {
-                                  field.onChange(classItem.id);
-                                  setClassOpen(false);
-                                }}
-                                className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                              >
-                                <Check
-                                  className={cn(
-                                    "mt-0.5 h-4 w-4 shrink-0",
-                                    field.value === classItem.id ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div className="flex flex-col gap-2 min-w-0 flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-semibold text-foreground truncate">
-                                      {classItem.name}
-                                    </span>
-                                    <span className="text-sm text-muted-foreground shrink-0">
-                                      by
-                                    </span>
-                                    <span className="font-medium text-foreground truncate">
-                                      {classItem.teacher}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                    <div className="flex items-center gap-1.5">
-                                      <Clock className="h-3.5 w-3.5" />
-                                      <span>{classItem.time}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <Calendar className="h-3.5 w-3.5" />
-                                      <span>
-                                        {new Date(classItem.startDate).toLocaleDateString()}
-                                        {classItem.endDate && ` - ${new Date(classItem.endDate).toLocaleDateString()}`}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
@@ -401,8 +321,14 @@ export default function EditStudentModal({ student, isOpen, onClose, onSuccess }
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
-                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="cursor-pointer"
+              >
+                {isSubmitting && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
                 {isSubmitting ? "Updating..." : "Update Student"}
               </Button>
             </div>

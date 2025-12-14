@@ -20,11 +20,22 @@ import {
   Target,
   RefreshCw,
   ChevronRight,
-  Plus
+  Plus,
 } from "lucide-react";
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Area,
+  AreaChart,
+} from "recharts";
 import type { Student, Attendance, Class } from "@/lib/schema";
 import { Loader } from "@/components/loader";
 import { format, subDays, eachDayOfInterval } from "date-fns";
@@ -43,7 +54,6 @@ interface Stats {
   lateToday: number;
 }
 
-
 export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [lastRefresh, setLastRefresh] = useState(new Date());
@@ -54,7 +64,11 @@ export default function Dashboard() {
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery<Stats>({
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useQuery<Stats>({
     queryKey: ["/api/stats"],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
@@ -82,68 +96,101 @@ export default function Dashboard() {
   // Calculate attendance trends for the last 7 days
   const attendanceTrends = eachDayOfInterval({
     start: subDays(new Date(), 6),
-    end: new Date()
-  }).map(date => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const dayAttendance = allAttendance.filter(a => a.date === dateStr);
-    const present = dayAttendance.filter(a => a.status === 'present').length;
+    end: new Date(),
+  }).map((date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const dayAttendance = allAttendance.filter((a) => a.date === dateStr);
+    const present = dayAttendance.filter((a) => a.status === "present").length;
     const total = dayAttendance.length;
     const rate = total > 0 ? (present / total) * 100 : 0;
 
     return {
-      date: format(date, 'MMM dd'),
+      date: format(date, "MMM dd"),
       attendance: Math.round(rate),
       present,
-      total
+      total,
     };
   });
 
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const today = format(new Date(), "yyyy-MM-dd");
   const todayAttendance = allAttendance.filter((a) => a.date === today);
 
   // Sort by recordedAt descending to show most recent first
-  const sortedTodayAttendance = todayAttendance.sort((a, b) =>
-    new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
+  const sortedTodayAttendance = todayAttendance.sort(
+    (a, b) =>
+      new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
   );
 
   const recentActivity = sortedTodayAttendance.slice(0, 8).map((att) => {
     const student = students.find((s) => s.id === att.studentId);
-    const studentClass = classes.find((c) => c.id === student?.classId);
+    const studentClass = classes.find((c) => c.id === att.classId);
     return {
       id: att.id,
       student,
       name: student?.name || "Unknown Student",
       avatar: student?.avatar || null,
       status: att.status as "present" | "absent" | "late",
-      time: format(new Date(att.recordedAt), 'h:mm a'),
+      time: format(new Date(att.recordedAt), "h:mm a"),
       class: studentClass?.name || "Unknown Class",
     };
   });
 
   const attendanceDistribution = [
-    { name: 'Present', value: stats?.presentToday || 0, color: '#00C49F' },
-    { name: 'Late', value: stats?.lateToday || 0, color: '#FFBB28' },
-    { name: 'Absent', value: stats?.absentToday || 0, color: '#FF8042' },
+    { name: "Present", value: stats?.presentToday || 0, color: "#00C49F" },
+    { name: "Late", value: stats?.lateToday || 0, color: "#FFBB28" },
+    { name: "Absent", value: stats?.absentToday || 0, color: "#FF8042" },
   ];
 
   // Calculate dynamic trends
   const todayRate = attendanceTrends[6]?.attendance || 0;
   const yesterdayRate = attendanceTrends[5]?.attendance || 0;
   const todayTrend = todayRate - yesterdayRate;
-  const todayTrendText = todayTrend > 0 ? `+${todayTrend.toFixed(1)}%` : todayTrend < 0 ? `${todayTrend.toFixed(1)}%` : '0.0%';
-  const todayTrendColor = todayTrend > 0 ? 'text-green-500' : todayTrend < 0 ? 'text-red-500' : 'text-muted-foreground';
+  const todayTrendText =
+    todayTrend > 0
+      ? `+${todayTrend.toFixed(1)}%`
+      : todayTrend < 0
+      ? `${todayTrend.toFixed(1)}%`
+      : "0.0%";
+  const todayTrendColor =
+    todayTrend > 0
+      ? "text-green-500"
+      : todayTrend < 0
+      ? "text-red-500"
+      : "text-muted-foreground";
 
   // For week trend, compare first half vs second half of the week
-  const weekFirstHalf = attendanceTrends.slice(0, 3).reduce((sum, d) => sum + d.attendance, 0) / 3;
-  const weekSecondHalf = attendanceTrends.slice(3, 7).reduce((sum, d) => sum + d.attendance, 0) / 4;
+  const weekFirstHalf =
+    attendanceTrends.slice(0, 3).reduce((sum, d) => sum + d.attendance, 0) / 3;
+  const weekSecondHalf =
+    attendanceTrends.slice(3, 7).reduce((sum, d) => sum + d.attendance, 0) / 4;
   const weekTrend = weekSecondHalf - weekFirstHalf;
-  const weekTrendText = weekTrend > 0 ? `+${weekTrend.toFixed(1)}%` : weekTrend < 0 ? `${weekTrend.toFixed(1)}%` : '0.0%';
-  const weekTrendColor = weekTrend > 0 ? 'text-green-500' : weekTrend < 0 ? 'text-red-500' : 'text-muted-foreground';
-  const weekTrendRotation = weekTrend < 0 ? 'rotate-180' : '';
+  const weekTrendText =
+    weekTrend > 0
+      ? `+${weekTrend.toFixed(1)}%`
+      : weekTrend < 0
+      ? `${weekTrend.toFixed(1)}%`
+      : "0.0%";
+  const weekTrendColor =
+    weekTrend > 0
+      ? "text-green-500"
+      : weekTrend < 0
+      ? "text-red-500"
+      : "text-muted-foreground";
+  const weekTrendRotation = weekTrend < 0 ? "rotate-180" : "";
 
   // Dynamic card backgrounds based on trends
-  const todayCardBg = todayTrend > 0 ? 'from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/20' : todayTrend < 0 ? 'from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/20' : 'from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/20';
-  const weekCardBg = weekTrend > 0 ? 'from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/20' : weekTrend < 0 ? 'from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/20' : 'from-yellow-50 to-yellow-100/50 dark:from-yellow-950/50 dark:to-yellow-900/20';
+  const todayCardBg =
+    todayTrend > 0
+      ? "from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/20"
+      : todayTrend < 0
+      ? "from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/20"
+      : "from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/20";
+  const weekCardBg =
+    weekTrend > 0
+      ? "from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/20"
+      : weekTrend < 0
+      ? "from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/20"
+      : "from-yellow-50 to-yellow-100/50 dark:from-yellow-950/50 dark:to-yellow-900/20";
 
   const getInitials = (name: string) => {
     return name
@@ -181,14 +228,18 @@ export default function Dashboard() {
       await queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/students"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
 
       toast.success("Student deleted successfully");
 
       setIsDeleteModalOpen(false);
       setSelectedStudent(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete student");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete student"
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -220,10 +271,11 @@ export default function Dashboard() {
                 {getGreeting()}! 👋
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground max-w-md">
-                Welcome to your attendance dashboard. Here's what's happening today.
+                Welcome to your attendance dashboard. Here's what's happening
+                today.
               </p>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
-                <span>Last updated: {format(lastRefresh, 'HH:mm')}</span>
+                <span>Last updated: {format(lastRefresh, "HH:mm")}</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -237,13 +289,20 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <Button asChild className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer w-full sm:w-auto">
+              <Button
+                asChild
+                className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer w-full sm:w-auto"
+              >
                 <Link href="/attendance">
                   <Plus className="h-4 w-4 mr-2" />
                   Quick Attendance
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="shadow-sm cursor-pointer w-full sm:w-auto">
+              <Button
+                asChild
+                variant="outline"
+                className="shadow-sm cursor-pointer w-full sm:w-auto"
+              >
                 <Link href="/reports">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   View Reports
@@ -264,9 +323,15 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Students</p>
-                <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{stats?.totalStudents || 0}</p>
-                <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-1">Across all classes</p>
+                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                  Total Students
+                </p>
+                <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">
+                  {stats?.totalStudents || 0}
+                </p>
+                <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-1">
+                  Across all classes
+                </p>
               </div>
               <div className="h-12 w-12 bg-blue-500/20 rounded-full flex items-center justify-center">
                 <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -278,15 +343,28 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className={`relative overflow-hidden border-0 shadow-lg bg-linear-to-br ${todayCardBg}`}>
+        <Card
+          className={`relative overflow-hidden border-0 shadow-lg bg-linear-to-br ${todayCardBg}`}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600 dark:text-green-400">Today's Attendance</p>
-                <p className="text-3xl font-bold text-green-900 dark:text-green-100">{stats?.todayAttendanceRate || 0}%</p>
+                <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                  Today's Attendance
+                </p>
+                <p className="text-3xl font-bold text-green-900 dark:text-green-100">
+                  {stats?.todayAttendanceRate || 0}%
+                </p>
                 <div className="flex items-center gap-1 mt-1">
                   <TrendingUp className={`h-3 w-3 ${todayTrendColor}`} />
-                  <span className={`text-xs ${todayTrendColor} dark:${todayTrendColor.replace('text-', '')}`}>{todayTrendText} from yesterday</span>
+                  <span
+                    className={`text-xs ${todayTrendColor} dark:${todayTrendColor.replace(
+                      "text-",
+                      ""
+                    )}`}
+                  >
+                    {todayTrendText} from yesterday
+                  </span>
                 </div>
               </div>
               <div className="h-12 w-12 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -294,20 +372,38 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="mt-4">
-              <Progress value={parseFloat(stats?.todayAttendanceRate || '0')} className="h-1" />
+              <Progress
+                value={parseFloat(stats?.todayAttendanceRate || "0")}
+                className="h-1"
+              />
             </div>
           </CardContent>
         </Card>
 
-        <Card className={`relative overflow-hidden border-0 shadow-lg bg-linear-to-br ${weekCardBg}`}>
+        <Card
+          className={`relative overflow-hidden border-0 shadow-lg bg-linear-to-br ${weekCardBg}`}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">This Week</p>
-                <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-100">{stats?.weekAttendanceRate || 0}%</p>
+                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                  This Week
+                </p>
+                <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-100">
+                  {stats?.weekAttendanceRate || 0}%
+                </p>
                 <div className="flex items-center gap-1 mt-1">
-                  <TrendingUp className={`h-3 w-3 ${weekTrendColor} ${weekTrendRotation}`} />
-                  <span className={`text-xs ${weekTrendColor} dark:${weekTrendColor.replace('text-', '')}`}>{weekTrendText} from last week</span>
+                  <TrendingUp
+                    className={`h-3 w-3 ${weekTrendColor} ${weekTrendRotation}`}
+                  />
+                  <span
+                    className={`text-xs ${weekTrendColor} dark:${weekTrendColor.replace(
+                      "text-",
+                      ""
+                    )}`}
+                  >
+                    {weekTrendText} from last week
+                  </span>
                 </div>
               </div>
               <div className="h-12 w-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
@@ -315,7 +411,10 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="mt-4">
-              <Progress value={parseFloat(stats?.weekAttendanceRate || '0')} className="h-1" />
+              <Progress
+                value={parseFloat(stats?.weekAttendanceRate || "0")}
+                className="h-1"
+              />
             </div>
           </CardContent>
         </Card>
@@ -324,16 +423,28 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600 dark:text-red-400">Absent Today</p>
-                <p className="text-3xl font-bold text-red-900 dark:text-red-100">{stats?.absentToday || 0}</p>
-                <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">Students marked absent</p>
+                <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                  Absent Today
+                </p>
+                <p className="text-3xl font-bold text-red-900 dark:text-red-100">
+                  {stats?.absentToday || 0}
+                </p>
+                <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">
+                  Students marked absent
+                </p>
               </div>
               <div className="h-12 w-12 bg-red-500/20 rounded-full flex items-center justify-center">
                 <UserX className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
             <div className="mt-4">
-              <Progress value={((stats?.absentToday || 0) / (stats?.totalStudents || 1)) * 100} className="h-1" />
+              <Progress
+                value={
+                  ((stats?.absentToday || 0) / (stats?.totalStudents || 1)) *
+                  100
+                }
+                className="h-1"
+              />
             </div>
           </CardContent>
         </Card>
@@ -350,9 +461,14 @@ export default function Dashboard() {
                   <BarChart3 className="h-5 w-5 text-primary shrink-0" />
                   <span className="truncate">Attendance Trends</span>
                 </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Last 7 days performance</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Last 7 days performance
+                </p>
               </div>
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 w-fit">
+              <Badge
+                variant="secondary"
+                className="bg-primary/10 text-primary border-primary/20 w-fit"
+              >
                 Live Data
               </Badge>
             </div>
@@ -362,9 +478,15 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300} minWidth={300}>
                 <AreaChart data={attendanceTrends}>
                   <defs>
-                    <linearGradient id="attendanceGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0088FE" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#0088FE" stopOpacity={0}/>
+                    <linearGradient
+                      id="attendanceGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#0088FE" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#0088FE" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -372,9 +494,9 @@ export default function Dashboard() {
                   <YAxis className="text-xs" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--background))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      backgroundColor: "hsl(var(--background))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
                     }}
                   />
                   <Area
@@ -398,7 +520,9 @@ export default function Dashboard() {
               <Activity className="h-5 w-5 text-primary shrink-0" />
               <span className="truncate">Today's Distribution</span>
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Present vs Absent breakdown</p>
+            <p className="text-sm text-muted-foreground">
+              Present vs Absent breakdown
+            </p>
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
             <div className="w-full">
@@ -428,8 +552,12 @@ export default function Dashboard() {
                     className="w-3 h-3 rounded-full shrink-0"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-sm font-medium truncate">{item.name}</span>
-                  <span className="text-sm text-muted-foreground">{item.value}</span>
+                  <span className="text-sm font-medium truncate">
+                    {item.name}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {item.value}
+                  </span>
                 </div>
               ))}
             </div>
@@ -448,7 +576,9 @@ export default function Dashboard() {
                   <Clock className="h-5 w-5 text-primary shrink-0" />
                   <span className="truncate">Recent Activity</span>
                 </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Today's attendance records</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Today's attendance records
+                </p>
               </div>
               <Button variant="ghost" size="sm" asChild className="w-fit">
                 <Link href="/attendance" className="flex items-center gap-1">
@@ -462,8 +592,12 @@ export default function Dashboard() {
             {recentActivity.length === 0 ? (
               <div className="text-center py-8">
                 <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">No recent activity</p>
-                <p className="text-xs text-muted-foreground mt-1">attendance records will appear here</p>
+                <p className="text-sm text-muted-foreground">
+                  No recent activity
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  attendance records will appear here
+                </p>
               </div>
             ) : (
               recentActivity.map((activity) => (
@@ -488,8 +622,12 @@ export default function Dashboard() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate text-sm sm:text-base">{activity.name}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{activity.class}</p>
+                    <p className="font-semibold truncate text-sm sm:text-base">
+                      {activity.name}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                      {activity.class}
+                    </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 sm:gap-2 shrink-0">
                     <AttendanceBadge status={activity.status} />
@@ -513,43 +651,69 @@ export default function Dashboard() {
                 <Zap className="h-5 w-5 text-primary shrink-0" />
                 <span className="truncate">Quick Actions</span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">Common tasks and shortcuts</p>
+              <p className="text-sm text-muted-foreground">
+                Common tasks and shortcuts
+              </p>
             </CardHeader>
             <CardContent className="space-y-3 px-4 sm:px-6">
-              <Button asChild variant="outline" className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <Link href="/attendance" className="flex items-center gap-3">
                   <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                     <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-secondary-foreground" />
                   </div>
                   <div className="text-left min-w-0 flex-1">
-                    <p className="font-semibold text-sm sm:text-base truncate">Take Attendance</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Mark students present or absent</p>
+                    <p className="font-semibold text-sm sm:text-base truncate">
+                      Take Attendance
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                      Mark students present or absent
+                    </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <Link href="/students" className="flex items-center gap-3">
                   <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                     <Users className="h-4 w-4 sm:h-5 sm:w-5 text-secondary-foreground" />
                   </div>
                   <div className="text-left min-w-0 flex-1">
-                    <p className="font-semibold text-sm sm:text-base truncate">Manage Students</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Add or edit student information</p>
+                    <p className="font-semibold text-sm sm:text-base truncate">
+                      Manage Students
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                      Add or edit student information
+                    </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <Link href="/reports" className="flex items-center gap-3">
                   <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                     <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-secondary-foreground" />
                   </div>
                   <div className="text-left min-w-0 flex-1">
-                    <p className="font-semibold text-sm sm:text-base truncate">View Reports</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Generate detailed attendance reports</p>
+                    <p className="font-semibold text-sm sm:text-base truncate">
+                      View Reports
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                      Generate detailed attendance reports
+                    </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
                 </Link>
@@ -568,14 +732,20 @@ export default function Dashboard() {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Database</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                >
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Connected
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">API Services</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                >
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Online
                 </Badge>
@@ -583,7 +753,10 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <span className="text-sm">Version</span>
                 <span className="text-sm text-muted-foreground">
-                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                  >
                     1.0.0
                   </Badge>
                 </span>
