@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Student, Class, Attendance } from "@/lib/schema";
+import type { Student, Class, Attendance, StudentClass } from "@/lib/schema";
 import {
   User,
   Mail,
@@ -112,7 +112,7 @@ function DeleteStudentModal({
   return (
     <>
       <Button onClick={() => setIsOpen(true)} variant="destructive" size="sm">
-        <Trash2/>
+        <Trash2 />
       </Button>
       <DeleteConfirmationModal
         isOpen={isOpen}
@@ -142,6 +142,11 @@ export default function StudentDetailsModal({
     queryKey: ["/api/classes"],
   });
 
+  const { data: studentClasses = [] } = useQuery<StudentClass[]>({
+    queryKey: ["/api/student-classes"],
+    enabled: !!student?.id && isOpen,
+  });
+
   const { data: attendance = [] } = useQuery<Attendance[]>({
     queryKey: ["/api/attendance", student?.id],
     queryFn: async () => {
@@ -152,6 +157,10 @@ export default function StudentDetailsModal({
     },
     enabled: !!student?.id && isOpen,
   });
+
+  const studentClassesForStudent = student
+    ? studentClasses.filter((sc: StudentClass) => sc.studentId === student.id)
+    : [];
 
   const getClassName = (classId: string) => {
     const cls = classes.find((c) => c.id === classId);
@@ -250,7 +259,7 @@ export default function StudentDetailsModal({
                   variant="outline"
                   size="sm"
                 >
-                  <Edit/>
+                  <Edit />
                 </Button>
               )}
               <DeleteStudentModal
@@ -326,7 +335,11 @@ export default function StudentDetailsModal({
                         Class
                       </p>
                       <p className="font-semibold">
-                        {getClassName(student.classId)}
+                        {studentClassesForStudent.length > 0
+                          ? studentClassesForStudent
+                              .map((sc) => getClassName(sc.classId))
+                              .join(", ")
+                          : "No classes assigned"}
                       </p>
                     </div>
                   </div>

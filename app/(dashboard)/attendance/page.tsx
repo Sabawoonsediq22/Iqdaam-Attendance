@@ -60,9 +60,14 @@ function AttendancePageContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
 
-  const { data: classes = [] } = useQuery<Class[]>({
+  const { data: allClasses = [] } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
   });
+
+  // Filter out completed and upgraded classes
+  const classes = allClasses.filter(
+    (cls) => cls.status !== "completed" && cls.status !== "upgraded"
+  );
 
   // Auto-select class from URL parameter
   useEffect(() => {
@@ -71,6 +76,9 @@ function AttendancePageContent() {
       const classExists = classes.find((cls) => cls.id === classIdFromUrl);
       if (classExists) {
         setSelectedClass(classIdFromUrl);
+      } else {
+        // If the class is completed/upgraded, clear the selection
+        setSelectedClass("");
       }
     }
   }, [searchParams, classes]);
@@ -285,6 +293,7 @@ function AttendancePageContent() {
 
       queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/student-classes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({
@@ -440,6 +449,9 @@ function AttendancePageContent() {
                       });
                       queryClient.invalidateQueries({
                         queryKey: ["/api/students"],
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: ["/api/student-classes"],
                       });
                       queryClient.invalidateQueries({
                         queryKey: ["/api/attendance"],

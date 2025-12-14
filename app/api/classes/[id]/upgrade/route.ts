@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { classes, students } from "@/lib/schema";
+import { classes, studentClasses } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { createNotification, notificationTemplates } from "@/lib/notifications";
 
@@ -20,14 +20,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { newClassData } = body;
-
-    if (!newClassData) {
-      return NextResponse.json(
-        { error: "newClassData is required" },
-        { status: 400 }
-      );
-    }
+    const { newClassData, createOnly, promoteToClassId } = body;
 
     // Check if current class exists and is completed
     const currentClass = await db
@@ -47,46 +40,134 @@ export async function POST(
       );
     }
 
-    // Create the new class
-    const newClass = await db
-      .insert(classes)
-      .values({
-        ...newClassData,
-        status: "active", // New classes start as active
-      })
-      .returning();
+    if (newClassData) {
+      // Create new class
+      const newClass = await db
+        .insert(classes)
+        .values({
+          ...newClassData,
+          status: "active",
+        })
+        .returning();
 
-    if (newClass.length === 0) {
+      if (newClass.length === 0) {
+        return NextResponse.json(
+          { error: "Failed to create new class" },
+          { status: 500 }
+        );
+      }
+
+      if (!createOnly) {
+        // Get students enrolled in the original class
+        const enrolledStudents = await db
+          .select({ studentId: studentClasses.studentId })
+          .from(studentClasses)
+          .where(eq(studentClasses.classId, id));
+
+        // Enroll them in the new class
+        if (enrolledStudents.length > 0) {
+          const newEnrollments = enrolledStudents.map(({ studentId }) => ({
+            studentId,
+            classId: newClass[0].id,
+          }));
+
+          await db.insert(studentClasses).values(newEnrollments);
+        }
+
+        // Update the original class status to 'upgraded'
+        await db
+          .update(classes)
+          .set({ status: "upgraded" })
+          .where(eq(classes.id, id));
+
+        try {
+          await createNotification({
+            ...notificationTemplates.classUpgraded(
+              currentClass[0].name,
+              newClass[0].name,
+              session.user.name
+            ),
+            entityId: id,
+          });
+        } catch (error) {
+          console.error(
+            "Failed to create notification for class upgrade:",
+            error
+          );
+        }
+
+        return NextResponse.json({
+          message: `Created ${newClass[0].name} and moved students from ${currentClass[0].name}`,
+          newClass: newClass[0],
+        });
+      } else {
+        return NextResponse.json({
+          newClass: newClass[0],
+        });
+      }
+    } else if (promoteToClassId) {
+      // Check target class exists
+      const targetClass = await db
+        .select()
+        .from(classes)
+        .where(eq(classes.id, promoteToClassId))
+        .limit(1);
+
+      if (targetClass.length === 0) {
+        return NextResponse.json(
+          { error: "Target class not found" },
+          { status: 404 }
+        );
+      }
+
+      // Get students enrolled in the original class
+      const enrolledStudents = await db
+        .select({ studentId: studentClasses.studentId })
+        .from(studentClasses)
+        .where(eq(studentClasses.classId, id));
+
+      // Enroll them in the target class
+      if (enrolledStudents.length > 0) {
+        const newEnrollments = enrolledStudents.map(({ studentId }) => ({
+          studentId,
+          classId: promoteToClassId,
+        }));
+
+        await db.insert(studentClasses).values(newEnrollments);
+      }
+
+      // Update the original class status to 'upgraded'
+      await db
+        .update(classes)
+        .set({ status: "upgraded" })
+        .where(eq(classes.id, id));
+
+      // Create notification
+      try {
+        await createNotification({
+          ...notificationTemplates.classUpgraded(
+            currentClass[0].name,
+            targetClass[0].name,
+            session.user.name
+          ),
+          entityId: id,
+        });
+      } catch (error) {
+        console.error(
+          "Failed to create notification for class upgrade:",
+          error
+        );
+      }
+
+      return NextResponse.json({
+        message: `Students promoted to ${targetClass[0].name}`,
+      });
+    } else {
       return NextResponse.json(
-        { error: "Failed to create new class" },
-        { status: 500 }
+        { error: "Either newClassData or promoteToClassId is required" },
+        { status: 400 }
       );
     }
-
-    // Move all students from current class to new class
-    await db
-      .update(students)
-      .set({ classId: newClass[0].id })
-      .where(eq(students.classId, id));
-
-    // Create notification
-    try {
-      await createNotification({
-        ...notificationTemplates.classUpgraded(
-          currentClass[0].name,
-          newClass[0].name,
-          session.user.name
-        ),
-        entityId: id,
-      });
-    } catch (error) {
-      console.error("Failed to create notification for class upgrade:", error);
-    }
-
-    return NextResponse.json({
-      message: `Created ${newClass[0].name} and moved students from ${currentClass[0].name}`,
-      newClass: newClass[0],
-    });
   } catch (error) {
     console.error("Upgrade class error:", error);
     return NextResponse.json(

@@ -19,7 +19,7 @@ import {
   Loader2,
   CheckCircle,
 } from "lucide-react";
-import type { Class, Student } from "@/lib/schema";
+import type { Class, StudentClass } from "@/lib/schema";
 import { Input } from "./ui/input";
 import { useState, useMemo, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -116,14 +116,14 @@ const getMonthRange = (
 // View Details Modal Component
 function ViewDetailsModal({
   cls,
-  students,
+  studentClasses,
 }: {
   cls: Class;
-  students: Student[];
+  studentClasses: StudentClass[];
 }) {
   const [open, setOpen] = useState(false);
-  const studentCount = (students || []).filter(
-    (s) => s.classId === cls.id
+  const studentCount = (studentClasses || []).filter(
+    (sc) => sc.classId === cls.id
   ).length;
 
   return (
@@ -908,28 +908,34 @@ const useClassFilters = (classes: Class[] | undefined) => {
 // Class Card Component
 function ClassCard({
   cls,
-  students,
+  studentClasses,
   onClassChange,
 }: {
   cls: Class;
-  students: Student[];
+  studentClasses: StudentClass[];
   onClassChange: () => void;
 }) {
   const router = useRouter();
-  const studentCount = (students || []).filter(
-    (s) => s.classId === cls.id
+  const studentCount = (studentClasses || []).filter(
+    (sc) => sc.classId === cls.id
   ).length;
 
+  const isCompleted = cls.status === "completed";
+  const isUpgraded = cls.status === "upgraded";
+
   const handleTakeAttendance = () => {
+    if (isCompleted || isUpgraded) return;
     router.push(`/attendance?classId=${cls.id}`);
   };
-
-  const isCompleted = cls.status === "completed";
 
   return (
     <Card
       className={`relative overflow-hidden border-2 shadow-lg bg-linear-to-br from-card via-card/95 to-card/90 hover:shadow-xl group ${
-        isCompleted ? "border-green-500/50" : ""
+        isUpgraded
+          ? "border-blue-500/50"
+          : isCompleted
+          ? "border-green-500/50"
+          : ""
       }`}
     >
       {/* Subtle background gradient */}
@@ -957,14 +963,21 @@ function ClassCard({
                   >
                     {studentCount} student{studentCount !== 1 ? "s" : ""}
                   </Badge>
-                  {isCompleted && (
+                  {isUpgraded ? (
+                    <Badge
+                      variant="secondary"
+                      className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 border-blue-300"
+                    >
+                      Upgraded
+                    </Badge>
+                  ) : isCompleted ? (
                     <Badge
                       variant="secondary"
                       className="text-xs px-2 py-0.5 bg-green-100 text-green-800 border-green-300"
                     >
                       Completed
                     </Badge>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -983,10 +996,14 @@ function ClassCard({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <ViewDetailsModal cls={cls} students={students} />
-                  <EditClassModal cls={cls} onSuccess={onClassChange} />
-                  <AddStudentModal cls={cls} onSuccess={onClassChange} />
-                  {isCompleted && (
+                  <ViewDetailsModal cls={cls} studentClasses={studentClasses} />
+                  {!isUpgraded && (
+                    <EditClassModal cls={cls} onSuccess={onClassChange} />
+                  )}
+                  {!isUpgraded && (
+                    <AddStudentModal cls={cls} onSuccess={onClassChange} />
+                  )}
+                  {isCompleted && !isUpgraded && (
                     <UpgradeClassModal cls={cls} onSuccess={onClassChange} />
                   )}
                   <DeleteClassModal cls={cls} onSuccess={onClassChange} />
@@ -1037,9 +1054,12 @@ function ClassCard({
             size="sm"
             className="w-full h-10 bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
             onClick={handleTakeAttendance}
+            disabled={isCompleted || isUpgraded}
           >
             <CheckCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-            Take Attendance
+            {isCompleted || isUpgraded
+              ? "Attendance Disabled"
+              : "Take Attendance"}
           </Button>
         </div>
       </CardContent>
@@ -1124,10 +1144,11 @@ export default function ClassesClient() {
     },
   });
 
-  const { data: students = [] } = useQuery<Student[]>({
-    queryKey: ["/api/students"],
+  const { data: studentClasses = [] } = useQuery<StudentClass[]>({
+    queryKey: ["/api/student-classes"],
     queryFn: async () => {
-      const res = await fetch("/api/students", { cache: "no-store" });
+      const res = await fetch("/api/student-classes", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch student classes");
       return res.json();
     },
   });
@@ -1136,13 +1157,15 @@ export default function ClassesClient() {
   const queryClient = useQueryClient();
 
   const handleClassChange = () => {
-    // Invalidate and refetch classes data
+    // Invalidate and refetch classes and studentClasses data
     queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/student-classes"] });
   };
 
   const handleClassAdded = () => {
-    // Invalidate and refetch classes data
+    // Invalidate and refetch classes and studentClasses data
     queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/student-classes"] });
   };
 
   return (
@@ -1166,7 +1189,7 @@ export default function ClassesClient() {
               <ClassCard
                 key={cls.id}
                 cls={cls}
-                students={students}
+                studentClasses={studentClasses}
                 onClassChange={handleClassChange}
               />
             ))}

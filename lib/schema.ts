@@ -11,6 +11,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Relationships: Many-to-many with students via studentClasses, one-to-many with attendance
 export const classes = pgTable("classes", {
   id: varchar("id")
     .primaryKey()
@@ -20,13 +21,14 @@ export const classes = pgTable("classes", {
   time: text("time").notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
-  status: text("status").notNull().default("active"), // 'active', 'completed', 'cancelled'
+  status: text("status").notNull().default("active"), // 'active', 'completed', 'upgraded', 'cancelled'
   description: text("description"),
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql`now()`),
 });
 
+// Relationships: Many-to-many with classes via studentClasses, one-to-many with attendance
 export const students = pgTable("students", {
   id: varchar("id")
     .primaryKey()
@@ -38,11 +40,34 @@ export const students = pgTable("students", {
   gender: text("gender").notNull(),
   email: text("email"),
   avatar: text("avatar"),
-  classId: varchar("class_id")
-    .notNull()
-    .references(() => classes.id, { onDelete: "cascade" }),
 });
 
+// Relationships: Junction table for many-to-many between students and classes
+export const studentClasses = pgTable(
+  "student_classes",
+  {
+    id: varchar("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    studentId: varchar("student_id")
+      .notNull()
+      .references(() => students.id, { onDelete: "cascade" }),
+    classId: varchar("class_id")
+      .notNull()
+      .references(() => classes.id, { onDelete: "cascade" }),
+    enrolledAt: timestamp("enrolled_at")
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => ({
+    uniqueStudentClass: unique("unique_student_class").on(
+      table.studentId,
+      table.classId
+    ),
+  })
+);
+
+// Relationships: Many-to-one with students, many-to-one with classes
 export const attendance = pgTable(
   "attendance",
   {
@@ -76,6 +101,7 @@ export const attendance = pgTable(
   })
 );
 
+// Relationships: One-to-many with reportAttendance, generatedBy references users.id
 export const reports = pgTable("reports", {
   id: varchar("id")
     .primaryKey()
@@ -94,7 +120,7 @@ export const reports = pgTable("reports", {
     .default(sql`now()`),
 });
 
-// Many-to-many relationship between reports and attendance
+// Relationships: Junction table for many-to-many between reports and attendance
 export const reportAttendance = pgTable("report_attendance", {
   id: varchar("id")
     .primaryKey()
@@ -108,6 +134,7 @@ export const reportAttendance = pgTable("report_attendance", {
   notes: text("notes"),
 });
 
+// Relationships: One-to-many with userPreferences, referenced by reports.generatedBy, notifications.userId
 export const users = pgTable("users", {
   id: varchar("id")
     .primaryKey()
@@ -123,6 +150,7 @@ export const users = pgTable("users", {
     .default(sql`now()`),
 });
 
+// Relationships: Many-to-one with users (userId), entityId references various entities
 export const notifications = pgTable("notifications", {
   id: varchar("id")
     .primaryKey()
@@ -141,6 +169,7 @@ export const notifications = pgTable("notifications", {
   userId: varchar("user_id"), // For future multi-user support
 });
 
+// Relationships: References users.email (not foreign key)
 export const passwordResetCodes = pgTable("password_reset_codes", {
   id: varchar("id")
     .primaryKey()
@@ -154,6 +183,7 @@ export const passwordResetCodes = pgTable("password_reset_codes", {
     .default(sql`now()`),
 });
 
+// Relationships: Many-to-one with users
 export const userPreferences = pgTable("user_preferences", {
   id: varchar("id")
     .primaryKey()
@@ -188,6 +218,13 @@ export const insertStudentSchema = createInsertSchema(students, {
 }).omit({
   id: true,
 });
+
+export const insertStudentClassSchema = createInsertSchema(studentClasses).omit(
+  {
+    id: true,
+    enrolledAt: true,
+  }
+);
 
 export const insertAttendanceSchema = createInsertSchema(attendance).omit({
   id: true,
@@ -233,6 +270,11 @@ export const insertUserPreferencesSchema = createInsertSchema(
   updatedAt: true,
 });
 
+// Combined schema for creating students with class assignment
+export const insertStudentWithClassSchema = insertStudentSchema.extend({
+  classId: z.string().min(1, "Class selection is required"),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -241,6 +283,13 @@ export type Class = typeof classes.$inferSelect;
 
 export type InsertStudent = z.infer<typeof insertStudentSchema>;
 export type Student = typeof students.$inferSelect;
+
+export type InsertStudentWithClass = z.infer<
+  typeof insertStudentWithClassSchema
+>;
+
+export type InsertStudentClass = z.infer<typeof insertStudentClassSchema>;
+export type StudentClass = typeof studentClasses.$inferSelect;
 
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 export type Attendance = typeof attendance.$inferSelect;
