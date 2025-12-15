@@ -136,35 +136,35 @@ export default function FeesPage() {
               onClick={() => setIsAddModalOpen(true)}
               className="cursor-pointer"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Fee
+              <Plus className="h-4 w-4" />
+              <span>Add Fee</span>
             </Button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <Card>
+            <Card className="border-blue-200 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Total Fees
                 </CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground" />
+                <Coins className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {totalFees.toFixed(2)}؋
+                <div className="text-2xl font-bold text-blue-700">
+                  {totalFees.toFixed(2)} ؋
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-green-200 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Total Paid
                 </CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground" />
+                <Coins className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {totalPaid.toFixed(2)}؋
+                <div className="text-2xl font-bold text-green-700">
+                  {totalPaid.toFixed(2)} ؋
                 </div>
               </CardContent>
             </Card>
@@ -181,13 +181,13 @@ export default function FeesPage() {
                     totalUnpaid > 0 ? "text-red-600" : ""
                   }`}
                 >
-                  {totalUnpaid.toFixed(2)}؋
+                  {totalUnpaid.toFixed(2)} ؋
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex gap-3 sm:gap-6 items-center">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -197,58 +197,70 @@ export default function FeesPage() {
                 className="pl-10"
               />
             </div>
-            <MonthFilter value={selectedMonth} onChange={setSelectedMonth} />
-            <Badge variant="secondary">Total {filteredFees.length} fees</Badge>
+            <div className="flex items-center">
+              <MonthFilter value={selectedMonth} onChange={setSelectedMonth} />
+            </div>
           </div>
 
+          <div className="text-end mr-2">
+            <Badge variant="secondary">Total {filteredFees.length} fees</Badge>
+          </div>
           <div className="space-y-4">
             {filteredFees.map((fee) => (
-              <Card key={fee.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{fee.studentName}</h3>
-                        <Badge variant="outline">{fee.className}</Badge>
+              <Card key={fee.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 sm:p-6 relative">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-base sm:text-lg">
+                            {fee.studentName}
+                          </h3>
+                          <Badge
+                            variant="outline"
+                            className="self-start text-xs"
+                          >
+                            {fee.className}
+                          </Badge>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditFee(fee)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4" />
+                          <p className="hidden sm:block">Edit</p>
+                        </Button>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         Father: {fee.fatherName} | Teacher: {fee.teacherName}
                       </p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span>Fee: {fee.feeToBePaid}؋</span>
-                        <span>Paid: {fee.feePaid || "0"}؋</span>
-                        <span
-                          className={
-                            parseFloat(fee.feeUnpaid || "0") > 0
-                              ? "text-red-600"
-                              : ""
-                          }
-                        >
-                          Unpaid: {fee.feeUnpaid || "0"}؋
+                      <div className="flex flex-wrap gap-2 sm:gap-4 text-sm">
+                        <span className="whitespace-nowrap">
+                          Fee: {fee.feeToBePaid} ؋
                         </span>
-                        <span
-                          className={
-                            fee.feePaid ? "text-green-600" : "text-red-600"
-                          }
-                        >
-                          Status: {fee.feePaid ? "Paid" : "Pending"}
+                        <span className="whitespace-nowrap">
+                          Paid: {fee.feePaid || "0"} ؋
                         </span>
+                        {parseFloat(fee.feeUnpaid || "0") > 0 && (
+                          <span className="whitespace-nowrap text-red-600">
+                            Unpaid: {fee.feeUnpaid || "0"} ؋
+                          </span>
+                        )}
+                        <Badge
+                          variant={fee.feePaid ? "default" : "destructive"}
+                          className="whitespace-nowrap"
+                        >
+                          {fee.feePaid ? "Paid" : "Pending"}
+                        </Badge>
                         {fee.paymentDate && (
-                          <span>
+                          <span className="whitespace-nowrap">
                             Paid on: {fee.paymentDate.toLocaleDateString()}
                           </span>
                         )}
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditFee(fee)}
-                      className="cursor-pointer"
-                    >
-                      <Edit className="h-4 w-4" />
-                      <p className="hidden sm:block">Edit</p>
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
