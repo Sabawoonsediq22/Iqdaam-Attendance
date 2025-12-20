@@ -385,6 +385,22 @@ export const insertFeeSchema = createInsertSchema(fees, {
   );
 
 export const updateFeeSchema = createInsertSchema(fees, {
+  feeToBePaid: (schema) =>
+    schema
+      .optional()
+      .refine(
+        (val) => val === undefined || val === "" || parseFloat(val) > 0,
+        {
+          message: "Fee amount must be greater than 0",
+        }
+      )
+      .refine(
+        (val) =>
+          val === undefined || val === "" || parseFloat(val) <= 99999999.99,
+        {
+          message: "Fee amount is too large",
+        }
+      ),
   feePaid: (schema) =>
     schema
       .optional()
@@ -435,7 +451,6 @@ export const updateFeeSchema = createInsertSchema(fees, {
   createdAt: true,
   studentId: true,
   classId: true,
-  feeToBePaid: true,
 });
 
 // Combined schema for creating students with class assignment

@@ -34,11 +34,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import type { Student, Class, StudentClass } from "@/lib/schema";
@@ -128,11 +124,18 @@ export default function AddFeeModal({
               name="studentId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className={form.formState.errors.studentId ? "text-red-500" : ""}>
+                  <FormLabel
+                    className={
+                      form.formState.errors.studentId ? "text-red-500" : ""
+                    }
+                  >
                     Student *
                   </FormLabel>
-                  <Popover open={studentOpen} onOpenChange={setStudentOpen}>
-                    <PopoverTrigger asChild>
+                  <ResponsiveDialog
+                    open={studentOpen}
+                    onOpenChange={setStudentOpen}
+                    title="Select Student"
+                    trigger={
                       <FormControl>
                         <Button
                           variant="outline"
@@ -148,55 +151,51 @@ export default function AddFeeModal({
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-full p-0 shadow-lg border-0"
-                      align="start"
-                    >
-                      <Command className="rounded-lg">
-                        <CommandInput
-                          placeholder="Search students..."
-                          className="h-11 border-0 shadow-none focus:ring-0"
-                        />
-                        <CommandList className="max-h-64">
-                          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-                            No student found.
-                          </CommandEmpty>
-                          <CommandGroup className="p-2">
-                            {students.map((student) => (
-                              <CommandItem
-                                key={student.id}
-                                value={`${student.name} ${student.fatherName}`}
-                                onSelect={() => {
-                                  field.onChange(student.id);
-                                  form.setValue("classId", "");
-                                  setStudentOpen(false);
-                                }}
-                                className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                              >
-                                <Check
-                                  className={cn(
-                                    "mt-0.5 h-4 w-4 shrink-0",
-                                    field.value === student.id
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                <div className="flex flex-col gap-1 min-w-0 flex-1">
-                                  <span className="font-semibold text-foreground truncate">
-                                    {student.name}
-                                  </span>
-                                  <span className="text-sm text-muted-foreground truncate">
-                                    Father: {student.fatherName}
-                                  </span>
-                                </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                    }
+                  >
+                    <Command className="rounded-lg">
+                      <CommandInput
+                        placeholder="Search students..."
+                        className="h-11 border-0 shadow-none focus:ring-0"
+                      />
+                      <CommandList className="max-h-64">
+                        <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                          No student found.
+                        </CommandEmpty>
+                        <CommandGroup className="p-2">
+                          {students.map((student) => (
+                            <CommandItem
+                              key={student.id}
+                              value={`${student.name} ${student.fatherName}`}
+                              onSelect={() => {
+                                field.onChange(student.id);
+                                form.setValue("classId", "");
+                                setStudentOpen(false);
+                              }}
+                              className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                            >
+                              <Check
+                                className={cn(
+                                  "mt-0.5 h-4 w-4 shrink-0",
+                                  field.value === student.id
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                                <span className="font-semibold text-foreground truncate">
+                                  {student.name}
+                                </span>
+                                <span className="text-sm text-muted-foreground truncate">
+                                  Father: {student.fatherName}
+                                </span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </ResponsiveDialog>
                   <FormMessage />
                 </FormItem>
               )}
@@ -206,11 +205,18 @@ export default function AddFeeModal({
               name="classId"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className={form.formState.errors.classId ? "text-red-500" : ""}>
+                  <FormLabel
+                    className={
+                      form.formState.errors.classId ? "text-red-500" : ""
+                    }
+                  >
                     Class *
                   </FormLabel>
-                  <Popover open={classOpen} onOpenChange={setClassOpen}>
-                    <PopoverTrigger asChild>
+                  <ResponsiveDialog
+                    open={classOpen}
+                    onOpenChange={setClassOpen}
+                    title="Select Class"
+                    trigger={
                       <FormControl>
                         <Button
                           variant="outline"
@@ -226,70 +232,67 @@ export default function AddFeeModal({
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-full p-0 shadow-lg border-0"
-                      align="start"
-                    >
-                      <Command className="rounded-lg">
-                        <CommandInput
-                          placeholder="Search classes..."
-                          className="h-11 border-0 shadow-none focus:ring-0"
-                        />
-                        <CommandList className="max-h-64">
-                          <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-                            No class found.
-                          </CommandEmpty>
-                          <CommandGroup className="p-2">
-                            {classes
-                              .filter(
-                                (classItem) =>
-                                  classItem.status === "active" &&
-                                  (!form.getValues("studentId") ||
-                                    studentClasses.some(
-                                      (sc) =>
-                                        sc.studentId === form.getValues("studentId") &&
-                                        sc.classId === classItem.id
-                                    ))
-                              )
-                              .map((classItem) => (
-                                <CommandItem
-                                  key={classItem.id}
-                                  value={`${classItem.name} ${classItem.teacher}`}
-                                  onSelect={() => {
-                                    field.onChange(classItem.id);
-                                    setClassOpen(false);
-                                  }}
-                                  className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mt-0.5 h-4 w-4 shrink-0",
-                                      field.value === classItem.id
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                  <div className="flex flex-col gap-2 min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-semibold text-foreground truncate">
-                                        {classItem.name}
-                                      </span>
-                                      <span className="text-sm text-muted-foreground shrink-0">
-                                        by
-                                      </span>
-                                      <span className="font-medium text-foreground truncate">
-                                        {classItem.teacher}
-                                      </span>
-                                    </div>
+                    }
+                  >
+                    <Command className="rounded-lg">
+                      <CommandInput
+                        placeholder="Search classes..."
+                        className="h-11 border-0 shadow-none focus:ring-0"
+                      />
+                      <CommandList className="max-h-64">
+                        <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                          No class found.
+                        </CommandEmpty>
+                        <CommandGroup className="p-2">
+                          {classes
+                            .filter(
+                              (classItem) =>
+                                classItem.status === "active" &&
+                                (!form.getValues("studentId") ||
+                                  studentClasses.some(
+                                    (sc) =>
+                                      sc.studentId ===
+                                        form.getValues("studentId") &&
+                                      sc.classId === classItem.id
+                                  ))
+                            )
+                            .map((classItem) => (
+                              <CommandItem
+                                key={classItem.id}
+                                value={`${classItem.name} ${classItem.teacher}`}
+                                onSelect={() => {
+                                  field.onChange(classItem.id);
+                                  setClassOpen(false);
+                                }}
+                                className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                              >
+                                <Check
+                                  className={cn(
+                                    "mt-0.5 h-4 w-4 shrink-0",
+                                    field.value === classItem.id
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col gap-2 min-w-0 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-foreground truncate">
+                                      {classItem.name}
+                                    </span>
+                                    <span className="text-sm text-muted-foreground shrink-0">
+                                      by
+                                    </span>
+                                    <span className="font-medium text-foreground truncate">
+                                      {classItem.teacher}
+                                    </span>
                                   </div>
-                                </CommandItem>
-                              ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                                </div>
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </ResponsiveDialog>
                   <FormMessage />
                 </FormItem>
               )}
@@ -299,7 +302,11 @@ export default function AddFeeModal({
               name="feeToBePaid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={form.formState.errors.feeToBePaid ? "text-red-500" : ""}>
+                  <FormLabel
+                    className={
+                      form.formState.errors.feeToBePaid ? "text-red-500" : ""
+                    }
+                  >
                     Fee Amount *
                   </FormLabel>
                   <FormControl>
@@ -315,7 +322,9 @@ export default function AddFeeModal({
                         const feePaid = form.getValues("feePaid");
                         const feeToBePaid = e.target.value;
                         if (feeToBePaid && feePaid) {
-                          const unpaid = (parseFloat(feeToBePaid) - parseFloat(feePaid)).toFixed(2);
+                          const unpaid = (
+                            parseFloat(feeToBePaid) - parseFloat(feePaid)
+                          ).toFixed(2);
                           form.setValue("feeUnpaid", unpaid);
                         } else if (feeToBePaid) {
                           form.setValue("feeUnpaid", feeToBePaid);
@@ -332,7 +341,11 @@ export default function AddFeeModal({
               name="feePaid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={form.formState.errors.feePaid ? "text-red-500" : ""}>
+                  <FormLabel
+                    className={
+                      form.formState.errors.feePaid ? "text-red-500" : ""
+                    }
+                  >
                     Amount Paid *
                   </FormLabel>
                   <FormControl>
@@ -348,7 +361,9 @@ export default function AddFeeModal({
                         const feeToBePaid = form.getValues("feeToBePaid");
                         const feePaid = e.target.value;
                         if (feeToBePaid && feePaid) {
-                          const unpaid = (parseFloat(feeToBePaid) - parseFloat(feePaid)).toFixed(2);
+                          const unpaid = (
+                            parseFloat(feeToBePaid) - parseFloat(feePaid)
+                          ).toFixed(2);
                           form.setValue("feeUnpaid", unpaid);
                         }
                       }}
@@ -383,7 +398,11 @@ export default function AddFeeModal({
               name="paymentDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className={form.formState.errors.paymentDate ? "text-red-500" : ""}>
+                  <FormLabel
+                    className={
+                      form.formState.errors.paymentDate ? "text-red-500" : ""
+                    }
+                  >
                     Payment Date *
                   </FormLabel>
                   <FormControl>

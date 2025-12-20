@@ -8,6 +8,12 @@ import { eq } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const classId = searchParams.get("classId");
 
@@ -32,9 +38,23 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json(enrolledStudents);
     } else {
-      // Get all students
-      const allStudents = await db.select().from(students);
-      return NextResponse.json(allStudents);
+      // Get all students who are enrolled in at least one class
+      const enrolledStudents = await db
+        .select({
+          id: students.id,
+          studentId: students.studentId,
+          name: students.name,
+          fatherName: students.fatherName,
+          phone: students.phone,
+          gender: students.gender,
+          email: students.email,
+          avatar: students.avatar,
+        })
+        .from(students)
+        .innerJoin(studentClasses, eq(students.id, studentClasses.studentId))
+        .innerJoin(classes, eq(studentClasses.classId, classes.id))
+        .where(eq(classes.status, "active"));
+      return NextResponse.json(enrolledStudents);
     }
   } catch (error) {
     console.error("Get students error:", error);

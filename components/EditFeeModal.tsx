@@ -60,6 +60,7 @@ export default function EditFeeModal({
   const form = useForm<UpdateFee>({
     resolver: zodResolver(updateFeeSchema),
     defaultValues: {
+      feeToBePaid: "",
       feePaid: "",
       feeUnpaid: "",
       paymentDate: "",
@@ -70,6 +71,7 @@ export default function EditFeeModal({
   useEffect(() => {
     if (fee) {
       form.reset({
+        feeToBePaid: fee.feeToBePaid || "",
         feePaid: fee.feePaid || "",
         feeUnpaid: fee.feeUnpaid || "",
         paymentDate: fee.paymentDate
@@ -114,11 +116,11 @@ export default function EditFeeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-w-[430px] rounded-lg">
+      <DialogContent className="w-full max-w-[500px] max-h-[90vh] overflow-y-auto rounded-lg">
         <DialogHeader>
           <DialogTitle>Edit Fee Payment</DialogTitle>
         </DialogHeader>
-        <div className="mb-4 p-4 bg-muted rounded-lg">
+        <div className="mb-2 p-2 bg-muted rounded-lg">
           <h4 className="font-medium">{fee.studentName}</h4>
           <p className="text-sm text-muted-foreground">
             Class: {fee.className} | Teacher: {fee.teacherName}
@@ -128,7 +130,27 @@ export default function EditFeeModal({
           </p>
         </div>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <FormField
+              control={form.control}
+              name="feeToBePaid"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fee Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Enter fee amount (؋)"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="feePaid"

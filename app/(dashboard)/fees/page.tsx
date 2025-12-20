@@ -220,7 +220,7 @@ export default function FeesPage() {
             </Card>
           </div>
 
-          <Card className="bg-gray-50 border-gray-200 p-4">
+          <Card className="border-gray-200 p-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

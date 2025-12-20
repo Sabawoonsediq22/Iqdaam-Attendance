@@ -85,21 +85,26 @@ export async function PUT(
       return NextResponse.json({ error: "Fee not found" }, { status: 404 });
     }
 
-    const { feePaid, feeUnpaid, paymentDate } = result.data;
+    const { feeToBePaid, feePaid, feeUnpaid, paymentDate } = result.data;
+
+    // Use the provided feeToBePaid or current one
+    const finalFeeToBePaid =
+      feeToBePaid != null && feeToBePaid !== ""
+        ? feeToBePaid
+        : currentFee[0].feeToBePaid;
 
     // Calculate feeUnpaid if not provided
     const calculatedFeeUnpaid =
       feeUnpaid != null && feeUnpaid !== ""
         ? feeUnpaid
         : feePaid != null && feePaid !== ""
-        ? (
-            parseFloat(currentFee[0].feeToBePaid) - parseFloat(feePaid!)
-          ).toFixed(2)
+        ? (parseFloat(finalFeeToBePaid) - parseFloat(feePaid!)).toFixed(2)
         : currentFee[0].feeUnpaid;
 
     const updatedFee = await db
       .update(fees)
       .set({
+        ...(feeToBePaid != null && { feeToBePaid }),
         ...(feePaid != null && { feePaid }),
         ...(feeUnpaid != null && { feeUnpaid: calculatedFeeUnpaid }),
         ...(paymentDate != null && { paymentDate }),
