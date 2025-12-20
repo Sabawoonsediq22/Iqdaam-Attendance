@@ -100,6 +100,7 @@ export default function EditFeeModal({
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/fees"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
 
       toast.success("Fee updated successfully");
 

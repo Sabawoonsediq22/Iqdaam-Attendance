@@ -479,8 +479,12 @@ export default function NotificationsPage() {
             disabled={markAllAsReadMutation.isPending}
             className="cursor-pointer"
           >
-            <CheckCheck className="w-4 h-4 mr-2" />
-            Mark All Read
+            {markAllAsReadMutation.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <CheckCheck className="w-4 h-4 mr-2" />
+            )}
+            {markAllAsReadMutation.isPending ? "Marking..." : "Mark All Read"}
           </Button>
         )}
       </div>

@@ -135,6 +135,7 @@ export async function PUT(
         type: "fee",
         entityType: "fee",
         entityId: id,
+        userId: session.user.id,
       });
     }
 

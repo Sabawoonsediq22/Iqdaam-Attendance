@@ -152,8 +152,8 @@ export async function POST(request: NextRequest) {
 
       if (feeDetails.length > 0) {
         await db.insert(notifications).values({
-          title: "Fee Updated",
-          message: `Fee updated for student **${
+          title: "Fee Added",
+          message: `Fee added for student **${
             feeDetails[0].studentName
           }** in class **${
             feeDetails[0].className
@@ -161,6 +161,7 @@ export async function POST(request: NextRequest) {
           type: "fee",
           entityType: "fee",
           entityId: updatedFee[0].id,
+          userId: session.user.id,
         });
       }
 
@@ -201,6 +202,7 @@ export async function POST(request: NextRequest) {
           type: "fee",
           entityType: "fee",
           entityId: newFee[0].id,
+          userId: session.user.id,
         });
       }
 

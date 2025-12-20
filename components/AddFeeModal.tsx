@@ -22,7 +22,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertFeeSchema } from "@/lib/schema";
 import { toast } from "sonner";
-import type { InsertFee } from "@/lib/schema";
+import type { InsertFee, Fee } from "@/lib/schema";
 import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
 import { Loader2 } from "lucide-react";
@@ -67,6 +67,10 @@ export default function AddFeeModal({
     queryKey: ["/api/student-classes"],
   });
 
+  const { data: fees = [] } = useQuery<Fee[]>({
+    queryKey: ["/api/fees"],
+  });
+
   const form = useForm<InsertFee>({
     resolver: zodResolver(insertFeeSchema),
     defaultValues: {
@@ -96,6 +100,7 @@ export default function AddFeeModal({
       }
 
       await queryClient.invalidateQueries({ queryKey: ["/api/fees"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
 
       toast.success("Fee added successfully");
 
@@ -241,21 +246,32 @@ export default function AddFeeModal({
                       />
                       <CommandList className="max-h-64">
                         <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-                          No class found.
+                          The selected student is not enrolled in any active
+                          class with unpaid fees.
                         </CommandEmpty>
                         <CommandGroup className="p-2">
                           {classes
-                            .filter(
-                              (classItem) =>
-                                classItem.status === "active" &&
-                                (!form.getValues("studentId") ||
-                                  studentClasses.some(
-                                    (sc) =>
-                                      sc.studentId ===
-                                        form.getValues("studentId") &&
-                                      sc.classId === classItem.id
-                                  ))
-                            )
+                            .filter((classItem) => {
+                              const isActive = classItem.status === "active";
+                              const isEnrolled =
+                                !form.getValues("studentId") ||
+                                studentClasses.some(
+                                  (sc) =>
+                                    sc.studentId ===
+                                      form.getValues("studentId") &&
+                                    sc.classId === classItem.id
+                                );
+                              const hasUnpaidFee =
+                                !form.getValues("studentId") ||
+                                fees.some(
+                                  (fee) =>
+                                    fee.studentId ===
+                                      form.getValues("studentId") &&
+                                    fee.classId === classItem.id &&
+                                    parseFloat(fee.feePaid || "0") === 0
+                                );
+                              return isActive && isEnrolled && hasUnpaidFee;
+                            })
                             .map((classItem) => (
                               <CommandItem
                                 key={classItem.id}

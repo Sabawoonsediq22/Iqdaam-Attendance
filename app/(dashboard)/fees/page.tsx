@@ -85,15 +85,49 @@ export default function FeesPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleFeeUpdateSuccess = () => {
+  const handleFeeUpdateSuccess = async () => {
     setIsEditModalOpen(false);
     setSelectedFee(null);
     queryClient.invalidateQueries({ queryKey: ["/api/fees"] });
+
+    // Create notification for fee update
+    try {
+      await fetch("/api/notifications/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: "Fee Updated",
+          message: `Fee record for ${selectedFee?.studentName} has been updated successfully.`,
+          type: "info",
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to create notification:", error);
+    }
   };
 
-  const handleFeeAddSuccess = () => {
+  const handleFeeAddSuccess = async () => {
     setIsAddModalOpen(false);
     queryClient.invalidateQueries({ queryKey: ["/api/fees"] });
+
+    // Create notification for fee addition
+    try {
+      await fetch("/api/notifications/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: "Fee Added",
+          message: "A new fee record has been added successfully.",
+          type: "success",
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to create notification:", error);
+    }
   };
 
   const filteredFees = fees.filter((fee) => {
