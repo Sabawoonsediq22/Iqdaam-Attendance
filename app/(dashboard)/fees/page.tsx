@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Coins, Search, Edit, Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Coins, Search, Edit, Plus, Users } from "lucide-react";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { Loader } from "@/components/loader";
 import EditFeeModal from "@/components/EditFeeModal";
@@ -46,6 +53,7 @@ type FeeApiResponse = {
 export default function FeesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedFee, setSelectedFee] = useState<FeeWithDetails | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -101,21 +109,46 @@ export default function FeesPage() {
         ? fee.createdAt.getMonth() + 1 === new Date().getMonth() + 1
         : fee.createdAt.getMonth() + 1 === parseInt(selectedMonth));
 
-    return matchesSearch && matchesMonth;
+    const matchesStatus =
+      selectedStatus === "all" ||
+      (selectedStatus === "paid" && parseFloat(fee.feePaid || "0") > 0) ||
+      (selectedStatus === "unpaid" && parseFloat(fee.feePaid || "0") === 0) ||
+      (selectedStatus === "debtors" && parseFloat(fee.feeUnpaid || "0") > 0);
+
+    return matchesSearch && matchesMonth && matchesStatus;
   });
 
-  const totalFees = filteredFees.reduce(
-    (sum, fee) => sum + parseFloat(fee.feeToBePaid),
-    0
-  );
-  const totalPaid = filteredFees.reduce(
-    (sum, fee) => sum + parseFloat(fee.feePaid || "0"),
-    0
-  );
-  const totalUnpaid = filteredFees.reduce(
-    (sum, fee) => sum + parseFloat(fee.feeUnpaid || "0"),
-    0
-  );
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+  const currentMonthName = new Date().toLocaleString("default", {
+    month: "long",
+  });
+
+  const totalPaid = fees
+    .filter((fee) => {
+      const inCurrentMonth =
+        fee.createdAt.getMonth() + 1 === currentMonth &&
+        fee.createdAt.getFullYear() === currentYear;
+      return inCurrentMonth;
+    })
+    .reduce((sum, fee) => sum + parseFloat(fee.feePaid || "0"), 0);
+  const totalUnpaid = fees
+    .filter((fee) => {
+      const inCurrentMonth =
+        fee.createdAt.getMonth() + 1 === currentMonth &&
+        fee.createdAt.getFullYear() === currentYear;
+      return inCurrentMonth;
+    })
+    .reduce((sum, fee) => sum + parseFloat(fee.feeUnpaid || "0"), 0);
+  const paidStudentsCount = fees.filter((fee) => {
+    const paid = parseFloat(fee.feePaid || "0") > 0;
+    const date = fee.paymentDate;
+    const inCurrentMonth =
+      date &&
+      date.getMonth() + 1 === currentMonth &&
+      date.getFullYear() === currentYear;
+    return paid && inCurrentMonth;
+  }).length;
 
   return (
     <div className="space-y-6">
@@ -145,20 +178,20 @@ export default function FeesPage() {
             <Card className="border-blue-200 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Fees
+                  Students Paid ({currentMonthName})
                 </CardTitle>
-                <Coins className="h-4 w-4 text-blue-600" />
+                <Users className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-700">
-                  {totalFees.toFixed(2)} ؋
+                  {paidStudentsCount}
                 </div>
               </CardContent>
             </Card>
             <Card className="border-green-200 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Paid
+                  Total Paid ({currentMonthName})
                 </CardTitle>
                 <Coins className="h-4 w-4 text-green-600" />
               </CardHeader>
@@ -171,7 +204,7 @@ export default function FeesPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Unpaid
+                  Total Unpaid ({currentMonthName})
                 </CardTitle>
                 <Coins className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -187,20 +220,39 @@ export default function FeesPage() {
             </Card>
           </div>
 
-          <div className="flex gap-3 sm:gap-6 items-center">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search fees..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <Card className="bg-gray-50 border-gray-200 p-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search fees..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <MonthFilter
+                  value={selectedMonth}
+                  onChange={setSelectedMonth}
+                />
+                <Select
+                  value={selectedStatus}
+                  onValueChange={setSelectedStatus}
+                >
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="unpaid">Unpaid</SelectItem>
+                    <SelectItem value="debtors">Debtors</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="flex items-center">
-              <MonthFilter value={selectedMonth} onChange={setSelectedMonth} />
-            </div>
-          </div>
+          </Card>
 
           <div className="text-end mr-2">
             <Badge variant="secondary">Total {filteredFees.length} fees</Badge>
