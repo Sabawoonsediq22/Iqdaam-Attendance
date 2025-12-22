@@ -150,6 +150,7 @@ export default function EditStudentModal({
 
       await queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       await queryClient.invalidateQueries({
         queryKey: ["/api/notifications/unread"],

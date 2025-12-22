@@ -39,11 +39,13 @@ export default function StudentsPage() {
   const handleStudentAdded = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/students"] });
     queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     queryClient.invalidateQueries({ queryKey: ["/api/student-classes"] });
   };
 
   const handleStudentChange = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     setSelectedStudent(null);
   };
 

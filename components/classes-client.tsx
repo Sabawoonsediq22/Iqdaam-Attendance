@@ -80,12 +80,40 @@ interface ClassFilters {
 
 // Utility functions for filtering
 const extractHour = (timeString: string): number => {
-  const match = timeString.match(/(\d{1,2}):(\d{2})/);
-  if (!match) return 0;
-  const hour = parseInt(match[1]);
-  const ampm =
-    timeString.toLowerCase().includes("pm") && hour !== 12 ? hour + 12 : hour;
-  return ampm === 12 && timeString.toLowerCase().includes("am") ? 0 : ampm;
+  if (!timeString) return 0;
+
+  // Normalize the string
+  const normalized = timeString.toLowerCase().trim();
+
+  // Try to match various time formats
+  const patterns = [
+    /^(\d{1,2}):(\d{2})\s*(am|pm)?$/,  // HH:MM AM/PM or 24-hour
+    /^(\d{1,2})\s*(am|pm)$/,           // H AM/PM
+    /^(\d{1,2}):(\d{2})$/,             // HH:MM (24-hour)
+  ];
+
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+    if (match) {
+      let hour = parseInt(match[1]);
+      const hasMinutes = match[2] !== undefined;
+      const ampm = match[3] || match[hasMinutes ? 3 : 2];
+
+      // Convert 12-hour to 24-hour format
+      if (ampm) {
+        if (ampm === 'am') {
+          if (hour === 12) hour = 0; // 12 AM is 0
+        } else if (ampm === 'pm') {
+          if (hour !== 12) hour += 12; // PM hours except 12
+        }
+      }
+      // For 24-hour format without AM/PM, assume it's already in 24-hour format
+
+      return hour;
+    }
+  }
+
+  return 0; // fallback
 };
 
 const getHourRange = (
@@ -93,9 +121,9 @@ const getHourRange = (
 ): { min: number; max: number } | null => {
   switch (hourFilter) {
     case "morning":
-      return { min: 8, max: 12 };
+      return { min: 6, max: 13 }; // 6 AM to 12:59 PM
     case "afternoon":
-      return { min: 12, max: 17 };
+      return { min: 13, max: 18 }; // 1 PM to 5:59 PM
     default:
       return null;
   }
@@ -871,8 +899,8 @@ const useClassFilters = (classes: Class[] | undefined) => {
             return false;
           }
         } else {
-          // Specific hour
-          const filterHour = parseInt(filters.hour.split(":")[0]);
+          // Specific hour - now the value is just the hour number as string
+          const filterHour = parseInt(filters.hour);
           const classHour = extractHour(cls.time);
           if (classHour !== filterHour) {
             return false;

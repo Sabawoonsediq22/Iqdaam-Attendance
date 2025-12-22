@@ -135,7 +135,8 @@ export default function FeesPage() {
       fee.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fee.fatherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fee.className.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fee.teacherName.toLowerCase().includes(searchTerm.toLowerCase());
+      fee.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (fee.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
 
     const matchesMonth =
       selectedMonth === "all" ||
@@ -259,7 +260,7 @@ export default function FeesPage() {
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search fees..."
+                  placeholder="Search by name, student ID, class..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"

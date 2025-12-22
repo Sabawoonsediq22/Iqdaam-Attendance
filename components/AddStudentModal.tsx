@@ -131,6 +131,7 @@ export default function AddStudentModal({
 
       await queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       await queryClient.invalidateQueries({
         queryKey: ["/api/notifications/unread"],
@@ -346,57 +347,62 @@ export default function AddStudentModal({
                                     No class found.
                                   </CommandEmpty>
                                   <CommandGroup className="p-2">
-                                    {classes.filter(classItem => classItem.status === "active").map((classItem) => (
-                                      <CommandItem
-                                        key={classItem.id}
-                                        value={`${classItem.name} ${classItem.teacher} ${classItem.time}`}
-                                        onSelect={() => {
-                                          field.onChange(classItem.id);
-                                          setClassOpen(false);
-                                        }}
-                                        className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mt-0.5 h-4 w-4 shrink-0",
-                                            field.value === classItem.id
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                        <div className="flex flex-col gap-2 min-w-0 flex-1">
-                                          <div className="flex items-center gap-2">
-                                            <span className="font-semibold text-foreground truncate">
-                                              {classItem.name}
-                                            </span>
-                                            <span className="text-sm text-muted-foreground shrink-0">
-                                              by
-                                            </span>
-                                            <span className="font-medium text-foreground truncate">
-                                              {classItem.teacher}
-                                            </span>
-                                          </div>
-                                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                            <div className="flex items-center gap-1.5">
-                                              <Clock className="h-3.5 w-3.5" />
-                                              <span>{classItem.time}</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                              <Calendar className="h-3.5 w-3.5" />
-                                              <span>
-                                                {new Date(
-                                                  classItem.startDate
-                                                ).toLocaleDateString()}
-                                                {classItem.endDate &&
-                                                  ` - ${new Date(
-                                                    classItem.endDate
-                                                  ).toLocaleDateString()}`}
+                                    {classes
+                                      .filter(
+                                        (classItem) =>
+                                          classItem.status === "active"
+                                      )
+                                      .map((classItem) => (
+                                        <CommandItem
+                                          key={classItem.id}
+                                          value={`${classItem.name} ${classItem.teacher} ${classItem.time}`}
+                                          onSelect={() => {
+                                            field.onChange(classItem.id);
+                                            setClassOpen(false);
+                                          }}
+                                          className="flex items-start gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mt-0.5 h-4 w-4 shrink-0",
+                                              field.value === classItem.id
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex flex-col gap-2 min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-semibold text-foreground truncate">
+                                                {classItem.name}
+                                              </span>
+                                              <span className="text-sm text-muted-foreground shrink-0">
+                                                by
+                                              </span>
+                                              <span className="font-medium text-foreground truncate">
+                                                {classItem.teacher}
                                               </span>
                                             </div>
+                                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                              <div className="flex items-center gap-1.5">
+                                                <Clock className="h-3.5 w-3.5" />
+                                                <span>{classItem.time}</span>
+                                              </div>
+                                              <div className="flex items-center gap-1.5">
+                                                <Calendar className="h-3.5 w-3.5" />
+                                                <span>
+                                                  {new Date(
+                                                    classItem.startDate
+                                                  ).toLocaleDateString()}
+                                                  {classItem.endDate &&
+                                                    ` - ${new Date(
+                                                      classItem.endDate
+                                                    ).toLocaleDateString()}`}
+                                                </span>
+                                              </div>
+                                            </div>
                                           </div>
-                                        </div>
-                                      </CommandItem>
-                                    ))}
+                                        </CommandItem>
+                                      ))}
                                   </CommandGroup>
                                 </CommandList>
                               </Command>

@@ -293,6 +293,7 @@ function AttendancePageContent() {
 
       queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/students"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/student-classes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/attendance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });

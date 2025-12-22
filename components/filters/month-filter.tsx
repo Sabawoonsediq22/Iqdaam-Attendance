@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MonthFilterProps {
   value: string;
@@ -15,8 +16,18 @@ interface MonthFilterProps {
 
 export function MonthFilter({ value, onChange }: MonthFilterProps) {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   return (
@@ -25,13 +36,15 @@ export function MonthFilter({ value, onChange }: MonthFilterProps) {
         <SelectValue placeholder="Month" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All Months</SelectItem>
-        <SelectItem value="this-month">This Month</SelectItem>
-        {months.map((month, index) => (
-          <SelectItem key={month} value={(index + 1).toString()}>
-            {month}
-          </SelectItem>
-        ))}
+        <ScrollArea className="h-48">
+          <SelectItem value="all">All Months</SelectItem>
+          <SelectItem value="this-month">This Month</SelectItem>
+          {months.map((month, index) => (
+            <SelectItem key={month} value={(index + 1).toString()}>
+              {month}
+            </SelectItem>
+          ))}
+        </ScrollArea>
       </SelectContent>
     </Select>
   );

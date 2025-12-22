@@ -709,7 +709,7 @@ export default function StudentDetailsModal({
                               ).toLocaleDateString()}`}
                           </p>
                         </div>
-                        <Badge variant={fee.feePaid ? "default" : "secondary"}>
+                        <Badge variant={fee.feePaid ? "default" : "destructive"}>
                           {fee.feePaid ? "Paid" : "Pending"}
                         </Badge>
                       </div>
