@@ -16,7 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Student, Class, Attendance, StudentClass } from "@/lib/schema";
+import type {
+  Student,
+  Class,
+  Attendance,
+  StudentClass,
+  InsertFee,
+} from "@/lib/schema";
 import {
   User,
   Mail,
@@ -45,6 +51,8 @@ import {
 } from "recharts";
 import { format, startOfWeek, addDays } from "date-fns";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import EditFeeModal from "./EditFeeModal";
+import AddFeeModal from "./AddFeeModal";
 
 type FeeWithDetails = {
   id: string;
@@ -53,12 +61,17 @@ type FeeWithDetails = {
   feeToBePaid: string;
   feePaid: string | null;
   feeUnpaid: string | null;
-  paymentDate: string | null;
-  createdAt: string;
+  paymentDate: Date | null;
+  createdAt: Date;
   studentName: string;
   fatherName: string;
   className: string;
   teacherName: string;
+};
+
+type RawFee = Omit<FeeWithDetails, "createdAt" | "paymentDate"> & {
+  createdAt: string;
+  paymentDate: string | null;
 };
 
 interface StudentDetailsModalProps {
@@ -154,6 +167,10 @@ export default function StudentDetailsModal({
     startOfWeek(new Date(), { weekStartsOn: 6 })
   );
   const [showImageViewer, setShowImageViewer] = useState(false);
+  const [selectedFee, setSelectedFee] = useState<FeeWithDetails | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addFeeDefaults, setAddFeeDefaults] = useState<Partial<InsertFee>>({});
 
   const { data: classes = [] } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
@@ -181,7 +198,12 @@ export default function StudentDetailsModal({
       if (!student?.id) return [];
       const res = await fetch(`/api/fees?studentId=${student.id}`);
       if (!res.ok) throw new Error("Failed to fetch fees");
-      return res.json();
+      const data: RawFee[] = await res.json();
+      return data.map((fee: RawFee) => ({
+        ...fee,
+        createdAt: new Date(fee.createdAt),
+        paymentDate: fee.paymentDate ? new Date(fee.paymentDate) : null,
+      }));
     },
     enabled: !!student?.id && isOpen,
   });
@@ -202,6 +224,29 @@ export default function StudentDetailsModal({
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleEditFee = (fee: FeeWithDetails) => {
+    setSelectedFee(fee);
+    setIsEditModalOpen(true);
+  };
+
+  const handleAddFee = (classId: string) => {
+    setAddFeeDefaults({
+      studentId: student!.id,
+      classId,
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleFeeUpdateSuccess = () => {
+    setIsEditModalOpen(false);
+    setSelectedFee(null);
+  };
+
+  const handleFeeAddSuccess = () => {
+    setIsAddModalOpen(false);
+    setAddFeeDefaults({});
   };
 
   const attendanceStats = useMemo(() => {
@@ -674,46 +719,93 @@ export default function StudentDetailsModal({
           </TabsContent>
 
           <TabsContent value="fees" className="space-y-6">
-            {/* Fee History */}
+            {/* Fee Management */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Coins className="h-5 w-5" />
-                  Fee History
+                  Fee Management
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {fees.length === 0 ? (
-                  <p className="text-muted-foreground">No fee records found.</p>
+                {studentClassesForStudent.length === 0 ? (
+                  <p className="text-muted-foreground">
+                    Student is not enrolled in any classes.
+                  </p>
                 ) : (
                   <div className="space-y-4">
-                    {fees.map((fee) => (
-                      <div
-                        key={fee.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{fee.className}</h4>
-                            <Badge variant="outline">{fee.teacherName}</Badge>
+                    {studentClassesForStudent.map((sc) => {
+                      const classInfo = classes.find(
+                        (c) => c.id === sc.classId
+                      );
+                      const fee = fees.find((f) => f.classId === sc.classId);
+                      return (
+                        <div
+                          key={sc.id}
+                          className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-4 border rounded-lg"
+                        >
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                              <h4 className="font-semibold text-sm sm:text-base">
+                                {classInfo?.name || "Unknown Class"}
+                              </h4>
+                              <Badge variant="outline" className="text-xs">
+                                {classInfo?.teacher || "Unknown Teacher"}
+                              </Badge>
+                            </div>
+                            {fee ? (
+                              <>
+                                <div className="text-sm text-muted-foreground space-y-1">
+                                  <p>
+                                    Fee: {fee.feeToBePaid}؋ | Paid:{" "}
+                                    {fee.feePaid || "0"}؋ | Unpaid:{" "}
+                                    {fee.feeUnpaid || "0"}؋
+                                  </p>
+                                  <p className="text-xs">
+                                    Created: {fee.createdAt.toLocaleDateString()}
+                                    {fee.paymentDate &&
+                                      ` | Paid: ${fee.paymentDate.toLocaleDateString()}`}
+                                  </p>
+                                </div>
+                              </>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">
+                                No fee set for this class.
+                              </p>
+                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            Fee: {fee.feeToBePaid}؋ | Paid: {fee.feePaid || "0"}؋ | Unpaid: {fee.feeUnpaid || "0"}؋
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Created:{" "}
-                            {new Date(fee.createdAt).toLocaleDateString()}
-                            {fee.paymentDate &&
-                              ` | Paid: ${new Date(
-                                fee.paymentDate
-                              ).toLocaleDateString()}`}
-                          </p>
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                            {fee && (
+                              <Badge
+                                variant={
+                                  parseFloat(fee.feePaid || "0") > 0
+                                    ? "default"
+                                    : "destructive"
+                                }
+                                className="text-xs"
+                              >
+                                {parseFloat(fee.feePaid || "0") > 0
+                                  ? "Paid"
+                                  : "Pending"}
+                              </Badge>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                fee
+                                  ? handleEditFee(fee)
+                                  : handleAddFee(sc.classId)
+                              }
+                              className="cursor-pointer w-full sm:w-auto"
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              {fee ? "Edit Fee" : "Add Fee"}
+                            </Button>
+                          </div>
                         </div>
-                        <Badge variant={fee.feePaid ? "default" : "destructive"}>
-                          {fee.feePaid ? "Paid" : "Pending"}
-                        </Badge>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
@@ -721,6 +813,20 @@ export default function StudentDetailsModal({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <EditFeeModal
+        fee={selectedFee}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={handleFeeUpdateSuccess}
+      />
+
+      <AddFeeModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleFeeAddSuccess}
+        defaultValues={addFeeDefaults}
+      />
 
       {/* Image Viewer Modal */}
       <Dialog open={showImageViewer} onOpenChange={setShowImageViewer}>
