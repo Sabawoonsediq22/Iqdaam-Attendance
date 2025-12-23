@@ -294,7 +294,7 @@ export default function FeesPage() {
           </div>
           <div className="space-y-4">
             {filteredFees.map((fee) => (
-              <Card key={fee.id} className="hover:shadow-md transition-shadow">
+              <Card key={fee.id} className={`hover:shadow-md transition-shadow ${parseFloat(fee.feeUnpaid || "0") > 0 ? "border-red-500" : ""}`}>
                 <CardContent className="p-4 sm:p-6 relative">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-2 flex-1">

@@ -43,12 +43,14 @@ interface AddFeeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  defaultValues?: Partial<InsertFee>;
 }
 
 export default function AddFeeModal({
   isOpen,
   onClose,
   onSuccess,
+  defaultValues = {},
 }: AddFeeModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [studentOpen, setStudentOpen] = useState(false);
@@ -80,6 +82,7 @@ export default function AddFeeModal({
       feePaid: "",
       feeUnpaid: "",
       paymentDate: "",
+      ...defaultValues,
     },
   });
 
