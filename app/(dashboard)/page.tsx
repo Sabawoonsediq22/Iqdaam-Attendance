@@ -294,7 +294,7 @@ export default function Dashboard() {
                 className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer w-full sm:w-auto"
               >
                 <Link href="/attendance">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 " />
                   Quick Attendance
                 </Link>
               </Button>

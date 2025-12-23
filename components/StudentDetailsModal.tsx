@@ -745,6 +745,20 @@ export default function StudentDetailsModal({
                           className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-4 border rounded-lg"
                         >
                           <div className="flex-1 space-y-1 min-w-0">
+                            {fee && (
+                              <Badge
+                                variant={
+                                  parseFloat(fee.feePaid || "0") > 0
+                                    ? "default"
+                                    : "destructive"
+                                }
+                                className="text-xs"
+                              >
+                                {parseFloat(fee.feePaid || "0") > 0
+                                  ? "Paid"
+                                  : "Pending"}
+                              </Badge>
+                            )}
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                               <h4 className="font-semibold text-sm sm:text-base">
                                 {classInfo?.name || "Unknown Class"}
@@ -762,7 +776,8 @@ export default function StudentDetailsModal({
                                     {fee.feeUnpaid || "0"}؋
                                   </p>
                                   <p className="text-xs">
-                                    Created: {fee.createdAt.toLocaleDateString()}
+                                    Created:{" "}
+                                    {fee.createdAt.toLocaleDateString()}
                                     {fee.paymentDate &&
                                       ` | Paid: ${fee.paymentDate.toLocaleDateString()}`}
                                   </p>
@@ -774,21 +789,7 @@ export default function StudentDetailsModal({
                               </p>
                             )}
                           </div>
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-                            {fee && (
-                              <Badge
-                                variant={
-                                  parseFloat(fee.feePaid || "0") > 0
-                                    ? "default"
-                                    : "destructive"
-                                }
-                                className="text-xs"
-                              >
-                                {parseFloat(fee.feePaid || "0") > 0
-                                  ? "Paid"
-                                  : "Pending"}
-                              </Badge>
-                            )}
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
                             <Button
                               variant="outline"
                               size="sm"

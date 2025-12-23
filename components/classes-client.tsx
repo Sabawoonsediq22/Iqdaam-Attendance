@@ -18,6 +18,7 @@ import {
   BookOpenCheck,
   Loader2,
   CheckCircle,
+  User,
 } from "lucide-react";
 import type { Class, StudentClass } from "@/lib/schema";
 import { Input } from "./ui/input";
@@ -37,6 +38,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import {
   Form,
   FormControl,
@@ -87,9 +95,9 @@ const extractHour = (timeString: string): number => {
 
   // Try to match various time formats
   const patterns = [
-    /^(\d{1,2}):(\d{2})\s*(am|pm)?$/,  // HH:MM AM/PM or 24-hour
-    /^(\d{1,2})\s*(am|pm)$/,           // H AM/PM
-    /^(\d{1,2}):(\d{2})$/,             // HH:MM (24-hour)
+    /^(\d{1,2}):(\d{2})\s*(am|pm)?$/, // HH:MM AM/PM or 24-hour
+    /^(\d{1,2})\s*(am|pm)$/, // H AM/PM
+    /^(\d{1,2}):(\d{2})$/, // HH:MM (24-hour)
   ];
 
   for (const pattern of patterns) {
@@ -101,9 +109,9 @@ const extractHour = (timeString: string): number => {
 
       // Convert 12-hour to 24-hour format
       if (ampm) {
-        if (ampm === 'am') {
+        if (ampm === "am") {
           if (hour === 12) hour = 0; // 12 AM is 0
-        } else if (ampm === 'pm') {
+        } else if (ampm === "pm") {
           if (hour !== 12) hour += 12; // PM hours except 12
         }
       }
@@ -145,25 +153,53 @@ const getMonthRange = (
 function ViewDetailsModal({
   cls,
   studentClasses,
+  inMenu = true,
+  onAction,
 }: {
   cls: Class;
   studentClasses: StudentClass[];
+  inMenu?: boolean;
+  onAction?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const studentCount = (studentClasses || []).filter(
     (sc) => sc.classId === cls.id
   ).length;
 
+  const content = (
+    <>
+      <Info className="h-4 w-4 mr-2" />
+      View Details
+    </>
+  );
+
+  const trigger = inMenu ? (
+    <DropdownMenuItem
+      onSelect={(e) => e.preventDefault()}
+      onClick={() => {
+        setOpen(true);
+        onAction?.();
+      }}
+      className="cursor-pointer"
+    >
+      {content}
+    </DropdownMenuItem>
+  ) : (
+    <Button
+      variant="ghost"
+      onClick={() => {
+        setOpen(true);
+        onAction?.();
+      }}
+      className="w-full justify-start"
+    >
+      {content}
+    </Button>
+  );
+
   return (
     <>
-      <DropdownMenuItem
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setOpen(true)}
-        className="cursor-pointer"
-      >
-        <Info className="h-4 w-4 mr-2" />
-        View Details
-      </DropdownMenuItem>
+      {trigger}
       <ResponsiveDialog
         open={open}
         onOpenChange={setOpen}
@@ -290,9 +326,13 @@ function ViewDetailsModal({
 function EditClassModal({
   cls,
   onSuccess,
+  inMenu = true,
+  onAction,
 }: {
   cls: Class;
   onSuccess: () => void;
+  inMenu?: boolean;
+  onAction?: () => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -350,17 +390,30 @@ function EditClassModal({
     }
   };
 
+  const content = (
+    <>
+      <PencilIcon className="h-4 w-4 mr-2" />
+      Edit Class
+    </>
+  );
+
+  const trigger = inMenu ? (
+    <DropdownMenuItem
+      onSelect={(e) => e.preventDefault()}
+      onClick={onAction}
+      className="cursor-pointer"
+    >
+      {content}
+    </DropdownMenuItem>
+  ) : (
+    <Button variant="ghost" className="w-full justify-start" onClick={onAction}>
+      {content}
+    </Button>
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <DropdownMenuItem
-          onSelect={(e) => e.preventDefault()}
-          className="cursor-pointer"
-        >
-          <PencilIcon className="h-4 w-4 mr-2" />
-          Edit Class
-        </DropdownMenuItem>
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <AnimatePresence>
         {open && (
           <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
@@ -503,9 +556,13 @@ function EditClassModal({
 function UpgradeClassModal({
   cls,
   onSuccess,
+  inMenu = true,
+  onAction,
 }: {
   cls: Class;
   onSuccess: () => void;
+  inMenu?: boolean;
+  onAction?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -601,16 +658,40 @@ function UpgradeClassModal({
     onSuccess(); // Refresh the list to show the new class
   };
 
+  const content = (
+    <>
+      <BookOpenCheck className="h-4 w-4 mr-2" />
+      Upgrade Class
+    </>
+  );
+
+  const trigger = inMenu ? (
+    <DropdownMenuItem
+      onSelect={(e) => e.preventDefault()}
+      onClick={() => {
+        setIsOpen(true);
+        onAction?.();
+      }}
+      className="cursor-pointer"
+    >
+      {content}
+    </DropdownMenuItem>
+  ) : (
+    <Button
+      variant="ghost"
+      onClick={() => {
+        setIsOpen(true);
+        onAction?.();
+      }}
+      className="w-full justify-start"
+    >
+      {content}
+    </Button>
+  );
+
   return (
     <>
-      <DropdownMenuItem
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setIsOpen(true)}
-        className="cursor-pointer"
-      >
-        <BookOpenCheck className="h-4 w-4 mr-2" />
-        Upgrade Class
-      </DropdownMenuItem>
+      {trigger}
       <ResponsiveDialog
         open={isOpen}
         onOpenChange={setIsOpen}
@@ -802,9 +883,13 @@ function UpgradeClassModal({
 function DeleteClassModal({
   cls,
   onSuccess,
+  inMenu = true,
+  onAction,
 }: {
   cls: Class;
   onSuccess: () => void;
+  inMenu?: boolean;
+  onAction?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -846,16 +931,40 @@ function DeleteClassModal({
     }
   };
 
+  const content = (
+    <>
+      <Delete className="h-4 w-4 mr-2" />
+      Delete Class
+    </>
+  );
+
+  const trigger = inMenu ? (
+    <DropdownMenuItem
+      onSelect={(e) => e.preventDefault()}
+      onClick={() => {
+        setIsOpen(true);
+        onAction?.();
+      }}
+      className="cursor-pointer text-destructive"
+    >
+      {content}
+    </DropdownMenuItem>
+  ) : (
+    <Button
+      variant="ghost"
+      onClick={() => {
+        setIsOpen(true);
+        onAction?.();
+      }}
+      className="w-full justify-start text-destructive"
+    >
+      {content}
+    </Button>
+  );
+
   return (
     <>
-      <DropdownMenuItem
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setIsOpen(true)}
-        className="cursor-pointer text-destructive"
-      >
-        <Delete className="h-4 w-4 mr-2" />
-        Delete Class
-      </DropdownMenuItem>
+      {trigger}
       <DeleteConfirmationModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -951,10 +1060,67 @@ function ClassCard({
   const isCompleted = cls.status === "completed";
   const isUpgraded = cls.status === "upgraded";
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const updateIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    updateIsMobile();
+    window.addEventListener("resize", updateIsMobile);
+    return () => window.removeEventListener("resize", updateIsMobile);
+  }, []);
+
   const handleTakeAttendance = () => {
     if (isCompleted || isUpgraded) return;
     router.push(`/attendance?classId=${cls.id}`);
   };
+
+  const menuItems = (
+    <>
+      <ViewDetailsModal
+        cls={cls}
+        studentClasses={studentClasses}
+        inMenu={!isMobile}
+      />
+      {!isUpgraded && (
+        <EditClassModal
+          cls={cls}
+          onSuccess={onClassChange}
+          inMenu={!isMobile}
+        />
+      )}
+      {!isUpgraded && (
+        <AddStudentModal
+          cls={cls}
+          onSuccess={onClassChange}
+          trigger={
+            isMobile ? (
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Add Student
+              </Button>
+            ) : undefined
+          }
+        />
+      )}
+      {isCompleted && !isUpgraded && (
+        <UpgradeClassModal
+          cls={cls}
+          onSuccess={onClassChange}
+          inMenu={!isMobile}
+        />
+      )}
+      <DeleteClassModal
+        cls={cls}
+        onSuccess={onClassChange}
+        inMenu={!isMobile}
+      />
+    </>
+  );
 
   return (
     <Card
@@ -1010,33 +1176,43 @@ function ClassCard({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  asChild
-                  className="cursor-pointer rounded-full"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+              {isMobile ? (
+                <Drawer>
+                  <DrawerTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent className="max-h-[90vh]">
+                    <DrawerHeader>
+                      <DrawerTitle>Actions</DrawerTitle>
+                    </DrawerHeader>
+                    <div className="p-4 space-y-2">{menuItems}</div>
+                  </DrawerContent>
+                </Drawer>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    asChild
+                    className="cursor-pointer rounded-full"
                   >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <ViewDetailsModal cls={cls} studentClasses={studentClasses} />
-                  {!isUpgraded && (
-                    <EditClassModal cls={cls} onSuccess={onClassChange} />
-                  )}
-                  {!isUpgraded && (
-                    <AddStudentModal cls={cls} onSuccess={onClassChange} />
-                  )}
-                  {isCompleted && !isUpgraded && (
-                    <UpgradeClassModal cls={cls} onSuccess={onClassChange} />
-                  )}
-                  <DeleteClassModal cls={cls} onSuccess={onClassChange} />
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {menuItems}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </CardTitle>
         </CardHeader>
