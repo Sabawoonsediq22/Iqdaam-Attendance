@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,15 @@ import {
   Edit,
   Trash2,
   Coins,
+  X,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   XAxis,
   YAxis,
@@ -49,7 +57,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { format, startOfWeek, addDays } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EditFeeModal from "./EditFeeModal";
 import AddFeeModal from "./AddFeeModal";
@@ -163,9 +171,10 @@ export default function StudentDetailsModal({
   onEdit,
   onStudentChange,
 }: StudentDetailsModalProps) {
-  const [selectedWeekStart, setSelectedWeekStart] = useState<Date>(
-    startOfWeek(new Date(), { weekStartsOn: 6 })
+  const [selectedMonth, setSelectedMonth] = useState<Date>(
+    startOfMonth(new Date())
   );
+  const [selectedClass, setSelectedClass] = useState<string>("");
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [selectedFee, setSelectedFee] = useState<FeeWithDetails | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -208,9 +217,23 @@ export default function StudentDetailsModal({
     enabled: !!student?.id && isOpen,
   });
 
-  const studentClassesForStudent = student
-    ? studentClasses.filter((sc: StudentClass) => sc.studentId === student.id)
-    : [];
+  const studentClassesForStudent = useMemo(() => {
+    return student
+      ? studentClasses.filter((sc: StudentClass) => sc.studentId === student.id)
+      : [];
+  }, [student, studentClasses]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
 
   const getClassName = (classId: string) => {
     const cls = classes.find((c) => c.id === classId);
@@ -279,81 +302,87 @@ export default function StudentDetailsModal({
     { name: "Late", value: attendanceStats.late, color: "#FFBB28" },
   ];
 
-  const weeklyAttendance = useMemo(() => {
-    const weekDays = [];
-    for (let i = 0; i < 6; i++) {
-      const date = addDays(selectedWeekStart, i);
+  const filteredAttendance = useMemo(() => {
+    return selectedClass ? attendance.filter(a => a.classId === selectedClass) : [];
+  }, [attendance, selectedClass]);
+
+  const monthlyAttendance = useMemo(() => {
+    const start = startOfMonth(selectedMonth);
+    const end = endOfMonth(selectedMonth);
+    const days = eachDayOfInterval({ start, end });
+    return days.map((date) => {
       const dateStr = format(date, "yyyy-MM-dd");
-      const record = attendance.find((a) => a.date === dateStr);
-      weekDays.push({
+      const record = filteredAttendance.find((a) => a.date === dateStr);
+      return {
         date,
         dateStr,
         status: record?.status || null,
         dayName: format(date, "EEE"),
         fullDate: format(date, "MMM dd"),
-      });
-    }
-    return weekDays;
-  }, [attendance, selectedWeekStart]);
+      };
+    });
+  }, [filteredAttendance, selectedMonth]);
 
   if (!student) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center sm:items-start justify-between gap-4">
-            <DialogTitle className="flex items-center gap-3 text-lg sm:text-xl">
-              <button
-                onClick={() => student.avatar && setShowImageViewer(true)}
-                className="cursor-pointer hover:opacity-80 transition-opacity"
-                disabled={!student.avatar}
-              >
-                <Avatar className="h-12 w-12">
-                  <AvatarImage
-                    src={student.avatar || undefined}
-                    alt={student.name}
-                  />
-                  <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
-                </Avatar>
-              </button>
-              <div>
-                <p className="font-bold">{student.name}</p>
-                <p className="text-sm text-muted-foreground">Student Details</p>
-              </div>
-            </DialogTitle>
-            <div className="flex items-center gap-2 mr-8">
-              {onEdit && (
-                <Button
-                  onClick={() => {
-                    onClose();
-                    onEdit();
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Edit />
-                </Button>
-              )}
-              <DeleteStudentModal
-                student={student!}
-                onSuccess={() => {
-                  onStudentChange?.();
-                }}
+  <>
+    {isOpen && (
+    <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300 animate-out fade-out-0 slide-out-to-bottom-4">
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => student.avatar && setShowImageViewer(true)}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+            disabled={!student.avatar}
+          >
+            <Avatar className="h-12 w-12">
+              <AvatarImage
+                src={student.avatar || undefined}
+                alt={student.name}
               />
-            </div>
+              <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
+            </Avatar>
+          </button>
+          <div>
+            <p className="font-bold text-lg">{student.name}</p>
+            <p className="text-sm text-muted-foreground">Student Details</p>
           </div>
-        </DialogHeader>
+        </div>
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <Button
+              onClick={() => {
+                onClose();
+                onEdit();
+              }}
+              variant="outline"
+              size="sm"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          <DeleteStudentModal
+            student={student!}
+            onSuccess={() => {
+              onStudentChange?.();
+            }}
+          />
+          <Button onClick={onClose} variant="ghost" size="sm" className="cursor-pointer">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
-        <Tabs defaultValue="weekly" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="weekly">Weekly View</TabsTrigger>
-            <TabsTrigger value="attendance">Analytics</TabsTrigger>
-            <TabsTrigger value="fees">Fees</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="details" className="space-y-6">
+      <Tabs defaultValue="details" className="flex-1 flex flex-col min-h-0">
+        <TabsList className="w-full justify-start sm:justify-center sm:gap-2 gap-1 px-4 py-8 border-b border-gray-200 bg-white flex">
+          <TabsTrigger value="details" className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer">Details</TabsTrigger>
+          <TabsTrigger value="monthly" className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer">Attendance</TabsTrigger>
+          <TabsTrigger value="attendance" className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer">Analytics</TabsTrigger>
+          <TabsTrigger value="fees" className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer">Fees</TabsTrigger>
+        </TabsList>
+        <div className="flex-1 overflow-y-auto px-4 py-4">
+          <TabsContent value="details" className="space-y-6 mt-0">
             {/* Basic Information */}
             <Card>
               <CardHeader>
@@ -463,110 +492,134 @@ export default function StudentDetailsModal({
               </CardContent>
             </Card>
           </TabsContent>
+<TabsContent value="monthly" className="space-y-6 mt-0">
 
-          <TabsContent value="weekly" className="space-y-6">
             {/* Date Picker */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CalendarIcon className="h-5 w-5" />
-                  Select Week
+                  Select Month and Class
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                    <Input
-                      type="date"
-                      value={format(selectedWeekStart, "yyyy-MM-dd")}
-                      onChange={(e) => {
-                        const date = new Date(e.target.value);
-                        if (!isNaN(date.getTime())) {
-                          setSelectedWeekStart(
-                            startOfWeek(date, { weekStartsOn: 6 })
-                          );
-                        }
-                      }}
-                      className="w-full sm:w-auto"
-                    />
-                    <div className="flex flex-col gap-1">
-                      <p className="text-sm font-medium text-foreground">
-                        Selected Week: {format(selectedWeekStart, "MMM dd")} -{" "}
-                        {format(addDays(selectedWeekStart, 5), "MMM dd, yyyy")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Select a date to choose the week
-                      </p>
+                <div className="flex flex-col gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="flex flex-col gap-3 p-4 border rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                      <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4" />
+                        Select Month
+                      </label>
+                      <Input
+                        type="month"
+                        value={format(selectedMonth, "yyyy-MM")}
+                        onChange={(e) => {
+                          const date = new Date(e.target.value + "-01");
+                          if (!isNaN(date.getTime())) {
+                            setSelectedMonth(date);
+                          }
+                        }}
+                        className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
                     </div>
+                    <div className="flex flex-col gap-3 p-4 border rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                      <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        Select Class
+                      </label>
+                      <Select value={selectedClass} onValueChange={setSelectedClass}>
+                        <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                          <SelectValue placeholder="Choose a class" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {studentClassesForStudent.map((sc) => (
+                            <SelectItem key={sc.classId} value={sc.classId}>
+                              {getClassName(sc.classId)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm font-medium text-blue-900">
+                      Selected Filters: {format(selectedMonth, "MMMM yyyy")}
+                      {selectedClass && ` | ${getClassName(selectedClass)}`}
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      Choose both month and class to view attendance records
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Weekly Attendance Grid */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Weekly Attendance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                  {weeklyAttendance.map((day) => (
-                    <div
-                      key={day.dateStr}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        day.status === "present"
-                          ? "border-green-500 bg-green-50"
-                          : day.status === "absent"
-                          ? "border-red-500 bg-red-50"
-                          : day.status === "late"
-                          ? "border-amber-500 bg-amber-50"
-                          : "border-gray-200 bg-gray-50"
-                      }`}
-                    >
-                      <div className="text-center">
-                        <p className="font-semibold text-sm">{day.dayName}</p>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          {day.fullDate}
-                        </p>
-                        <div className="flex justify-center">
-                          {day.status ? (
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                day.status === "present"
-                                  ? "bg-green-500"
-                                  : day.status === "absent"
-                                  ? "bg-red-500"
-                                  : "bg-amber-500"
-                              }`}
-                            >
-                              {day.status === "present" ? (
-                                <CheckCircle className="h-4 w-4 text-white" />
-                              ) : day.status === "absent" ? (
-                                <XCircle className="h-4 w-4 text-white" />
-                              ) : (
-                                <Clock className="h-4 w-4 text-white" />
-                              )}
-                            </div>
-                          ) : (
-                            <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                              <span className="text-xs text-gray-400">-</span>
-                            </div>
+            {selectedClass && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Monthly Attendance for {getClassName(selectedClass)}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
+                    {monthlyAttendance.map((day) => (
+                      <div
+                        key={day.dateStr}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          day.status === "present"
+                            ? "border-green-500 bg-green-50"
+                            : day.status === "absent"
+                            ? "border-red-500 bg-red-50"
+                            : day.status === "late"
+                            ? "border-amber-500 bg-amber-50"
+                            : "border-gray-200 bg-gray-50"
+                        }`}
+                      >
+                        <div className="text-center">
+                          <p className="font-semibold text-sm">{day.dayName}</p>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            {day.fullDate}
+                          </p>
+                          <div className="flex justify-center">
+                            {day.status ? (
+                              <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                  day.status === "present"
+                                    ? "bg-green-500"
+                                    : day.status === "absent"
+                                    ? "bg-red-500"
+                                    : "bg-amber-500"
+                                }`}
+                              >
+                                {day.status === "present" ? (
+                                  <CheckCircle className="h-4 w-4 text-white" />
+                                ) : day.status === "absent" ? (
+                                  <XCircle className="h-4 w-4 text-white" />
+                                ) : (
+                                  <Clock className="h-4 w-4 text-white" />
+                                )}
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                                <span className="text-xs text-gray-400">-</span>
+                              </div>
+                            )}
+                          </div>
+                          {day.status && (
+                            <p className="text-xs font-medium mt-1 capitalize text-center">
+                              {day.status}
+                            </p>
                           )}
                         </div>
-                        {day.status && (
-                          <p className="text-xs font-medium mt-1 capitalize text-center">
-                            {day.status}
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
-          <TabsContent value="attendance" className="space-y-6">
+          <TabsContent value="attendance" className="space-y-6 mt-0">
             {/* Attendance Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
@@ -718,7 +771,7 @@ export default function StudentDetailsModal({
             </div>
           </TabsContent>
 
-          <TabsContent value="fees" className="space-y-6">
+          <TabsContent value="fees" className="space-y-6 mt-0">
             {/* Fee Management */}
             <Card>
               <CardHeader>
@@ -812,8 +865,10 @@ export default function StudentDetailsModal({
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
-      </DialogContent>
+        </div>
+      </Tabs>
+    </div>
+  )}
 
       <EditFeeModal
         fee={selectedFee}
@@ -847,6 +902,6 @@ export default function StudentDetailsModal({
           </div>
         </DialogContent>
       </Dialog>
-    </Dialog>
+  </>
   );
 }

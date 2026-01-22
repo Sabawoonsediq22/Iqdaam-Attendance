@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Users,
   TrendingUp,
@@ -62,6 +63,7 @@ export default function Dashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAbsentModalOpen, setIsAbsentModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -120,6 +122,11 @@ export default function Dashboard() {
     (a, b) =>
       new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
   );
+
+  const absentStudents = todayAttendance
+    .filter((a) => a.status === "absent")
+    .map((a) => students.find((s) => s.id === a.studentId))
+    .filter(Boolean) as Student[];
 
   const recentActivity = sortedTodayAttendance.slice(0, 8).map((att) => {
     const student = students.find((s) => s.id === att.studentId);
@@ -446,9 +453,40 @@ export default function Dashboard() {
                 className="h-1"
               />
             </div>
+            <div className="text-right mt-2">
+              <span
+                className="text-xs text-muted-foreground hover:underline cursor-pointer"
+                onClick={() => setIsAbsentModalOpen(true)}
+              >
+                View list →
+              </span>
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isAbsentModalOpen} onOpenChange={setIsAbsentModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Absent Students Today</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto">
+            {absentStudents.length > 0 ? (
+              absentStudents.map((student) => (
+                <div key={student.id} className="flex items-center gap-2 p-2 border-b">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={student.avatar || undefined} />
+                    <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
+                  </Avatar>
+                  <span>{student.name}</span>
+                </div>
+              ))
+            ) : (
+              <p>No absent students today.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Charts and Activity Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
