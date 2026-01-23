@@ -1,10 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import Image from "next/image";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -55,34 +67,41 @@ export default function Navbar() {
             Enroll Now
           </button>
 
-          <button onClick={() => setIsOpen(!isOpen)} className="md:hidden">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 rounded-md hover:bg-gray-100 transition-transform duration-150"
+          >
             {isOpen ? (
               <X className={`w-6 h-6 text-slate-800`} />
             ) : (
               <Menu className={`w-6 h-6 text-slate-800`} />
             )}
-          </button>
+          </motion.button>
         </div>
 
-        {isOpen && (
-          <div className="md:hidden mt-4 bg-white rounded-2xl shadow-xl p-6 space-y-4">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className="block w-full text-left text-slate-700 font-medium hover:text-blue-600 transition-colors py-2"
-              >
-                {link.name}
-              </button>
-            ))}
-            <Button
-              onClick={() => scrollToSection("programs")}
-              className="w-full bg-linear-to-r from-blue-600 to-sky-600 text-white px-6 py-3 rounded-full font-medium cursor-pointer"
+        <motion.div
+          animate={{ opacity: isOpen ? 1 : 0, y: isOpen ? 0 : -12 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="md:hidden bg-white rounded-2xl shadow-lg p-6 space-y-4"
+        >
+          {navLinks.map((link) => (
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              key={link.id}
+              onClick={() => scrollToSection(link.id)}
+              className="block w-full text-left text-slate-700 font-medium hover:text-blue-600 transition-colors py-2"
             >
-              Enroll Now
-            </Button>
-          </div>
-        )}
+              {link.name}
+            </motion.button>
+          ))}
+          <Button
+            onClick={() => scrollToSection("programs")}
+            className="w-full bg-linear-to-r from-blue-600 to-sky-600 text-white px-6 py-3 rounded-full font-medium cursor-pointer"
+          >
+            Enroll Now
+          </Button>
+        </motion.div>
       </div>
     </nav>
   );

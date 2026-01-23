@@ -97,6 +97,13 @@ const menuItems = [
     description: "System Alerts",
     roles: ["admin"],
   },
+  {
+    title: "cron",
+    url: "/cron",
+    icon: Bell,
+    description: "System Alerts",
+    roles: ["admin"],
+  },
 ];
 
 // Animation variants

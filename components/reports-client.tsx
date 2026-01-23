@@ -400,14 +400,14 @@ export default function ReportsClient({ students, classes }: Props) {
             {loading ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4" />
             )}
             Refresh
           </Button>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="h-4 w-4" />
                 Schedule Reports
               </Button>
             </DropdownMenuTrigger>
@@ -782,7 +782,7 @@ export default function ReportsClient({ students, classes }: Props) {
                 <SelectTrigger>
                   <SelectValue placeholder="All Classes" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto">
                   <SelectItem value="all">All Classes</SelectItem>
                   {classes.map((cls) => (
                     <SelectItem key={cls.id} value={cls.id}>
@@ -802,7 +802,7 @@ export default function ReportsClient({ students, classes }: Props) {
                 <SelectTrigger>
                   <SelectValue placeholder="All Students" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto">
                   <SelectItem value="all">All Students</SelectItem>
                   {students.map((student) => (
                     <SelectItem key={student.id} value={student.id}>
