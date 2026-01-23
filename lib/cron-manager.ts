@@ -20,6 +20,8 @@ class CronManager {
 
   constructor() {
     this.initializeDefaultJobs();
+    // Start all jobs automatically on initialization
+    this.startAllJobs();
   }
 
   private initializeDefaultJobs() {

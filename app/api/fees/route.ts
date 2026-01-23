@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fees, students, classes, notifications } from "@/lib/schema";
+import { fees, students, classes } from "@/lib/schema";
 import { insertFeeSchema } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
+import { createNotification, notificationTemplates } from "@/lib/notifications";
 
 type FeeWithDetails = {
   id: string;
@@ -151,17 +152,14 @@ export async function POST(request: NextRequest) {
         .limit(1);
 
       if (feeDetails.length > 0) {
-        await db.insert(notifications).values({
-          title: "Fee Added",
-          message: `Fee added for student **${
-            feeDetails[0].studentName
-          }** in class **${
-            feeDetails[0].className
-          }**. New amount: ${newFeeToBePaid.toFixed(2)}؋`,
-          type: "fee",
-          entityType: "fee",
+        await createNotification({
+          ...notificationTemplates.feeAdded(
+            feeDetails[0].studentName,
+            feeDetails[0].className,
+            newFeeToBePaid.toFixed(2),
+            session.user.name
+          ),
           entityId: updatedFee[0].id,
-          userId: session.user.id,
         });
       }
 
@@ -196,13 +194,14 @@ export async function POST(request: NextRequest) {
         .limit(1);
 
       if (feeDetails.length > 0) {
-        await db.insert(notifications).values({
-          title: "Fee Added",
-          message: `Fee added for student **${feeDetails[0].studentName}** in class **${feeDetails[0].className}**. Amount: ${feeToBePaid}؋`,
-          type: "fee",
-          entityType: "fee",
+        await createNotification({
+          ...notificationTemplates.feeAdded(
+            feeDetails[0].studentName,
+            feeDetails[0].className,
+            feeToBePaid,
+            session.user.name
+          ),
           entityId: newFee[0].id,
-          userId: session.user.id,
         });
       }
 

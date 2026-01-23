@@ -299,7 +299,7 @@ export class DrizzleStorage implements IStorage {
       .from(notifications)
       .where(eq(notifications.userId, userId))
       .orderBy(notifications.createdAt)
-      .limit(100);
+      .limit(500); // Increased limit but still reasonable
   }
 
   async getUnreadNotificationsCount(): Promise<number> {

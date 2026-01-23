@@ -14,8 +14,9 @@ export interface NotificationData {
     | "info"
     | "class"
     | "student"
-    | "attendance";
-  entityType?: "class" | "student" | "attendance" | "user";
+    | "attendance"
+    | "fee";
+  entityType?: "class" | "student" | "attendance" | "user" | "fee";
   entityId?: string;
   actorName?: string;
   action?: string;
@@ -23,7 +24,7 @@ export interface NotificationData {
 
 export const createNotification = async (
   data: NotificationData,
-  userIds?: string[]
+  userIds?: string[],
 ) => {
   try {
     // If no specific users provided, create notification for all users (legacy behavior)
@@ -117,7 +118,7 @@ export const notificationTemplates = {
   classUpgraded: (
     fromClassName: string,
     toClassName: string,
-    actorName: string
+    actorName: string,
   ) => ({
     title: "Class Upgraded",
     message: `**${actorName}** promoted students from "${fromClassName}" to "${toClassName}".`,
@@ -130,7 +131,7 @@ export const notificationTemplates = {
   studentAdded: (
     studentName: string,
     className: string,
-    actorName: string
+    actorName: string,
   ) => ({
     title: "Student Added",
     message: `**${actorName}** added ${studentName} to class "${className}".`,
@@ -276,5 +277,32 @@ export const notificationTemplates = {
     type: "error" as const,
     entityType: "attendance" as const,
     action: "failed",
+  }),
+
+  feeAdded: (studentName: string, className: string, amount: string, actorName: string) => ({
+    title: "Fee Added",
+    message: `**${actorName}** added a fee of ${amount}؋ for student **${studentName}** in class **${className}**.`,
+    type: "fee" as const,
+    entityType: "fee" as const,
+    actorName,
+    action: "added",
+  }),
+
+  feeUpdated: (studentName: string, className: string, actorName: string) => ({
+    title: "Fee Updated",
+    message: `**${actorName}** updated fee information for student **${studentName}** in class **${className}**.`,
+    type: "fee" as const,
+    entityType: "fee" as const,
+    actorName,
+    action: "updated",
+  }),
+
+  feePaid: (studentName: string, className: string, amount: string, actorName: string) => ({
+    title: "Fee Payment",
+    message: `**${actorName}** recorded a payment of ${amount}؋ for student **${studentName}** in class **${className}**.`,
+    type: "success" as const,
+    entityType: "fee" as const,
+    actorName,
+    action: "paid",
   }),
 };

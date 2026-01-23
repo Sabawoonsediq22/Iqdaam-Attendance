@@ -16,7 +16,8 @@ export interface NotificationEmailData {
     | "info"
     | "class"
     | "student"
-    | "attendance";
+    | "attendance"
+    | "fee";
 }
 
 export async function sendPasswordResetEmail({
@@ -175,6 +176,8 @@ export async function sendNotificationEmail({
           return { color: "#06b6d4", icon: "👨‍🎓" };
         case "attendance":
           return { color: "#84cc16", icon: "📊" };
+        case "fee":
+          return { color: "#f97316", icon: "💰" };
         default:
           return { color: "#6b7280", icon: "📢" };
       }

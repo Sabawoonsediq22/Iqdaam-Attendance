@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fees, students, classes, notifications } from "@/lib/schema";
+import { fees, students, classes } from "@/lib/schema";
 import { updateFeeSchema } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { createNotification, notificationTemplates } from "@/lib/notifications";
 
 export async function GET(
   request: NextRequest,
@@ -129,13 +130,13 @@ export async function PUT(
       .limit(1);
 
     if (feeDetails.length > 0) {
-      await db.insert(notifications).values({
-        title: "Fee Updated",
-        message: `Fee updated for student **${feeDetails[0].studentName}** in class **${feeDetails[0].className}**.`,
-        type: "fee",
-        entityType: "fee",
+      await createNotification({
+        ...notificationTemplates.feeUpdated(
+          feeDetails[0].studentName,
+          feeDetails[0].className,
+          session.user.name
+        ),
         entityId: id,
-        userId: session.user.id,
       });
     }
 

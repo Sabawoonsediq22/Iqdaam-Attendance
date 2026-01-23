@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
-import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -25,7 +25,7 @@ export async function GET() {
         createdAt: users.createdAt,
       })
       .from(users)
-      .where(sql`${users.isApproved} = false OR ${users.isApproved} = 'false'`);
+      .where(eq(users.isApproved, false));
 
     return NextResponse.json({ users: pendingUsers });
   } catch (error) {

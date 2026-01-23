@@ -5,6 +5,8 @@ import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import type { User, Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
+// Initialize cron jobs on server startup
+import "./init";
 
 export const config = {
   secret: process.env.AUTH_SECRET,
