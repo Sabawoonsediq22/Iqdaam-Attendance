@@ -14,6 +14,7 @@ import EditStudentModal from "@/components/EditStudentModal";
 import { useQueryClient } from "@tanstack/react-query";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { Loader } from "@/components/loader";
+import { getStudentAvatarSrc } from "@/lib/utils";
 
 export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -157,7 +158,7 @@ export default function StudentsPage() {
                       >
                         <Avatar className="h-12 w-12">
                           <AvatarImage
-                            src={student.avatar || undefined}
+                            src={getStudentAvatarSrc(student.avatar, student.gender)}
                             alt={student.name}
                           />
                           <AvatarFallback>

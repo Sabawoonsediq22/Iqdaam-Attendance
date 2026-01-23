@@ -42,6 +42,7 @@ import { Loader } from "@/components/loader";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { isAfter, startOfDay, format } from "date-fns";
 import AddStudentModal from "@/components/AddStudentModal";
+import { getStudentAvatarSrc } from "@/lib/utils";
 
 function AttendancePageContent() {
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -431,7 +432,7 @@ function AttendancePageContent() {
             <CardContent>
               {isStudentsLoading ? (
                 <div className="text-center py-12">
-                  <Loader size="md" text="Loading students..." />
+                  <Loader size="md" text="please wait..." />
                 </div>
               ) : students.length === 0 ? (
                 <div className="text-center py-12">
@@ -489,7 +490,7 @@ function AttendancePageContent() {
                           onClick={() => handleStudentClick(student)}
                         >
                           <AvatarImage
-                            src={student.avatar || undefined}
+                            src={getStudentAvatarSrc(student.avatar, student.gender)}
                             alt={student.name}
                           />
                           <AvatarFallback className="text-sm sm:text-base font-semibold bg-primary/10 text-primary">
@@ -613,7 +614,7 @@ function AttendancePageContent() {
         ) : selectedClass ? (
           <Card>
             <CardContent className="flex items-center justify-center py-12">
-              <Loader size="md" text="Loading attendance data..." />
+              <Loader size="md" text="please wait..." />
             </CardContent>
           </Card>
         ) : null}

@@ -1385,7 +1385,7 @@ export default function ClassesClient() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {classesLoading ? (
           <div className="col-span-full flex justify-center py-12">
-            <Loader text="Loading classes..." />
+            <Loader text="please wait..." />
           </div>
         ) : (
           <>

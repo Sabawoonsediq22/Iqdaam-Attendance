@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getStudentAvatarSrc } from "@/lib/utils";
 import {
   XAxis,
   YAxis,
@@ -134,6 +135,7 @@ export default function Dashboard() {
       student,
       name: student?.name || "Unknown Student",
       avatar: student?.avatar || null,
+      gender: student?.gender || "male",
       status: att.status as "present" | "absent" | "late",
       time: format(new Date(att.recordedAt), "h:mm a"),
       class: studentClass?.name || "Unknown Class",
@@ -151,6 +153,7 @@ export default function Dashboard() {
         fatherName: student?.fatherName || "Unknown",
         phone: student?.phone || "N/A",
         avatar: student?.avatar || null,
+        gender: student?.gender || "male",
         class: studentClass?.name || "Unknown Class",
       };
     });
@@ -276,7 +279,7 @@ export default function Dashboard() {
   if (statsLoading && !stats) {
     return (
       <div className="col-span-full flex justify-center py-12">
-        <Loader size="md" text="Loading dashboard..." />
+        <Loader size="md" text="please wait..." />
       </div>
     );
   }
@@ -358,7 +361,7 @@ export default function Dashboard() {
                 <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 mb-3">
               <Progress value={85} className="h-1" />
             </div>
             <Link href={"/students"}
@@ -648,7 +651,7 @@ export default function Dashboard() {
                 >
                   <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-background shadow-sm shrink-0">
                     <AvatarImage
-                      src={activity.avatar || undefined}
+                      src={getStudentAvatarSrc(activity.avatar, activity.gender)}
                       alt={activity.name}
                     />
                     <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs sm:text-sm">
@@ -863,7 +866,7 @@ export default function Dashboard() {
               >
                 <Avatar className="h-16 w-16 border-2 border-background shrink-0">
                   <AvatarImage
-                    src={student.avatar || undefined}
+                    src={getStudentAvatarSrc(student.avatar, student.gender)}
                     alt={student.name}
                   />
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">

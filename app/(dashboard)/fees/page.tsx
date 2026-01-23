@@ -190,7 +190,7 @@ export default function FeesPage() {
       <OfflineIndicator />
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader size="md" text="Loading fees..." />
+          <Loader size="md" text="please wait..." />
         </div>
       ) : (
         <>

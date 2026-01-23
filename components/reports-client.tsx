@@ -62,6 +62,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getStudentAvatarSrc } from "@/lib/utils";
 import {
   BarChart,
   Bar,
@@ -86,6 +87,7 @@ interface ReportStudent {
   name: string;
   studentId: string | null;
   avatar: string | null;
+  gender: string;
 }
 
 interface AttendanceRecord {
@@ -592,7 +594,7 @@ export default function ReportsClient({ students, classes }: Props) {
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex-1 min-w-0">
                                 <p
-                                  className="font-semibold text-sm break-words leading-tight"
+                                  className="font-semibold text-sm wrap-break-word leading-tight"
                                   title={report.email}
                                 >
                                   {report.email}
@@ -617,7 +619,7 @@ export default function ReportsClient({ students, classes }: Props) {
                             {/* Next run info */}
                             <div className="bg-muted/50 rounded-lg p-3">
                               <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">
                                     Next Run
@@ -831,7 +833,7 @@ export default function ReportsClient({ students, classes }: Props) {
       {loading && (
         <Card>
           <CardContent className="flex items-center justify-center py-12">
-            <Loader text="Loading report..." />
+            <Loader text="please wait..." />
           </CardContent>
         </Card>
       )}
@@ -1160,8 +1162,8 @@ export default function ReportsClient({ students, classes }: Props) {
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-8 w-8 hidden md:block">
                                     <AvatarImage
-                                      src={record.student?.avatar || undefined}
-                                      alt={record.student?.name}
+                                      src={getStudentAvatarSrc(record.student?.avatar ?? null, record.student?.gender as string | null)}
+                                      alt={record.student?.name ?? "Unknown"}
                                     />
                                     <AvatarFallback>
                                       {getInitials(record.student?.name || "U")}

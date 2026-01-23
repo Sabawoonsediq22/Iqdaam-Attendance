@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getStudentAvatarSrc } from "@/lib/utils";
 import {
   XAxis,
   YAxis,
@@ -262,7 +263,7 @@ export default function Dashboard() {
   if (statsLoading && !stats) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader size="md" text="Loading Dashboard..." />
+        <Loader size="md" text="please wait..." />
       </div>
     );
   }
@@ -475,7 +476,7 @@ export default function Dashboard() {
               absentStudents.map((student) => (
                 <div key={student.id} className="flex items-center gap-2 p-2 border-b">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={student.avatar || undefined} />
+                    <AvatarImage src={getStudentAvatarSrc(student.avatar, student.gender)} />
                     <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
                   </Avatar>
                   <span>{student.name}</span>

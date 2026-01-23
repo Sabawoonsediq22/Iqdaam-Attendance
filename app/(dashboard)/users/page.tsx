@@ -301,7 +301,7 @@ export default function UsersPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader size="md" text="Loading users..." />
+        <Loader size="md" text="please wait..." />
       </div>
     );
   }

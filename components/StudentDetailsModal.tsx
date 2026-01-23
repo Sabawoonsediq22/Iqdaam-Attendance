@@ -61,6 +61,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EditFeeModal from "./EditFeeModal";
 import AddFeeModal from "./AddFeeModal";
+import { getStudentAvatarSrc } from "@/lib/utils";
 
 type FeeWithDetails = {
   id: string;
@@ -338,13 +339,12 @@ export default function StudentDetailsModal({
           <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => student.avatar && setShowImageViewer(true)}
+                onClick={() => setShowImageViewer(true)}
                 className="cursor-pointer hover:opacity-80 transition-opacity"
-                disabled={!student.avatar}
               >
                 <Avatar className="h-12 w-12">
                   <AvatarImage
-                    src={student.avatar || undefined}
+                    src={getStudentAvatarSrc(student.avatar, student.gender)}
                     alt={student.name}
                   />
                   <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
@@ -949,7 +949,7 @@ export default function StudentDetailsModal({
           </DialogHeader>
           <div className="relative w-full h-[70vh]">
             <Image
-              src={student.avatar || ""}
+              src={getStudentAvatarSrc(student.avatar, student.gender) || ""}
               alt={`${student.name} avatar`}
               fill
               className="object-contain rounded-b-lg"
