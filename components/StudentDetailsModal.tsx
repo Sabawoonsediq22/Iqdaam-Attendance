@@ -867,7 +867,7 @@ export default function StudentDetailsModal({
                                       : "Pending"}
                                   </Badge>
                                 )}
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                <div className="flex items-center gap-2">
                                   <h4 className="font-semibold text-sm sm:text-base">
                                     {classInfo?.name || "Unknown Class"}
                                   </h4>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import {
   Users,
   TrendingUp,
@@ -21,6 +22,9 @@ import {
   RefreshCw,
   ChevronRight,
   Plus,
+  ArrowRight,
+  Phone,
+  BookOpen,
 } from "lucide-react";
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -62,6 +66,7 @@ export default function Dashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAbsentModalOpen, setIsAbsentModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -134,6 +139,21 @@ export default function Dashboard() {
       class: studentClass?.name || "Unknown Class",
     };
   });
+
+  const absentStudents = todayAttendance
+    .filter((att) => att.status === "absent")
+    .map((att) => {
+      const student = students.find((s) => s.id === att.studentId);
+      const studentClass = classes.find((c) => c.id === att.classId);
+      return {
+        id: att.studentId,
+        name: student?.name || "Unknown Student",
+        fatherName: student?.fatherName || "Unknown",
+        phone: student?.phone || "N/A",
+        avatar: student?.avatar || null,
+        class: studentClass?.name || "Unknown Class",
+      };
+    });
 
   const attendanceDistribution = [
     { name: "Present", value: stats?.presentToday || 0, color: "#00C49F" },
@@ -341,6 +361,12 @@ export default function Dashboard() {
             <div className="mt-4">
               <Progress value={85} className="h-1" />
             </div>
+            <Link href={"/students"}
+              className="absolute bottom-2 right-2 text-xs text-muted-foreground hover:underline cursor-pointer"
+            >
+              View list
+              <ArrowRight className="inline-block h-3 w-3 ml-1" />
+            </Link>
           </CardContent>
         </Card>
 
@@ -447,6 +473,13 @@ export default function Dashboard() {
                 className="h-1"
               />
             </div>
+            <p
+              className="absolute bottom-2 right-2 text-xs text-muted-foreground hover:underline cursor-pointer"
+              onClick={() => setIsAbsentModalOpen(true)}
+            >
+              View list
+              <ArrowRight className="inline-block h-3 w-3 ml-1" />
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -658,6 +691,25 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="space-y-3 px-4 sm:px-6">
               <Button
+                variant="outline"
+                className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex items-center gap-3"
+                onClick={() => setIsAbsentModalOpen(true)}
+              >
+                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-secondary-foreground" />
+                </div>
+                <div className="text-left min-w-0 flex-1">
+                  <p className="font-semibold text-sm sm:text-base truncate">
+                    View today's absent students
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                    See who is marked absent today
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
+              </Button>
+
+              <Button
                 asChild
                 variant="outline"
                 className="w-full justify-start h-auto p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow"
@@ -792,6 +844,57 @@ export default function Dashboard() {
         description={`Are you sure you want to delete ${selectedStudent?.name}? This action cannot be undone.`}
         isDeleting={isDeleting}
       />
+
+      <ResponsiveDialog
+        open={isAbsentModalOpen}
+        onOpenChange={setIsAbsentModalOpen}
+        title="Absent Students Today"
+      >
+        {absentStudents.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No students are absent today.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {absentStudents.map((student) => (
+              <li
+                key={student.id}
+                className="flex items-center gap-3 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+              >
+                <Avatar className="h-16 w-16 border-2 border-background shrink-0">
+                  <AvatarImage
+                    src={student.avatar || undefined}
+                    alt={student.name}
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {getInitials(student.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="font-semibold text-sm truncate">{student.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {student.fatherName}
+                  </p>
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <p className="font-semibold text-sm truncate">
+                    {student.phone}
+                  </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground truncate">
+                      {student.class}
+                    </p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </ResponsiveDialog>
     </div>
   );
 }
