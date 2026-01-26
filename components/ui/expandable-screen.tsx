@@ -51,8 +51,8 @@ export function ExpandableScreen({
   defaultExpanded = false,
   onExpandChange,
   layoutId = "expandable-card",
-  triggerRadius = "100px",
-  contentRadius = "24px",
+  triggerRadius = "0",
+  contentRadius = "0",
   animationDuration = 0.3,
   lockScroll = true,
 }: ExpandableScreenProps) {
@@ -158,7 +158,7 @@ export function ExpandableScreenContent({
   return (
     <AnimatePresence initial={false}>
       {isExpanded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Morphing background with shared layoutId */}
           <motion.div
             layoutId={layoutId}
@@ -183,7 +183,7 @@ export function ExpandableScreenContent({
                 onClick={collapse}
                 className={`absolute right-6 top-6 z-30 flex h-10 w-10 cursor-pointer items-center justify-center transition-colors rounded-full ${
                   closeButtonClassName ||
-                  "text-white bg-transparent hover:bg-white/10"
+                  "text-black bg-gray-200 hover:bg-gray-300 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
                 }`}
                 aria-label="Close"
               >

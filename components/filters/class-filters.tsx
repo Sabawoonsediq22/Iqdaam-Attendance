@@ -26,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertClassSchema } from "@/lib/schema";
 import { toast } from "sonner";
 import type { InsertClass } from "@/lib/schema";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Paintbrush } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
 
@@ -104,15 +104,15 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   return (
     <div className="relative z-10 flex flex-col lg:flex-row h-full w-full max-w-[1100px] mx-auto items-center p-6 sm:p-10 lg:p-16 gap-8 lg:gap-16">
       <div className="flex-1 flex flex-col justify-center space-y-3 w-full">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium text-primary-foreground leading-none tracking-[-0.03em]">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-none tracking-[-0.03em]">
           Add New Class
         </h2>
 
         <div className="space-y-4 sm:space-y-6 pt-4">
           <div className="flex gap-3 sm:gap-4">
-            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary-foreground/10 flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
               <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground"
+                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -127,16 +127,16 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
               </svg>
             </div>
             <div>
-              <p className="text-sm sm:text-base text-primary-foreground leading-[150%]">
+              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
                 Create a new class to organize your students and track
                 attendance efficiently.
               </p>
             </div>
           </div>
           <div className="flex gap-3 sm:gap-4">
-            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary-foreground/10 flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
               <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground"
+                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -151,7 +151,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
               </svg>
             </div>
             <div>
-              <p className="text-sm sm:text-base text-primary-foreground leading-[150%]">
+              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
                 Set up class schedules, assign teachers, and manage student
                 enrollment.
               </p>
@@ -160,14 +160,14 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
         </div>
       </div>
 
-      <div className="flex-1 w-full">
+      <div className="flex-1 w-full border px-4 py-4 sm:px-16 sm:py-6 rounded-lg bg-muted/30 shadow">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 sm:space-y-5"
           >
             <div>
-              <FormLabel className="mb-3 text-white">
+              <FormLabel className="mb-3 text-foreground">
                 CLASS NAME *
               </FormLabel>
               <FormControl>
@@ -180,7 +180,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             <div>
-              <FormLabel className="mb-3 text-white">
+              <FormLabel className="mb-3 text-foreground">
                 TEACHER *
               </FormLabel>
               <FormControl>
@@ -193,7 +193,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             <div>
-              <FormLabel className="mb-3 text-white">
+              <FormLabel className="mb-3 text-foreground">
                 TIME *
               </FormLabel>
               <FormControl>
@@ -207,7 +207,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <FormLabel className="mb-3 text-white">
+                <FormLabel className="mb-3 text-foreground">
                   START DATE *
                 </FormLabel>
                 <FormControl>
@@ -219,7 +219,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
                 <FormMessage />
               </div>
               <div className="flex-1">
-                <FormLabel className="mb-3 text-white">
+                <FormLabel className="mb-3 text-foreground">
                   END DATE (OPTIONAL)
                 </FormLabel>
                 <FormControl>
@@ -233,7 +233,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             <div>
-              <FormLabel className="mb-3 text-white">
+              <FormLabel className="mb-3 text-foreground">
                 DESCRIPTION
               </FormLabel>
               <FormControl>
@@ -252,14 +252,14 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
                 variant="outline"
                 onClick={collapse}
                 disabled={isSubmitting}
-                className="flex-1 px-8 py-2.5 rounded-full bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 transition-colors tracking-[-0.03em] h-10 cursor-pointer"
+                className="flex-1 px-8 py-2.5 rounded-full transition-colors tracking-[-0.03em] h-10 cursor-pointer"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-8 py-2.5 rounded-full bg-primary-foreground text-primary font-medium hover:bg-primary-foreground/90 transition-colors tracking-[-0.03em] h-10 cursor-pointer"
+                className="flex-1 px-8 py-2.5 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors tracking-[-0.03em] h-10 cursor-pointer"
               >
                 {isSubmitting && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -278,8 +278,6 @@ function AddClassForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <ExpandableScreen
       layoutId="add-class-screen"
-      triggerRadius="100px"
-      contentRadius="24px"
     >
       <ExpandableScreenTrigger>
         <Button variant="default" className="cursor-pointer w-full">
@@ -287,7 +285,7 @@ function AddClassForm({ onSuccess }: { onSuccess: () => void }) {
           Add Class
         </Button>
       </ExpandableScreenTrigger>
-      <ExpandableScreenContent className="bg-primary">
+      <ExpandableScreenContent className="bg-background">
         <AddClassFormContent onSuccess={onSuccess} />
       </ExpandableScreenContent>
     </ExpandableScreen>
@@ -355,7 +353,8 @@ export function ClassFilters({
             onClick={clearAllFilters}
             className="text-muted-foreground hover:text-foreground cursor-pointer"
           >
-            Clear All
+            <Paintbrush className="h-4 w-4" />
+            <span className="hidden sm:block">Clear All</span>
           </Button>
         </div>
 
@@ -373,3 +372,4 @@ export function ClassFilters({
     </div>
   );
 }
+

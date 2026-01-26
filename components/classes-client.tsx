@@ -416,7 +416,7 @@ function EditClassModal({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[600px] w-full sm:rounded-lg sm:max-h-[90vh] h-screen overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -424,8 +424,9 @@ function EditClassModal({
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
               <DialogHeader>
-                <DialogTitle>Edit Class</DialogTitle>
+                <DialogTitle className="text-xl sm:text-2xl text-start font-medium leading-none tracking-[-0.03em]">Edit Class</DialogTitle>
               </DialogHeader>
+              <div className="flex-1 w-full border px-4 py-4 sm:py-6 rounded-lg bg-muted/30 shadow mt-6">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -438,7 +439,7 @@ function EditClassModal({
                       <FormItem>
                         <FormLabel>Class Name *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter class name" {...field} />
+                          <Input placeholder="Enter class name" {...field} className="mt-1" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -451,7 +452,7 @@ function EditClassModal({
                       <FormItem>
                         <FormLabel>Teacher *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter teacher name" {...field} />
+                          <Input placeholder="Enter teacher name" {...field} className="mt-1" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -466,7 +467,7 @@ function EditClassModal({
                         <FormControl>
                           <Input
                             placeholder="e.g., 9:00 AM - 10:30 AM"
-                            {...field}
+                            {...field} className="mt-1"
                           />
                         </FormControl>
                         <FormMessage />
@@ -480,7 +481,7 @@ function EditClassModal({
                       <FormItem>
                         <FormLabel>Start Date *</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" {...field} className="mt-1" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -496,7 +497,7 @@ function EditClassModal({
                           <Input
                             type="date"
                             {...field}
-                            value={field.value || ""}
+                            value={field.value || ""} className="mt-1"
                           />
                         </FormControl>
                         <FormMessage />
@@ -512,7 +513,7 @@ function EditClassModal({
                         <FormControl>
                           <Textarea
                             placeholder="Enter class description (optional)"
-                            className="resize-none"
+                            className="resize-none mt-1"
                             {...field}
                             value={field.value || ""}
                           />
@@ -527,14 +528,14 @@ function EditClassModal({
                       variant="outline"
                       onClick={() => setOpen(false)}
                       disabled={isSubmitting}
-                      className="cursor-pointer"
+                      className="cursor-pointer w-full sm:w-auto"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="cursor-pointer"
+                      className="cursor-pointer w-full sm:w-auto"
                     >
                       {isSubmitting && (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -544,6 +545,7 @@ function EditClassModal({
                   </div>
                 </form>
               </Form>
+              </div>
             </motion.div>
           </DialogContent>
         )}

@@ -299,12 +299,12 @@ export default function Dashboard() {
                 today.
               </p>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
-                <span>Last updated: {format(lastRefresh, "HH:mm")}</span>
+                <span>Last updated: {format(lastRefresh, "h:mm a")}</span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleRefresh}
-                  className="h-8 px-2 w-fit"
+                  className="h-8 px-2 w-fit cursor-pointer"
                 >
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Refresh
@@ -467,7 +467,7 @@ export default function Dashboard() {
                 <UserX className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 mb-3">
               <Progress
                 value={
                   ((stats?.absentToday || 0) / (stats?.totalStudents || 1)) *
