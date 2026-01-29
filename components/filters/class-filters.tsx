@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "./search-input";
 import { HourFilter } from "./hour-filter";
@@ -29,6 +29,8 @@ import type { InsertClass } from "@/lib/schema";
 import { Plus, Loader2, Paintbrush } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
+import { TimepickerUI } from "timepicker-ui";
+import "timepicker-ui/index.css";
 
 // Types for filtering
 interface ClassFilters {
@@ -48,6 +50,8 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   const { collapse } = useExpandableScreen();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [selectedTime, setSelectedTime] = useState("");
 
   const form = useForm<InsertClass>({
     resolver: zodResolver(insertClassSchema),
@@ -56,10 +60,25 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
       teacher: "",
       time: "",
       startDate: "",
-      endDate: undefined,
+      endDate: "",
       description: "",
     },
   });
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    const picker = new TimepickerUI(inputRef.current, {
+      callbacks: {
+        onConfirm: (data) => {
+          const time = `${data.hour}:${data.minutes}${data.type ? " " + data.type : ""}`;
+          setSelectedTime(time);
+          form.setValue("time", time);
+        },
+      },
+    });
+    picker.create();
+    return () => picker.destroy();
+  }, [form]);
 
   const onSubmit = async (data: InsertClass) => {
     setIsSubmitting(true);
@@ -198,8 +217,11 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="e.g., 9:00 AM - 10:30 AM"
-                  {...form.register("time")}
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Select time"
+                  value={selectedTime}
+                  readOnly
                 />
               </FormControl>
               <FormMessage />

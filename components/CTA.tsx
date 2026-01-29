@@ -1,7 +1,11 @@
 import { ArrowRight, Phone } from "lucide-react";
 
 export default function CTA() {
-  const phoneNumber = "+93711163551"; // Replace with actual phone number
+  const phoneNumber = "+93711163551";
+  const item= [{ label: "Flexible Timings", value: "Morning & Evening" },
+    { label: "Affordable Fees", value: "Best Value" },
+    { label: "Quick Start", value: "Enroll Today" },
+  ];
 
   const openWhatsApp = () => {
     const message =
@@ -36,7 +40,18 @@ export default function CTA() {
               futures with quality education at Iqdaam
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              {item.map((item, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-2xl font-bold text-white mb-2">
+                    {item.value}
+                  </div>
+                  <div className="text-white/80">{item.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-10">
               <button
                 onClick={() => openWhatsApp()}
                 className="group bg-white text-blue-600 px-8 py-2 rounded-full font-semibold text-lg hover:shadow-2xl transform hover:scale-105 transition-all flex items-center space-x-2 cursor-pointer"
@@ -51,21 +66,6 @@ export default function CTA() {
                 <Phone className="w-5 h-5" />
                 <span>Contact Us</span>
               </button>
-            </div>
-
-            <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              {[
-                { label: "Flexible Timings", value: "Morning & Evening" },
-                { label: "Affordable Fees", value: "Best Value" },
-                { label: "Quick Start", value: "Enroll Today" },
-              ].map((item, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-2xl font-bold text-white mb-2">
-                    {item.value}
-                  </div>
-                  <div className="text-white/80">{item.label}</div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
