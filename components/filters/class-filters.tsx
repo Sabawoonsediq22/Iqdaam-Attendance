@@ -68,6 +68,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   useEffect(() => {
     if (!inputRef.current) return;
     const picker = new TimepickerUI(inputRef.current, {
+      ui: { theme: "ai" },
       callbacks: {
         onConfirm: (data) => {
           const time = `${data.hour}:${data.minutes}${data.type ? " " + data.type : ""}`;
@@ -121,7 +122,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="relative z-10 flex flex-col lg:flex-row h-full w-full max-w-[1100px] mx-auto items-center p-6 sm:p-10 lg:p-16 gap-8 lg:gap-16">
+    <div className="relative z-10 flex flex-col lg:flex-row h-full w-full max-w-[1200px] mx-auto items-center p-6 sm:p-10 lg:p-16 gap-8 lg:gap-16">
       <div className="flex-1 flex flex-col justify-center space-y-3 w-full">
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-none tracking-[-0.03em]">
           Add New Class

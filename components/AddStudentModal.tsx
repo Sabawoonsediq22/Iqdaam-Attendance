@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -165,21 +164,75 @@ export default function AddStudentModal({
       </DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="h-screen">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex flex-col lg:flex-row h-screen w-full mx-auto items-center sm:px-10 md:px-22 gap-8 lg:gap-16 sm:my-6"
             >
-              <DialogHeader className="mb-2">
-                <DialogTitle>Add New Student</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
+              <DialogTitle></DialogTitle>
+              <div className="flex-1 flex flex-col justify-center space-y-3 w-full">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-none tracking-[-0.03em]">
+                  Add Student
+                </h2>
+
+                <div className="space-y-4 sm:space-y-6 pt-4">
+                  <div className="flex gap-3 sm:gap-4">
+                    <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <title>Icon</title>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
+                        Enter student details such as name, father&apos;s name, gender, and contact information.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 sm:gap-4">
+                    <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <title>Icon</title>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
+                        Ensure all information is accurate before adding the student.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 w-full border px-4 py-4 sm:px-16 sm:py-6 rounded-lg bg-muted/30 shadow">
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                  >
                   <FormField
                     control={form.control}
                     name="studentId"
@@ -456,6 +509,7 @@ export default function AddStudentModal({
                   </div>
                 </form>
               </Form>
+            </div>
             </motion.div>
           </DialogContent>
         )}

@@ -27,7 +27,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -416,17 +415,72 @@ function EditClassModal({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="sm:max-w-[600px] w-full sm:rounded-lg sm:max-h-[90vh] h-screen overflow-y-auto">
+          <DialogContent className="h-screen">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex flex-col lg:flex-row h-screen w-full mx-auto items-center sm:px-10 md:px-22 gap-8 lg:gap-16"
             >
-              <DialogHeader>
-                <DialogTitle className="text-xl sm:text-2xl text-start font-medium leading-none tracking-[-0.03em]">Edit Class</DialogTitle>
-              </DialogHeader>
-              <div className="flex-1 w-full border px-4 py-4 sm:py-6 rounded-lg bg-muted/30 shadow mt-6">
+                <DialogTitle></DialogTitle>
+
+              <div className="flex-1 flex flex-col justify-center space-y-3 w-full">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-none tracking-[-0.03em]">
+                Edit Class
+              </h2>
+
+        <div className="space-y-4 sm:space-y-6 pt-4">
+          <div className="flex gap-3 sm:gap-4">
+            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <title>Icon</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
+                Modify class details such as name, teacher, schedule, and dates.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3 sm:gap-4">
+            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <title>Icon</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
+                Ensure all information is accurate before saving changes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+              <div className="flex-1 w-full border px-4 py-6 sm:px-16 sm:py-6 rounded-lg bg-muted/30 shadow">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -464,16 +518,14 @@ function EditClassModal({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Time *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., 9:00 AM - 10:30 AM"
-                            {...field} className="mt-1"
-                          />
-                        </FormControl>
+                          <FormControl>
+                            <Input placeholder="Select time" {...field}
+                            className="mt-1" />
+                          </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
+                      )}
+                    />
                   <FormField
                     control={form.control}
                     name="startDate"
