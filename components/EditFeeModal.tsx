@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -24,7 +23,7 @@ import { toast } from "sonner";
 import type { UpdateFee } from "@/lib/schema";
 import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
-import { Loader2 } from "lucide-react";
+import { DollarSign, GraduationCap, Loader2, User } from "lucide-react";
 
 type FeeWithDetails = {
   id: string;
@@ -117,19 +116,27 @@ export default function EditFeeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-[500px] max-h-[90vh] overflow-y-auto rounded-lg">
-        <DialogHeader>
-          <DialogTitle>Edit Fee Payment</DialogTitle>
-        </DialogHeader>
-        <div className="mb-2 p-2 bg-muted rounded-lg">
-          <h4 className="font-medium">{fee.studentName}</h4>
-          <p className="text-sm text-muted-foreground">
-            Class: {fee.className} | Teacher: {fee.teacherName}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Total Fee: {fee.feeToBePaid}؋
-          </p>
+      <DialogContent className="w-full sm:max-w-[500px] h-screen sm:max-h-[90vh] overflow-y-auto sm:rounded-lg rounded-none">
+          <DialogTitle className="text-lg text-start">Edit Fee Payment</DialogTitle>
+        <div className="mb-4 p-4 rounded-lg bg-muted/30 shadow-sm border">
+          <div className="flex items-center gap-2 mb-2">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <h4 className="font-medium text-foreground">{fee.studentName}</h4>
+          </div>
+          <div className="flex items-center gap-2 mb-1">
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Class: {fee.className} | Teacher: {fee.teacherName}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Total Fee: {parseFloat(fee.feeToBePaid).toLocaleString()}؋
+            </p>
+          </div>
         </div>
+        <div className="p-2 sm:p-4 rounded-lg py-4 bg-muted/30 shadow border">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
@@ -210,20 +217,20 @@ export default function EditFeeModal({
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex sm:justify-end justify-center items-center space-x-2 mt-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="cursor-pointer w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="cursor-pointer w-full sm:w-auto"
               >
                 {isSubmitting && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -233,6 +240,7 @@ export default function EditFeeModal({
             </div>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

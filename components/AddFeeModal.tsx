@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -121,10 +120,9 @@ export default function AddFeeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add New Fee</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[600px] w-full sm:rounded-lg sm:max-h-[90vh] h-screen overflow-y-auto">
+          <DialogTitle className="text-lg text-start">Add New Fee</DialogTitle>
+        <div className="p-2 sm:p-4 rounded-lg py-4 bg-muted/30 shadow border">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -436,20 +434,20 @@ export default function AddFeeModal({
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex sm:justify-end justify-center item-center space-x-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="cursor-pointer w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="cursor-pointer"
+                className="cursor-pointer w-full sm:w-auto"
               >
                 {isSubmitting && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -459,6 +457,7 @@ export default function AddFeeModal({
             </div>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

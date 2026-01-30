@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -182,6 +183,10 @@ export default function StudentDetailsModal({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addFeeDefaults, setAddFeeDefaults] = useState<Partial<InsertFee>>({});
 
+  const [isTabsVisible, setIsTabsVisible] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
   const { data: classes = [] } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
   });
@@ -233,6 +238,30 @@ export default function StudentDetailsModal({
     return () => {
       document.body.style.overflow = "unset";
     };
+  }, [isOpen]);
+
+  // Handle scroll-based tab visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+
+      const currentScrollY = scrollContainerRef.current.scrollTop;
+      const scrollDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
+
+      if (scrollDirection === 'down' && currentScrollY > 10) {
+        setIsTabsVisible(false);
+      } else if (scrollDirection === 'up' || currentScrollY <= 10) {
+        setIsTabsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+      return () => scrollContainer.removeEventListener('scroll', handleScroll);
+    }
   }, [isOpen]);
 
   // Effective selected class: use user selection or auto-select first
@@ -336,7 +365,7 @@ export default function StudentDetailsModal({
     <>
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300 animate-out fade-out-0 slide-out-to-bottom-4">
-          <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm">
+          <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowImageViewer(true)}
@@ -378,7 +407,7 @@ export default function StudentDetailsModal({
                 onClick={onClose}
                 variant="ghost"
                 size="sm"
-                className="cursor-pointer"
+                className="cursor-pointer bg-gray-100"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -386,27 +415,35 @@ export default function StudentDetailsModal({
           </div>
 
           <Tabs defaultValue="details" className="flex-1 flex flex-col min-h-0">
-            <TabsList className="w-full justify-start sm:justify-center sm:gap-2 gap-1 px-4 py-8 border-b border-gray-200 bg-white flex">
-              <TabsTrigger
-                value="details"
-                className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
-              >
-                Details
-              </TabsTrigger>
-              <TabsTrigger
-                value="monthly"
-                className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
-              >
-                Attendance
-              </TabsTrigger>
-              <TabsTrigger
-                value="fees"
-                className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
-              >
-                Fees
-              </TabsTrigger>
-            </TabsList>
-            <div className="flex-1 overflow-y-auto px-4 py-4">
+            <motion.div
+              animate={{
+                opacity: isTabsVisible ? 1 : 0,
+                y: isTabsVisible ? 0 : -10,
+              }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <TabsList className={`${isTabsVisible ? "h-12 px-4 sm:py-8 py-6" : "h-0 p-0 overflow-hidden hidden"} bg-transparent border-b border-gray-200 gap-2 sm:gap-3 transition-all flex justify-center w-full`}>
+                <TabsTrigger
+                  value="details"
+                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
+                >
+                  Details
+                </TabsTrigger>
+                <TabsTrigger
+                  value="monthly"
+                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
+                >
+                  Attendance
+                </TabsTrigger>
+                <TabsTrigger
+                  value="fees"
+                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
+                >
+                  Fees
+                </TabsTrigger>
+              </TabsList>
+            </motion.div>
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-4">
               <TabsContent value="details" className="space-y-6 mt-0">
                 {/* Basic Information */}
                 <Card>
@@ -960,3 +997,4 @@ export default function StudentDetailsModal({
     </>
   );
 }
+
