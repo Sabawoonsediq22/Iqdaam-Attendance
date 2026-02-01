@@ -83,7 +83,7 @@ export default function Navbar() {
         <motion.div
           animate={{ opacity: isOpen ? 1 : 0, y: isOpen ? 0 : -12 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="md:hidden bg-white rounded-2xl shadow-lg p-6 space-y-4"
+          className={`md:hidden bg-white rounded-2xl shadow-lg p-6 space-y-4 ${isOpen ? 'block' : 'hidden'}`}
         >
           {navLinks.map((link) => (
             <motion.button
