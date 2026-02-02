@@ -418,11 +418,13 @@ export default function StudentDetailsModal({
             <motion.div
               animate={{
                 opacity: isTabsVisible ? 1 : 0,
+                height: isTabsVisible ? "auto" : 0,
                 y: isTabsVisible ? 0 : -10,
               }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
+              style={{ overflow: "hidden" }}
             >
-              <TabsList className={`${isTabsVisible ? "h-12 px-4 sm:py-8 py-6" : "h-0 p-0 overflow-hidden hidden"} bg-transparent border-b border-gray-200 gap-2 sm:gap-3 transition-all flex justify-center w-full`}>
+              <TabsList className="h-12 px-4 sm:py-8 py-6 bg-transparent border-b border-gray-200 gap-2 sm:gap-3 flex justify-center w-full">
                 <TabsTrigger
                   value="details"
                   className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
