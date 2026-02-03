@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -183,10 +182,6 @@ export default function StudentDetailsModal({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addFeeDefaults, setAddFeeDefaults] = useState<Partial<InsertFee>>({});
 
-  const [isTabsVisible, setIsTabsVisible] = useState(true);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const lastScrollY = useRef(0);
-
   const { data: classes = [] } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
   });
@@ -238,30 +233,6 @@ export default function StudentDetailsModal({
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
-
-  // Handle scroll-based tab visibility
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!scrollContainerRef.current) return;
-
-      const currentScrollY = scrollContainerRef.current.scrollTop;
-      const scrollDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
-
-      if (scrollDirection === 'down' && currentScrollY > 10) {
-        setIsTabsVisible(false);
-      } else if (scrollDirection === 'up' || currentScrollY <= 10) {
-        setIsTabsVisible(true);
-      }
-
-      lastScrollY.current = currentScrollY;
-    };
-
-    const scrollContainer = scrollContainerRef.current;
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-      return () => scrollContainer.removeEventListener('scroll', handleScroll);
-    }
   }, [isOpen]);
 
   // Effective selected class: use user selection or auto-select first
@@ -415,14 +386,7 @@ export default function StudentDetailsModal({
           </div>
 
           <Tabs defaultValue="details" className="flex-1 flex flex-col min-h-0">
-            <motion.div
-              animate={{
-                opacity: isTabsVisible ? 1 : 0,
-                height: isTabsVisible ? "auto" : 0,
-                y: isTabsVisible ? 0 : -10,
-              }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              style={{ overflow: "hidden" }}
+            <div
             >
               <TabsList className="h-12 px-4 sm:py-8 py-6 bg-transparent border-b border-gray-200 gap-2 sm:gap-3 flex justify-center w-full">
                 <TabsTrigger
@@ -444,8 +408,8 @@ export default function StudentDetailsModal({
                   Fees
                 </TabsTrigger>
               </TabsList>
-            </motion.div>
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-4">
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-4">
               <TabsContent value="details" className="space-y-6 mt-0">
                 {/* Basic Information */}
                 <Card>

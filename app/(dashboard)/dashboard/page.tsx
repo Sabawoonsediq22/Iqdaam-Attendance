@@ -852,6 +852,7 @@ export default function Dashboard() {
         open={isAbsentModalOpen}
         onOpenChange={setIsAbsentModalOpen}
         title="Absent Students Today"
+        contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
       >
         {absentStudents.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">

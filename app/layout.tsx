@@ -12,6 +12,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Iqdaam Educational Center",
   description: "Track student attendance across classes",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+  },
 };
 
 export default function RootLayout({
