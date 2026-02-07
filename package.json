@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx ./scripts/seed.ts",
-    "cleanup-notifications": "tsx ./scripts/cleanup-notifications.ts",
-    "test-cron": "tsx ./scripts/test-cron.ts"
+    "cleanup-notifications": "tsx ./scripts/cleanup-notifications.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -59,7 +58,6 @@
     "next": "^16.0.8",
     "next-auth": "^5.0.0-beta.30",
     "next-themes": "^0.4.6",
-    "node-cron": "^4.2.1",
     "pg": "^8.16.3",
     "postgres": "^3.4.7",
     "react": "19.2.0",

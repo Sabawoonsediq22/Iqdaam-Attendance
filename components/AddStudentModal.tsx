@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -61,6 +60,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { AnimatePresence } from "framer-motion";
 
 interface AddStudentModalProps {
   cls?: Class;
@@ -164,13 +164,8 @@ export default function AddStudentModal({
       </DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="h-screen">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className={`flex flex-col lg:flex-row h-screen w-full mx-auto items-center sm:px-10 md:px-22 gap-8 lg:gap-16 sm:my-6 ${!cls && "sm:my-16"}`}
+          <DialogContent className="h-full">
+            <div className={`flex flex-col lg:flex-row h-screen w-full mx-auto items-center sm:px-10 md:px-22 gap-8 lg:gap-16 sm:my-6 ${!cls && "sm:my-16"}`}
             >
               <DialogTitle></DialogTitle>
               <div className="flex-1 flex flex-col justify-center space-y-3 w-full">
@@ -510,7 +505,7 @@ export default function AddStudentModal({
                 </form>
               </Form>
             </div>
-            </motion.div>
+            </div>
           </DialogContent>
         )}
       </AnimatePresence>

@@ -415,7 +415,7 @@ function EditClassModal({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="h-screen">
+          <DialogContent className=" h-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -480,7 +480,7 @@ function EditClassModal({
         </div>
       </div>
 
-              <div className="flex-1 w-full border px-4 py-6 sm:px-16 sm:py-6 rounded-lg bg-muted/30 shadow">
+              <div className="flex-1 w-full border px-4 py-6 sm:px-16 sm:py-6 rounded-lg bg-muted/30 shadow mb-8 md:mb-0">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
