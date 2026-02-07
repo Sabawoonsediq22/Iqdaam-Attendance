@@ -10,8 +10,9 @@ export async function GET() {
         id: "report-scheduler",
         name: "Scheduled Reports Processor",
         path: "/api/cron/reports",
-        schedule: "* * * * *",
-        description: "Checks and sends scheduled reports every minute",
+        schedule: "0 9 * * *",
+        description:
+          "Checks and sends scheduled reports daily at 9 AM UTC (1:30 PM local time)",
       },
       {
         id: "daily-cleanup",
