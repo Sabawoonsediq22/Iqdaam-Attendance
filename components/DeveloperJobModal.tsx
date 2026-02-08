@@ -35,7 +35,7 @@ export default function DeveloperJobModal() {
           data.jobs.map((job: Omit<Job, "status">) => ({
             ...job,
             status: "idle" as JobStatus,
-          }))
+          })),
         );
       } else {
         toast.error("Failed to load jobs");
@@ -92,8 +92,8 @@ export default function DeveloperJobModal() {
 
   // Keyboard listener for opening the modal
   useEffect(() => {
+    // Desktop shortcut: Ctrl+Shift+J or Cmd+Shift+J
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for Ctrl + Shift + J (Windows/Linux) or Cmd + Shift + J (macOS)
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "J") {
         e.preventDefault();
         setIsOpen(true);
@@ -101,10 +101,39 @@ export default function DeveloperJobModal() {
       }
     };
 
+     // Mobile touch shortcut: Triple tap on body (for debugging on touch devices)
+    let tapCount = 0;
+    let lastTapTime = 0;
+    
+    const handleTouchStart = () => {
+      const currentTime = Date.now();
+      const timeSinceLastTap = currentTime - lastTapTime;
+      
+      if (timeSinceLastTap < 500) {
+        tapCount++;
+      } else {
+        tapCount = 1;
+      }
+      
+      lastTapTime = currentTime;
+      
+      if (tapCount === 3) {
+        tapCount = 0;
+        setIsOpen(prevIsOpen => {
+          if (!prevIsOpen) {
+            loadJobs();
+          }
+          return !prevIsOpen;
+        });
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
+    document.body.addEventListener("touchstart", handleTouchStart);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      document.body.removeEventListener("touchstart", handleTouchStart);
     };
   }, []);
 
@@ -152,8 +181,8 @@ export default function DeveloperJobModal() {
                         job.status === "success"
                           ? "border-green-500 bg-green-50"
                           : job.status === "error"
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
+                            ? "border-red-500 bg-red-50"
+                            : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -178,10 +207,10 @@ export default function DeveloperJobModal() {
                             job.status === "loading"
                               ? "bg-blue-500 text-white"
                               : job.status === "success"
-                              ? "bg-green-500 text-white"
-                              : job.status === "error"
-                              ? "bg-red-500 text-white"
-                              : "bg-gray-900 text-white hover:bg-gray-800"
+                                ? "bg-green-500 text-white"
+                                : job.status === "error"
+                                  ? "bg-red-500 text-white"
+                                  : "bg-gray-900 text-white hover:bg-gray-800"
                           }`}
                         >
                           {job.status === "loading" ? (
@@ -215,7 +244,10 @@ export default function DeveloperJobModal() {
 
             {/* Footer */}
             <div className="p-4 border-t bg-gray-50 text-xs text-gray-500 text-center rounded-b-2xl">
-              <p>Press Esc or click X to close</p>
+              <p>Press Esc, click X, or triple-tap on screen to close</p>
+              <p className="mt-1 text-xs text-gray-400">
+                Mobile: Triple-tap anywhere to open/close
+              </p>
             </div>
           </motion.div>
         </DialogContent>
