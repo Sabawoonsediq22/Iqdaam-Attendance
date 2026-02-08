@@ -1,19 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { processScheduledReports } from "@/app/api/reports/schedule/route";
 
-// Secure API route for Vercel Cron to process scheduled reports
-export async function GET(request: NextRequest) {
-  // Verify the request comes from Vercel Cron
-  const authHeader = request.headers.get("authorization");
-  const validToken = process.env.CRON_SECRET;
-
-  if (!validToken || authHeader !== `Bearer ${validToken}`) {
-    return NextResponse.json(
-      { error: "Unauthorized - Invalid or missing token" },
-      { status: 401 }
-    );
-  }
-
+// API route for Vercel Cron to process scheduled reports
+export async function GET() {
   try {
     console.log("Processing scheduled reports via Vercel Cron...");
     await processScheduledReports();
@@ -29,7 +18,7 @@ export async function GET(request: NextRequest) {
         error: "Failed to process scheduled reports",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

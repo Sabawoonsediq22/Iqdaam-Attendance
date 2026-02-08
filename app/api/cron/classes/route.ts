@@ -1,18 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { checkCompletedClasses } from "@/lib/class-completion";
 
-// Secure API route for Vercel Cron to check for completed classes
-export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const validToken = process.env.CRON_SECRET;
-
-  if (!validToken || authHeader !== `Bearer ${validToken}`) {
-    return NextResponse.json(
-      { error: "Unauthorized - Invalid or missing token" },
-      { status: 401 }
-    );
-  }
-
+// API route for Vercel Cron to check for completed classes
+export async function GET() {
   try {
     console.log("Checking for completed classes via Vercel Cron...");
     await checkCompletedClasses();
@@ -28,7 +18,7 @@ export async function GET(request: NextRequest) {
         error: "Failed to check completed classes",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

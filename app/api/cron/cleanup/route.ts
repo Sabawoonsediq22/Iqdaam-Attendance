@@ -1,18 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cleanupOldNotifications } from "@/lib/cleanup";
 
-// Secure API route for Vercel Cron to cleanup old notifications
-export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const validToken = process.env.CRON_SECRET;
-
-  if (!validToken || authHeader !== `Bearer ${validToken}`) {
-    return NextResponse.json(
-      { error: "Unauthorized - Invalid or missing token" },
-      { status: 401 }
-    );
-  }
-
+// API route for Vercel Cron to cleanup old notifications
+export async function GET() {
   try {
     console.log("Running daily notification cleanup via Vercel Cron...");
     await cleanupOldNotifications();
@@ -28,7 +18,7 @@ export async function GET(request: NextRequest) {
         error: "Failed to cleanup notifications",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

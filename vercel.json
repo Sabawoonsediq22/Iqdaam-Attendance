@@ -2,18 +2,15 @@
   "crons": [
     {
       "path": "/api/cron/reports",
-      "schedule": "0 9 * * *",
-      "secret": "${CRON_SECRET}"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/cleanup",
-      "schedule": "0 2 * * *",
-      "secret": "${CRON_SECRET}"
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/classes",
-      "schedule": "0 0 * * *",
-      "secret": "${CRON_SECRET}"
+      "schedule": "0 0 * * *"
     }
   ]
 }
