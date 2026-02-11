@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -32,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Edit } from "lucide-react";
 
 interface EditStudentModalProps {
   student: Student | null;
@@ -171,10 +170,16 @@ export default function EditStudentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Student</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-2xl max-h-[90vh] overflow-y-auto p-0 border-0 shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <Edit className="w-5 h-5 text-blue-400" />
+            Edit Student
+          </DialogTitle>
+        </div>
+        
+        <div className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -335,6 +340,7 @@ export default function EditStudentModal({
             </div>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

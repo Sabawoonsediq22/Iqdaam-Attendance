@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
@@ -32,26 +31,25 @@ export default function DeleteConfirmationModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <AnimatePresence>
         {isOpen && (
-      <DialogContent className="sm:max-w-[400px] max-w-[350px] rounded-lg">
+      <DialogContent className="sm:max-w-[400px] max-w-[350px] rounded-2xl p-0 border-0 shadow-2xl">
         <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <DialogTitle className="text-left">{title}</DialogTitle>
-              <DialogDescription className="text-left mt-2">
-                {description}
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-400" />
+            {title}
+          </DialogTitle>
+        </div>
+        
+        <div className="p-6">
+          <DialogDescription className="text-left">
+            {description}
+          </DialogDescription>
         <div className="flex justify-end space-x-2 mt-4">
           <Button
             type="button"
@@ -72,6 +70,7 @@ export default function DeleteConfirmationModal({
             {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {isDeleting ? "Deleting..." : "Delete"}
           </Button>
+        </div>
         </div>
         </motion.div>
       </DialogContent>

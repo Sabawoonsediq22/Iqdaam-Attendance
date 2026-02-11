@@ -62,17 +62,17 @@ export function ResponsiveDialog({
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-          <DialogHeader>
+          <DialogHeader className="px-4 pt-4">
             <DialogTitle>{title}</DialogTitle>
             {description && (
               <DialogDescription>{description}</DialogDescription>
             )}
           </DialogHeader>
-          <div className="py-4">
+          <div className="px-4 py-4">
             {children}
           </div>
           {footer && (
-            <div className="flex justify-end gap-2 pt-4 border-t">
+            <div className="flex justify-end gap-2 px-4 py-4 border-t">
               {footer}
             </div>
           )}

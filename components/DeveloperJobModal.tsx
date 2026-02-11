@@ -119,7 +119,7 @@ export default function DeveloperJobModal() {
             transition={{ duration: 0.2 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white rounded-t-2xl">
+            <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
               <DialogTitle className="text-xl font-bold flex items-center gap-2">
                 <Play className="w-5 h-5 text-blue-400" />
                 Developer Job Runner
@@ -215,7 +215,8 @@ export default function DeveloperJobModal() {
 
             {/* Footer */}
             <div className="p-4 border-t bg-gray-50 text-xs text-gray-500 text-center rounded-b-2xl">
-              <p>Press Esc or click X to close</p>
+              <p>Press <strong>Ctrl+Shift+J</strong> or <strong>Cmd+Shift+J</strong> to open/close</p>
+              <p className="mt-1">Press <strong>Esc</strong> or click <strong>X</strong> to close</p>
             </div>
           </motion.div>
         </DialogContent>

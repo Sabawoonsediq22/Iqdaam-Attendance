@@ -116,9 +116,16 @@ export default function EditFeeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full sm:max-w-[500px] h-screen sm:max-h-[90vh] overflow-y-auto sm:rounded-lg rounded-none">
-          <DialogTitle className="text-lg text-start">Edit Fee Payment</DialogTitle>
-        <div className="mb-4 p-4 rounded-lg bg-muted/30 shadow-sm border">
+      <DialogContent className="w-full sm:max-w-[500px] h-screen sm:max-h-[90vh] overflow-y-auto sm:rounded-2xl rounded-none p-0 border-0 shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-blue-400" />
+            Edit Fee Payment
+          </DialogTitle>
+        </div>
+        
+        <div className="mb-4 p-4 rounded-lg bg-muted/30 shadow-sm border m-6">
           <div className="flex items-center gap-2 mb-2">
             <User className="h-4 w-4 text-muted-foreground" />
             <h4 className="font-medium text-foreground">{fee.studentName}</h4>

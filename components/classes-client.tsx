@@ -23,7 +23,7 @@ import {
 import type { Class, StudentClass } from "@/lib/schema";
 import { Input } from "./ui/input";
 import { useState, useMemo, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -205,7 +205,7 @@ function ViewDetailsModal({
         title="Class Details"
         contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
       >
-        <div className="space-y-6">
+        <div className="space-y-6 mt-4">
           {/* Class Header */}
           <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-4 border">
             <h3 className="font-bold text-xl text-primary mb-1">{cls.name}</h3>
@@ -415,190 +415,195 @@ function EditClassModal({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className=" h-full">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="flex flex-col lg:flex-row h-screen w-full mx-auto items-center sm:px-10 md:px-22 gap-8 lg:gap-16"
-            >
-                <DialogTitle></DialogTitle>
-
-              <div className="flex-1 flex flex-col justify-center space-y-3 w-full">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-none tracking-[-0.03em]">
+          <DialogContent className="max-w-full w-full h-full sm:h-auto sm:max-w-4xl sm:rounded-lg p-0 border-0 shadow-2xl md:h-[90vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
+              <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                 Edit Class
-              </h2>
+              </DialogTitle>
+            </div>
+            
+            <div className="flex flex-col lg:flex-row h-full overflow-hidden">
+              {/* Left side - information section */}
+              <div className="sm:flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+                <div className="max-w-lg mx-auto">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-tight mb-6">
+                    Edit Class
+                  </h2>
 
-        <div className="space-y-4 sm:space-y-6 pt-4">
-          <div className="flex gap-3 sm:gap-4">
-            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
-                Modify class details such as name, teacher, schedule, and dates.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3 sm:gap-4">
-            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
-                Ensure all information is accurate before saving changes.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-              <div className="flex-1 w-full border px-4 py-6 sm:px-16 sm:py-6 rounded-lg bg-muted/30 shadow mb-8 md:mb-0">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Class Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter class name" {...field} className="mt-1" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="teacher"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Teacher *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter teacher name" {...field} className="mt-1" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Time *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Select time" {...field}
-                            className="mt-1" />
-                          </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                      )}
-                    />
-                  <FormField
-                    control={form.control}
-                    name="startDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Date *</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} className="mt-1" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="endDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>End Date (Optional)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            {...field}
-                            value={field.value || ""} className="mt-1"
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="flex gap-3 sm:gap-4">
+                      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <title>Icon</title>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Enter class description (optional)"
-                            className="resize-none mt-1"
-                            {...field}
-                            value={field.value || ""}
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                          Modify class details such as name, teacher, schedule, and dates.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 sm:gap-4">
+                      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <title>Icon</title>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setOpen(false)}
-                      disabled={isSubmitting}
-                      className="cursor-pointer w-full sm:w-auto"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="cursor-pointer w-full sm:w-auto"
-                    >
-                      {isSubmitting && (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      )}
-                      {isSubmitting ? "Updating..." : "Update Class"}
-                    </Button>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                          Ensure all information is accurate before saving changes.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </form>
-              </Form>
+                </div>
               </div>
-            </motion.div>
+              
+              {/* Right side - form section */}
+              <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-white dark:bg-gray-950">
+                <div className="max-w-md mx-auto">
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-4 sm:space-y-6"
+                    >
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Class Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter class name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="teacher"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Teacher *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter teacher name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="time"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Time *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Select time" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="startDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Start Date *</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="endDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>End Date (Optional)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Enter class description (optional)"
+                                className="resize-none"
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setOpen(false)}
+                          disabled={isSubmitting}
+                          className="w-full sm:w-auto"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full sm:w-auto"
+                        >
+                          {isSubmitting && (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          )}
+                          {isSubmitting ? "Updating..." : "Update Class"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </div>
+              </div>
+            </div>
           </DialogContent>
         )}
       </AnimatePresence>

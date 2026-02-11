@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/command";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, DollarSign } from "lucide-react";
 import type { Student, Class, StudentClass } from "@/lib/schema";
 
 interface AddFeeModalProps {
@@ -120,9 +120,16 @@ export default function AddFeeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] w-full sm:rounded-lg sm:max-h-[90vh] h-screen overflow-y-auto">
-          <DialogTitle className="text-lg text-start">Add New Fee</DialogTitle>
-        <div className="p-2 sm:p-4 rounded-lg py-4 bg-muted/30 shadow border">
+      <DialogContent className="sm:max-w-[600px] w-full sm:rounded-lg sm:max-h-[90vh] h-screen overflow-y-auto p-0 border-0 shadow-2xl rounded-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-blue-400" />
+            Add New Fee
+          </DialogTitle>
+        </div>
+        
+        <div className="p-2 sm:p-4 rounded-lg py-4 bg-muted/30 shadow border m-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
