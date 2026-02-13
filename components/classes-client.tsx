@@ -8,7 +8,6 @@ import {
   MoreVertical,
   Info,
   PencilIcon,
-  Delete,
   UserCheck,
   Clock,
   Calendar,
@@ -20,7 +19,8 @@ import {
   CheckCircle,
   User,
 } from "lucide-react";
-import type { Class, StudentClass } from "@/lib/schema";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { Class, Student, StudentClass } from "@/lib/schema";
 import { Input } from "./ui/input";
 import { useState, useMemo, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
@@ -149,6 +149,108 @@ const getMonthRange = (
 };
 
 // View Details Modal Component
+function ViewStudentsModal({
+  cls,
+  studentClasses,
+  students,
+  inMenu = true,
+  onAction,
+}: {
+  cls: Class;
+  studentClasses: StudentClass[];
+  students: Student[];
+  inMenu?: boolean;
+  onAction?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const enrolledStudents = students.filter(student =>
+    studentClasses.some(sc => sc.studentId === student.id && sc.classId === cls.id)
+  );
+
+  const content = (
+    <>
+      <Users className="h-4 w-4 mr-2" />
+      View Students
+    </>
+  );
+
+  const trigger = inMenu ? (
+    <DropdownMenuItem
+      onSelect={(e) => e.preventDefault()}
+      onClick={() => {
+        setOpen(true);
+        onAction?.();
+      }}
+      className="cursor-pointer"
+    >
+      {content}
+    </DropdownMenuItem>
+  ) : (
+    <Button
+      variant="ghost"
+      onClick={() => {
+        setOpen(true);
+        onAction?.();
+      }}
+      className="w-full justify-start"
+    >
+      {content}
+    </Button>
+  );
+
+  return (
+    <>
+      {trigger}
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Class Students"
+        contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
+      >
+        <div className="space-y-6 mt-4">
+          {/* Class Header */}
+          <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-4 border">
+            <h3 className="font-bold text-xl text-primary mb-1">{cls.name}</h3>
+            <p className="text-sm text-muted-foreground">
+              {enrolledStudents.length} student{enrolledStudents.length !== 1 ? "s" : ""} enrolled
+            </p>
+          </div>
+
+          {/* Students List */}
+          {enrolledStudents.length > 0 ? (
+            <div className="space-y-3">
+              {enrolledStudents.map((student) => (
+                <div key={student.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                  <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold">{student.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {student.fatherName}
+                    </p>
+                    {student.phone && (
+                      <p className="text-xs text-muted-foreground">{student.phone}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium">No students enrolled</h3>
+              <p className="text-muted-foreground mt-2">
+                This class currently has no enrolled students.
+              </p>
+            </div>
+          )}
+        </div>
+      </ResponsiveDialog>
+    </>
+  );
+}
+
 function ViewDetailsModal({
   cls,
   studentClasses,
@@ -423,7 +525,6 @@ function EditClassModal({
                 Edit Class
               </DialogTitle>
             </div>
-            
             <div className="flex flex-col lg:flex-row h-full overflow-hidden">
               {/* Left side - information section */}
               <div className="sm:flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -482,7 +583,6 @@ function EditClassModal({
                   </div>
                 </div>
               </div>
-              
               {/* Right side - form section */}
               <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-white dark:bg-gray-950">
                 <div className="max-w-md mx-auto">
@@ -938,104 +1038,6 @@ function UpgradeClassModal({
   );
 }
 
-// Delete Class Modal Component
-function DeleteClassModal({
-  cls,
-  onSuccess,
-  inMenu = true,
-  onAction,
-}: {
-  cls: Class;
-  onSuccess: () => void;
-  inMenu?: boolean;
-  onAction?: () => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const queryClient = useQueryClient();
-
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/classes/${cls.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to delete class");
-      }
-
-      // Optimistically update the cache by removing the deleted class
-      queryClient.setQueryData<Class[]>(["/api/classes"], (oldClasses) =>
-        oldClasses ? oldClasses.filter((c) => c.id !== cls.id) : []
-      );
-
-      // Invalidate notifications
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({
-        queryKey: ["/api/notifications/unread"],
-      });
-
-      toast.success("Class deleted successfully");
-
-      setIsOpen(false);
-      onSuccess();
-    } catch (error) {
-      // Invalidate queries on error to ensure cache consistency
-      queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
-      toast.error(humanizeError(error));
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const content = (
-    <>
-      <Delete className="h-4 w-4 mr-2" />
-      Delete Class
-    </>
-  );
-
-  const trigger = inMenu ? (
-    <DropdownMenuItem
-      onSelect={(e) => e.preventDefault()}
-      onClick={() => {
-        setIsOpen(true);
-        onAction?.();
-      }}
-      className="cursor-pointer text-destructive"
-    >
-      {content}
-    </DropdownMenuItem>
-  ) : (
-    <Button
-      variant="ghost"
-      onClick={() => {
-        setIsOpen(true);
-        onAction?.();
-      }}
-      className="w-full justify-start text-destructive"
-    >
-      {content}
-    </Button>
-  );
-
-  return (
-    <>
-      {trigger}
-      <DeleteConfirmationModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        onConfirm={handleDelete}
-        title="Delete Class"
-        description={`Are you sure you want to delete ${cls.name}? This action cannot be undone and will also remove all attendance records for this class.`}
-        isDeleting={isDeleting}
-      />
-    </>
-  );
-}
-
 // Filtering logic
 const useClassFilters = (classes: Class[] | undefined) => {
   const [filters, setFilters] = useState<ClassFilters>({
@@ -1106,10 +1108,16 @@ function ClassCard({
   cls,
   studentClasses,
   onClassChange,
+  isSelected,
+  onSelect,
+  students,
 }: {
   cls: Class;
   studentClasses: StudentClass[];
   onClassChange: () => void;
+  isSelected?: boolean;
+  onSelect?: (classId: string) => void;
+  students: Student[];
 }) {
   const router = useRouter();
   const studentCount = (studentClasses || []).filter(
@@ -1140,6 +1148,12 @@ function ClassCard({
       <ViewDetailsModal
         cls={cls}
         studentClasses={studentClasses}
+        inMenu={!isMobile}
+      />
+      <ViewStudentsModal
+        cls={cls}
+        studentClasses={studentClasses}
+        students={students}
         inMenu={!isMobile}
       />
       {!isUpgraded && (
@@ -1173,17 +1187,14 @@ function ClassCard({
           inMenu={!isMobile}
         />
       )}
-      <DeleteClassModal
-        cls={cls}
-        onSuccess={onClassChange}
-        inMenu={!isMobile}
-      />
     </>
   );
 
   return (
     <Card
       className={`relative overflow-hidden border-2 shadow-lg bg-linear-to-br from-card via-card/95 to-card/90 hover:shadow-xl group ${
+        isSelected ? "border-primary ring-2 ring-primary/20" : ""
+      } ${
         isUpgraded
           ? "border-blue-500/50"
           : isCompleted
@@ -1191,6 +1202,13 @@ function ClassCard({
           : ""
       }`}
     >
+      {/* Selection checkbox */}
+      <div className="absolute top-3 right-3 z-10">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => onSelect?.(cls.id)}
+        />
+      </div>
       {/* Subtle background gradient */}
       <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-0" />
 
@@ -1398,6 +1416,9 @@ export default function ClassesClient() {
     }
   }, []);
 
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
+  const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+
   const { data: classes = [], isLoading: classesLoading } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
     queryFn: async () => {
@@ -1416,8 +1437,34 @@ export default function ClassesClient() {
     },
   });
 
+  const { data: students = [] } = useQuery<Student[]>({
+    queryKey: ["/api/students"],
+    queryFn: async () => {
+      const res = await fetch("/api/students", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch students");
+      return res.json();
+    },
+  });
+
   const { filters, setFilters, filteredClasses } = useClassFilters(classes);
   const queryClient = useQueryClient();
+
+  // Selection handlers
+  const handleSelectClass = (classId: string) => {
+    setSelectedClassIds(prev =>
+      prev.includes(classId)
+        ? prev.filter(id => id !== classId)
+        : [...prev, classId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedClassIds.length === filteredClasses.length) {
+      setSelectedClassIds([]);
+    } else {
+      setSelectedClassIds(filteredClasses.map(cls => cls.id));
+    }
+  };
 
   const handleClassChange = () => {
     // Invalidate and refetch classes and studentClasses data
@@ -1431,9 +1478,77 @@ export default function ClassesClient() {
     queryClient.invalidateQueries({ queryKey: ["/api/student-classes"] });
   };
 
+  // Bulk delete handler
+  const handleBulkDelete = async () => {
+    try {
+      const response = await fetch("/api/classes/bulk-delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids: selectedClassIds }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete classes");
+      }
+
+      // Optimistically update the cache
+      queryClient.setQueryData<Class[]>(["/api/classes"], (oldClasses) =>
+        oldClasses ? oldClasses.filter((c) => !selectedClassIds.includes(c.id)) : []
+      );
+
+      // Invalidate notifications
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread"],
+      });
+
+      toast.success(`Successfully deleted ${selectedClassIds.length} class${selectedClassIds.length > 1 ? "es" : ""}`);
+      setSelectedClassIds([]);
+      setIsBulkDeleteModalOpen(false);
+    } catch (error) {
+      queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
+      toast.error(humanizeError(error));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <OfflineIndicator />
+      
+      {/* Bulk delete control bar */}
+      {selectedClassIds.length > 0 && (
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <p className="font-medium">
+                {selectedClassIds.length} class{selectedClassIds.length > 1 ? "es" : ""} selected
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedClassIds([])}
+                className="cursor-pointer"
+              >
+                Clear Selection
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setIsBulkDeleteModalOpen(true)}
+                className="cursor-pointer"
+              >
+                Delete Selected
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ClassFilters
         filters={filters}
         onFiltersChange={setFilters}
@@ -1441,27 +1556,49 @@ export default function ClassesClient() {
         onAddClass={handleClassAdded}
       />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {classesLoading ? (
-          <div className="col-span-full flex justify-center py-12">
-            <Loader text="please wait..." />
-          </div>
-        ) : (
-          <>
-            {filteredClasses.map((cls) => (
-              <ClassCard
-                key={cls.id}
-                cls={cls}
-                studentClasses={studentClasses}
-                onClassChange={handleClassChange}
-              />
-            ))}
-            {filteredClasses.length === 0 && (
-              <EmptyState isOffline={isOffline} />
-            )}
-          </>
-        )}
+      {/* Main content with select all button (appears when classes are selected) */}
+      <div className="space-y-8">
+          {selectedClassIds.length > 0 && (
+            <Button onClick={handleSelectAll} variant="outline" size="sm">
+              Select All Classes
+            </Button>
+          )}
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {classesLoading ? (
+            <div className="col-span-full flex justify-center py-12">
+              <Loader text="please wait..." />
+            </div>
+          ) : (
+            <>
+              {filteredClasses.map((cls) => (
+                <ClassCard
+                  key={cls.id}
+                  cls={cls}
+                  studentClasses={studentClasses}
+                  onClassChange={handleClassChange}
+                  isSelected={selectedClassIds.includes(cls.id)}
+                  onSelect={handleSelectClass}
+                  students={students}
+                />
+              ))}
+              {filteredClasses.length === 0 && (
+                <EmptyState isOffline={isOffline} />
+              )}
+            </>
+          )}
+        </div>
       </div>
+
+      {/* Bulk delete confirmation modal */}
+      <DeleteConfirmationModal
+        isOpen={isBulkDeleteModalOpen}
+        onClose={() => setIsBulkDeleteModalOpen(false)}
+        onConfirm={handleBulkDelete}
+        title="Delete Classes"
+        description="Are you sure you want to delete the selected classes? This action cannot be undone and will also remove all attendance records for these classes."
+        itemCount={selectedClassIds.length}
+      />
     </div>
   );
 }
