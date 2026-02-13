@@ -101,39 +101,10 @@ export default function DeveloperJobModal() {
       }
     };
 
-     // Mobile touch shortcut: Triple tap on body (for debugging on touch devices)
-    let tapCount = 0;
-    let lastTapTime = 0;
-    
-    const handleTouchStart = () => {
-      const currentTime = Date.now();
-      const timeSinceLastTap = currentTime - lastTapTime;
-      
-      if (timeSinceLastTap < 500) {
-        tapCount++;
-      } else {
-        tapCount = 1;
-      }
-      
-      lastTapTime = currentTime;
-      
-      if (tapCount === 3) {
-        tapCount = 0;
-        setIsOpen(prevIsOpen => {
-          if (!prevIsOpen) {
-            loadJobs();
-          }
-          return !prevIsOpen;
-        });
-      }
-    };
-
     window.addEventListener("keydown", handleKeyDown);
-    document.body.addEventListener("touchstart", handleTouchStart);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.removeEventListener("touchstart", handleTouchStart);
     };
   }, []);
 

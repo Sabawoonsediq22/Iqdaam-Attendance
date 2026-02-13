@@ -443,7 +443,7 @@ export default function ReportsClient({ students, classes }: Props) {
             open={scheduleDialogOpen}
             onOpenChange={setScheduleDialogOpen}
           >
-            <DialogContent>
+            <DialogContent className="p-8">
               <DialogHeader>
                 <DialogTitle>Schedule Email Report</DialogTitle>
               </DialogHeader>

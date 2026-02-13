@@ -151,7 +151,7 @@ export default function Footer() {
           <p className="text-slate-500 font-medium">
             Developed with ❤️ and lots of coffee☕ by
             <a
-              href="https://sabawoonsediqi.netlify.app"
+              href="https://sabawoonsediqi.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 transition-colors ml-1 underline"
