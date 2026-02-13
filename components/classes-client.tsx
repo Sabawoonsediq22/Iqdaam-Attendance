@@ -1418,6 +1418,7 @@ export default function ClassesClient() {
 
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: classes = [], isLoading: classesLoading } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
@@ -1480,6 +1481,7 @@ export default function ClassesClient() {
 
   // Bulk delete handler
   const handleBulkDelete = async () => {
+    setIsDeleting(true);
     try {
       const response = await fetch("/api/classes/bulk-delete", {
         method: "DELETE",
@@ -1511,13 +1513,14 @@ export default function ClassesClient() {
     } catch (error) {
       queryClient.invalidateQueries({ queryKey: ["/api/classes"] });
       toast.error(humanizeError(error));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
     <div className="space-y-6">
       <OfflineIndicator />
-      
       {/* Bulk delete control bar */}
       {selectedClassIds.length > 0 && (
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b">
@@ -1598,6 +1601,7 @@ export default function ClassesClient() {
         title="Delete Classes"
         description="Are you sure you want to delete the selected classes? This action cannot be undone and will also remove all attendance records for these classes."
         itemCount={selectedClassIds.length}
+        isDeleting={isDeleting}
       />
     </div>
   );
