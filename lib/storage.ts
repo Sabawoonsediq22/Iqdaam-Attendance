@@ -7,6 +7,7 @@ import {
   type InsertAttendance,
   type Notification,
   type InsertNotification,
+  type StudentClass,
   classes,
   students,
   attendance,
@@ -43,6 +44,7 @@ export interface IStorage {
   getStudent(id: string): Promise<Student | undefined>;
   getStudentsByClass(classId: string): Promise<Student[]>;
   getAllStudents(): Promise<Student[]>;
+  getAllStudentClasses(): Promise<StudentClass[]>;
   createStudent(student: InsertStudent): Promise<Student>;
   updateStudent(
     id: string,
@@ -146,6 +148,10 @@ export class DrizzleStorage implements IStorage {
 
   async getAllStudents(): Promise<Student[]> {
     return await getDb().select().from(students);
+  }
+
+  async getAllStudentClasses(): Promise<StudentClass[]> {
+    return await getDb().select().from(studentClasses);
   }
 
   async createStudent(student: InsertStudent): Promise<Student> {

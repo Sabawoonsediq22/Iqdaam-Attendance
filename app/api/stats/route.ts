@@ -9,26 +9,54 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const students = await storage.getAllStudents();
+    const classes = await storage.getAllClasses();
     const attendance = await storage.getAllAttendance();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
 
-    const todayAttendance = attendance.filter(a => a.date === today);
-    const presentToday = todayAttendance.filter(a => a.status === "present").length;
-    const absentToday = todayAttendance.filter(a => a.status === "absent").length;
-    const lateToday = todayAttendance.filter(a => a.status === "late").length;
+    const todayAttendance = attendance.filter((a) => a.date === today);
+    const presentToday = todayAttendance.filter(
+      (a) => a.status === "present",
+    ).length;
+    const absentToday = todayAttendance.filter(
+      (a) => a.status === "absent",
+    ).length;
+    const lateToday = todayAttendance.filter((a) => a.status === "late").length;
 
-    const totalStudents = students.length;
-    const todayAttendanceRate = totalStudents > 0
-      ? ((presentToday + lateToday) / totalStudents * 100).toFixed(1)
-      : "0.0";
+    // First, get all non-upgraded classes
+    const nonUpgradedClasses = classes.filter(
+      (cls) => cls.status !== "upgraded",
+    );
+    const nonUpgradedClassIds = new Set(
+      nonUpgradedClasses.map((cls) => cls.id),
+    );
 
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
-    const weekAttendance = attendance.filter(a => a.date >= weekAgo);
-    const weekPresent = weekAttendance.filter(a => a.status === "present" || a.status === "late").length;
+    // Get all student-class relationships
+    const allStudentClasses = await storage.getAllStudentClasses();
+
+    // Find all students in non-upgraded classes
+    const studentsInNonUpgradedClassesSet = new Set<string>();
+    for (const sc of allStudentClasses) {
+      if (nonUpgradedClassIds.has(sc.classId)) {
+        studentsInNonUpgradedClassesSet.add(sc.studentId);
+      }
+    }
+
+    const totalStudents = studentsInNonUpgradedClassesSet.size;
+    const todayAttendanceRate =
+      totalStudents > 0
+        ? (((presentToday + lateToday) / totalStudents) * 100).toFixed(1)
+        : "0.0";
+
+    const weekAgo = new Date(Date.now() - 7 * 86400000)
+      .toISOString()
+      .split("T")[0];
+    const weekAttendance = attendance.filter((a) => a.date >= weekAgo);
+    const weekPresent = weekAttendance.filter(
+      (a) => a.status === "present" || a.status === "late",
+    ).length;
     const weekTotal = weekAttendance.length;
-    const weekAttendanceRate = weekTotal > 0
-      ? ((weekPresent / weekTotal) * 100).toFixed(1)
-      : "0.0";
+    const weekAttendanceRate =
+      weekTotal > 0 ? ((weekPresent / weekTotal) * 100).toFixed(1) : "0.0";
 
     return NextResponse.json({
       totalStudents,
@@ -38,7 +66,10 @@ export async function GET() {
       presentToday,
       lateToday,
     });
-   } catch {
-     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
-   }
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to fetch stats" },
+      { status: 500 },
+    );
+  }
 }

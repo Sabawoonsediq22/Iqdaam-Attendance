@@ -348,13 +348,13 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  Total Students
+                  Students
                 </p>
                 <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">
                   {stats?.totalStudents || 0}
                 </p>
                 <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-1">
-                  Across all classes
+                  Currently active students
                 </p>
               </div>
               <div className="h-12 w-12 bg-blue-500/20 rounded-full flex items-center justify-center">
