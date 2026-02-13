@@ -1523,12 +1523,19 @@ export default function ClassesClient() {
       <OfflineIndicator />
       {/* Bulk delete control bar */}
       {selectedClassIds.length > 0 && (
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b">
-          <div className="flex items-center justify-between px-4 py-3">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border rounded">
+          <div className="flex sm:flex-row flex-col items-center justify-between px-4 py-3 space-y-4 sm:space-y-0">
             <div className="flex items-center gap-3">
               <p className="font-medium">
                 {selectedClassIds.length} class{selectedClassIds.length > 1 ? "es" : ""} selected
               </p>
+              <div>
+              {selectedClassIds.length > 0 && (
+            <Button onClick={handleSelectAll} variant="outline" size="sm">
+              Select All Classes
+            </Button>
+          )}
+            </div>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -1561,12 +1568,6 @@ export default function ClassesClient() {
 
       {/* Main content with select all button (appears when classes are selected) */}
       <div className="space-y-8">
-          {selectedClassIds.length > 0 && (
-            <Button onClick={handleSelectAll} variant="outline" size="sm">
-              Select All Classes
-            </Button>
-          )}
-
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {classesLoading ? (
             <div className="col-span-full flex justify-center py-12">
