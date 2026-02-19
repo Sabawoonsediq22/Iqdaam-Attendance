@@ -21,7 +21,6 @@ import type {
   Class,
   Attendance,
   StudentClass,
-  InsertFee,
 } from "@/lib/schema";
 import {
   User,
@@ -60,7 +59,6 @@ import {
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EditFeeModal from "./EditFeeModal";
-import AddFeeModal from "./AddFeeModal";
 import { getStudentAvatarSrc } from "@/lib/utils";
 
 type FeeWithDetails = {
@@ -179,8 +177,6 @@ export default function StudentDetailsModal({
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [selectedFee, setSelectedFee] = useState<FeeWithDetails | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [addFeeDefaults, setAddFeeDefaults] = useState<Partial<InsertFee>>({});
 
   const { data: classes = [] } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
@@ -259,22 +255,9 @@ export default function StudentDetailsModal({
     setIsEditModalOpen(true);
   };
 
-  const handleAddFee = (classId: string) => {
-    setAddFeeDefaults({
-      studentId: student!.id,
-      classId,
-    });
-    setIsAddModalOpen(true);
-  };
-
   const handleFeeUpdateSuccess = () => {
     setIsEditModalOpen(false);
     setSelectedFee(null);
-  };
-
-  const handleFeeAddSuccess = () => {
-    setIsAddModalOpen(false);
-    setAddFeeDefaults({});
   };
 
   const attendanceStats = useMemo(() => {
@@ -906,8 +889,7 @@ export default function StudentDetailsModal({
                                   size="sm"
                                   onClick={() =>
                                     fee
-                                      ? handleEditFee(fee)
-                                      : handleAddFee(sc.classId)
+                                      && handleEditFee(fee)
                                   }
                                   className="cursor-pointer w-full sm:w-auto"
                                 >
@@ -934,14 +916,6 @@ export default function StudentDetailsModal({
         onClose={() => setIsEditModalOpen(false)}
         onSuccess={handleFeeUpdateSuccess}
       />
-
-      <AddFeeModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSuccess={handleFeeAddSuccess}
-        defaultValues={addFeeDefaults}
-      />
-
       {/* Image Viewer Modal */}
       <Dialog open={showImageViewer} onOpenChange={setShowImageViewer}>
         <DialogContent className="sm:max-w-[600px] max-w-[430px] p-0">

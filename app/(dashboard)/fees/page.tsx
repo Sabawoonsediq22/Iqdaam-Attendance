@@ -12,11 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Coins, Search, Edit, Plus, Users } from "lucide-react";
+import { Coins, Search, Edit, Users } from "lucide-react";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { Loader } from "@/components/loader";
 import EditFeeModal from "@/components/EditFeeModal";
-import AddFeeModal from "@/components/AddFeeModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { MonthFilter } from "@/components/filters/month-filter";
 
@@ -56,7 +55,6 @@ export default function FeesPage() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedFee, setSelectedFee] = useState<FeeWithDetails | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: fees = [], isLoading } = useQuery<
@@ -101,28 +99,6 @@ export default function FeesPage() {
           title: "Fee Updated",
           message: `Fee record for ${selectedFee?.studentName} has been updated successfully.`,
           type: "info",
-        }),
-      });
-    } catch (error) {
-      console.error("Failed to create notification:", error);
-    }
-  };
-
-  const handleFeeAddSuccess = async () => {
-    setIsAddModalOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["/api/fees"] });
-
-    // Create notification for fee addition
-    try {
-      await fetch("/api/notifications/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "Fee Added",
-          message: "A new fee record has been added successfully.",
-          type: "success",
         }),
       });
     } catch (error) {
@@ -194,19 +170,10 @@ export default function FeesPage() {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-start">
               <p className="text-muted-foreground mt-1">
                 Track and manage student fee payments
               </p>
-            </div>
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Fee</span>
-            </Button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -373,12 +340,6 @@ export default function FeesPage() {
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             onSuccess={handleFeeUpdateSuccess}
-          />
-
-          <AddFeeModal
-            isOpen={isAddModalOpen}
-            onClose={() => setIsAddModalOpen(false)}
-            onSuccess={handleFeeAddSuccess}
           />
         </>
       )}
