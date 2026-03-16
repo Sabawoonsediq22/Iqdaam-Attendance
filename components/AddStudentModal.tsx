@@ -408,10 +408,6 @@ export default function AddStudentModal({
                                     </CommandEmpty>
                                     <CommandGroup className="p-2">
                                       {classes
-                                        .filter(
-                                          (classItem) =>
-                                            classItem.status === "active"
-                                        )
                                         .map((classItem) => (
                                           <CommandItem
                                             key={classItem.id}
