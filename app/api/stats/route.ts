@@ -8,7 +8,6 @@ export async function GET() {
     if (!session || !session.user.isApproved) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const students = await storage.getAllStudents();
     const classes = await storage.getAllClasses();
     const attendance = await storage.getAllAttendance();
     const today = new Date().toISOString().split("T")[0];
@@ -22,26 +21,21 @@ export async function GET() {
     ).length;
     const lateToday = todayAttendance.filter((a) => a.status === "late").length;
 
-    // First, get all non-upgraded classes
-    const nonUpgradedClasses = classes.filter(
-      (cls) => cls.status !== "upgraded",
-    );
-    const nonUpgradedClassIds = new Set(
-      nonUpgradedClasses.map((cls) => cls.id),
-    );
+    // Get all classes (no status filtering needed)
+    const allClassIds = new Set(classes.map((cls) => cls.id));
 
     // Get all student-class relationships
     const allStudentClasses = await storage.getAllStudentClasses();
 
-    // Find all students in non-upgraded classes
-    const studentsInNonUpgradedClassesSet = new Set<string>();
+    // Find all students in all classes
+    const studentsInClassesSet = new Set<string>();
     for (const sc of allStudentClasses) {
-      if (nonUpgradedClassIds.has(sc.classId)) {
-        studentsInNonUpgradedClassesSet.add(sc.studentId);
+      if (allClassIds.has(sc.classId)) {
+        studentsInClassesSet.add(sc.studentId);
       }
     }
 
-    const totalStudents = studentsInNonUpgradedClassesSet.size;
+    const totalStudents = studentsInClassesSet.size;
     const todayAttendanceRate =
       totalStudents > 0
         ? (((presentToday + lateToday) / totalStudents) * 100).toFixed(1)

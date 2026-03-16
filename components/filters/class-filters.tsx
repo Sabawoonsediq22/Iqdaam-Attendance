@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertClassSchema } from "@/lib/schema";
+import { ACADEMIC_CLASS_NAMES, SKILL_CLASS_NAMES } from "@/lib/class-names";
 import { toast } from "sonner";
 import type { InsertClass } from "@/lib/schema";
 import { Plus, Loader2, Paintbrush } from "lucide-react";
@@ -31,6 +32,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
 import { TimepickerUI } from "timepicker-ui";
 import "timepicker-ui/index.css";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Types for filtering
 interface ClassFilters {
@@ -191,10 +202,38 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
                 CLASS NAME *
               </FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Enter class name"
-                  {...form.register("name")}
-                />
+                <Select
+                  onValueChange={(value) => form.setValue("name", value as InsertClass["name"])}
+                  defaultValue={form.getValues("name")}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a class name" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <ScrollArea className="h-[200px] w-full">
+                      <SelectGroup>
+                        <SelectLabel className="font-semibold">
+                          Academic Series
+                        </SelectLabel>
+                        {ACADEMIC_CLASS_NAMES.map((className) => (
+                          <SelectItem key={className} value={className}>
+                            {className}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel className="font-semibold mt-2">
+                          Skill Classes
+                        </SelectLabel>
+                        {SKILL_CLASS_NAMES.map((className) => (
+                          <SelectItem key={className} value={className}>
+                            {className}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </ScrollArea>
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </div>

@@ -52,8 +52,7 @@ export async function GET(request: NextRequest) {
         })
         .from(students)
         .innerJoin(studentClasses, eq(students.id, studentClasses.studentId))
-        .innerJoin(classes, eq(studentClasses.classId, classes.id))
-        .where(eq(classes.status, "active"));
+        .innerJoin(classes, eq(studentClasses.classId, classes.id));
       return NextResponse.json(enrolledStudents);
     }
   } catch (error) {

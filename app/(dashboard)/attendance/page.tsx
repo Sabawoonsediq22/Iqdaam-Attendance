@@ -63,10 +63,8 @@ function AttendancePageContent() {
     queryKey: ["/api/classes"],
   });
 
-  // Filter out completed and upgraded classes
-  const classes = allClasses.filter(
-    (cls) => cls.status !== "completed" && cls.status !== "upgraded"
-  );
+  // Use all classes for attendance (no status filtering needed)
+  const classes = allClasses;
 
   // Auto-select class from URL parameter
   useEffect(() => {
@@ -76,8 +74,7 @@ function AttendancePageContent() {
       if (classExists) {
         setSelectedClass(classIdFromUrl);
       } else {
-        // If the class is completed/upgraded, clear the selection
-        setSelectedClass("");
+        // Clear the selection if class doesn't exist
       }
     }
   }, [searchParams, classes]);

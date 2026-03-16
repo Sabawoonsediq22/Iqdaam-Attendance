@@ -53,10 +53,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertClassSchema } from "@/lib/schema";
 import type { InsertClass } from "@/lib/schema";
+import { ACADEMIC_CLASS_NAMES, SKILL_CLASS_NAMES } from "@/lib/class-names";
 import { parseISO, isWithinInterval, startOfMonth, endOfMonth } from "date-fns";
 import { ClassFilters } from "./filters";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -163,9 +174,18 @@ function ViewStudentsModal({
   onAction?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const enrolledStudents = students.filter(student =>
-    studentClasses.some(sc => sc.studentId === student.id && sc.classId === cls.id)
-  );
+  const enrolledStudents = useMemo(() => {
+    const filtered = students.filter(student =>
+      studentClasses.some(sc => sc.studentId === student.id && sc.classId === cls.id)
+    );
+    // Deduplicate by student ID to prevent React key errors
+    const seen = new Set<string>();
+    return filtered.filter(student => {
+      if (seen.has(student.id)) return false;
+      seen.add(student.id);
+      return true;
+    });
+  }, [students, studentClasses, cls.id]);
 
   const content = (
     <>
@@ -536,20 +556,9 @@ function EditClassModal({
                   <div className="space-y-4 sm:space-y-6">
                     <div className="flex gap-3 sm:gap-4">
                       <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <svg
+                        <BookOpen
                           className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <title>Icon</title>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                          />
-                        </svg>
+                        />
                       </div>
                       <div>
                         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -559,20 +568,9 @@ function EditClassModal({
                     </div>
                     <div className="flex gap-3 sm:gap-4">
                       <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <svg
+                        <FileText
                           className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <title>Icon</title>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
+                        />
                       </div>
                       <div>
                         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
@@ -598,7 +596,38 @@ function EditClassModal({
                           <FormItem>
                             <FormLabel>Class Name *</FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter class name" {...field} />
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a class name" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <ScrollArea className="h-[200px] w-full">
+                                    <SelectGroup>
+                                      <SelectLabel className="font-semibold">
+                                        Academic Series
+                                      </SelectLabel>
+                                      {ACADEMIC_CLASS_NAMES.map((className) => (
+                                        <SelectItem key={className} value={className}>
+                                          {className}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                    <SelectGroup>
+                                      <SelectLabel className="font-semibold mt-2">
+                                        Skill Classes
+                                      </SelectLabel>
+                                      {SKILL_CLASS_NAMES.map((className) => (
+                                        <SelectItem key={className} value={className}>
+                                          {className}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectGroup>
+                                  </ScrollArea>
+                                </SelectContent>
+                              </Select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -711,333 +740,6 @@ function EditClassModal({
   );
 }
 
-// Upgrade Class Modal Component
-function UpgradeClassModal({
-  cls,
-  onSuccess,
-  inMenu = true,
-  onAction,
-}: {
-  cls: Class;
-  onSuccess: () => void;
-  inMenu?: boolean;
-  onAction?: () => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [showPromotionConfirm, setShowPromotionConfirm] = useState(false);
-  const [createdClass, setCreatedClass] = useState<Class | null>(null);
-
-  // Generate suggested name for next class
-  const generateNextClassName = (currentName: string): string => {
-    const match = currentName.match(/(\d+)/);
-    if (match) {
-      const num = parseInt(match[1]);
-      return currentName.replace(/\d+/, (num + 1).toString());
-    }
-    return `${currentName} - Next`;
-  };
-
-  const form = useForm<InsertClass>({
-    resolver: zodResolver(insertClassSchema),
-    defaultValues: {
-      name: generateNextClassName(cls.name),
-      teacher: cls.teacher,
-      time: cls.time,
-      startDate: new Date().toISOString().split("T")[0], // Today
-      endDate: undefined,
-      description: `Next level class following ${cls.name}`,
-    },
-  });
-
-  const onSubmit = async (data: InsertClass) => {
-    setIsCreating(true);
-    try {
-      const response = await fetch(`/api/classes/${cls.id}/upgrade`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ newClassData: data, createOnly: true }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to create class");
-      }
-
-      const result = await response.json();
-      setCreatedClass(result.newClass);
-      setShowPromotionConfirm(true);
-      toast.success(`Created ${result.newClass.name} successfully`);
-    } catch (error) {
-      toast.error(humanizeError(error));
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handlePromotionConfirm = async () => {
-    if (!createdClass) return;
-
-    setIsCreating(true);
-    try {
-      const response = await fetch(`/api/classes/${cls.id}/upgrade`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ promoteToClassId: createdClass.id }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to promote students");
-      }
-
-      toast.success(`Students promoted to ${createdClass.name}`);
-
-      setIsOpen(false);
-      setShowPromotionConfirm(false);
-      setCreatedClass(null);
-      form.reset();
-      onSuccess();
-    } catch (error) {
-      toast.error(humanizeError(error));
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handlePromotionCancel = () => {
-    setShowPromotionConfirm(false);
-    setCreatedClass(null);
-    setIsOpen(false);
-    form.reset();
-    onSuccess(); // Refresh the list to show the new class
-  };
-
-  const content = (
-    <>
-      <BookOpenCheck className="h-4 w-4 mr-2" />
-      Upgrade Class
-    </>
-  );
-
-  const trigger = inMenu ? (
-    <DropdownMenuItem
-      onSelect={(e) => e.preventDefault()}
-      onClick={() => {
-        setIsOpen(true);
-        onAction?.();
-      }}
-      className="cursor-pointer"
-    >
-      {content}
-    </DropdownMenuItem>
-  ) : (
-    <Button
-      variant="ghost"
-      onClick={() => {
-        setIsOpen(true);
-        onAction?.();
-      }}
-      className="w-full justify-start"
-    >
-      {content}
-    </Button>
-  );
-
-  return (
-    <>
-      {trigger}
-      <ResponsiveDialog
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        title="Create Next Class & Promote Students"
-        contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
-      >
-        <div className="space-y-6">
-          <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                <BookOpenCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="font-semibold text-blue-900 dark:text-blue-100">
-                Upgrade Class
-              </h3>
-            </div>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              Create a new class for the next level and automatically promote
-              all students from <strong>{cls.name}</strong>. The original class
-              will remain unchanged for historical attendance records.
-            </p>
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Class Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter new class name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="teacher"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Teacher *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter teacher name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Time *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., 9:00 AM - 10:30 AM"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Date *</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Date (Optional)</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} value={field.value || ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter class description (optional)"
-                        className="resize-none"
-                        {...field}
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsOpen(false)}
-                  disabled={isCreating}
-                  className="cursor-pointer"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isCreating}
-                  className="cursor-pointer"
-                >
-                  {isCreating && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  {isCreating ? "Creating Class..." : "Create Class"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-      </ResponsiveDialog>
-
-      {/* Promotion Confirmation Dialog */}
-      <ResponsiveDialog
-        open={showPromotionConfirm}
-        onOpenChange={setShowPromotionConfirm}
-        title="Promote Students"
-        contentClassName="sm:max-w-[400px] max-w-[350px] rounded-lg"
-      >
-        <div className="space-y-4">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="text-lg font-semibold">Promote Students</h3>
-            <p className="text-muted-foreground mt-2">
-              Would you like to promote all students from{" "}
-              <strong>{cls.name}</strong> to the newly created class{" "}
-              <strong>{createdClass?.name}</strong>?
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              The original class will remain unchanged for historical attendance
-              records.
-            </p>
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handlePromotionCancel}
-              disabled={isCreating}
-              className="cursor-pointer"
-            >
-              Skip Promotion
-            </Button>
-            <Button
-              type="button"
-              onClick={handlePromotionConfirm}
-              disabled={isCreating}
-              className="cursor-pointer"
-            >
-              {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isCreating ? "Promoting..." : "Promote Students"}
-            </Button>
-          </div>
-        </div>
-      </ResponsiveDialog>
-    </>
-  );
-}
-
 // Filtering logic
 const useClassFilters = (classes: Class[] | undefined) => {
   const [filters, setFilters] = useState<ClassFilters>({
@@ -1124,9 +826,6 @@ function ClassCard({
     (sc) => sc.classId === cls.id
   ).length;
 
-  const isCompleted = cls.status === "completed";
-  const isUpgraded = cls.status === "upgraded";
-
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -1139,7 +838,6 @@ function ClassCard({
   }, []);
 
   const handleTakeAttendance = () => {
-    if (isCompleted || isUpgraded) return;
     router.push(`/attendance?classId=${cls.id}`);
   };
 
@@ -1156,37 +854,26 @@ function ClassCard({
         students={students}
         inMenu={!isMobile}
       />
-      {!isUpgraded && (
-        <EditClassModal
-          cls={cls}
-          onSuccess={onClassChange}
-          inMenu={!isMobile}
-        />
-      )}
-      {!isUpgraded && (
-        <AddStudentModal
-          cls={cls}
-          onSuccess={onClassChange}
-          trigger={
-            isMobile ? (
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-              >
-                <User className="h-4 w-4 mr-2" />
-                Add Student
-              </Button>
-            ) : undefined
-          }
-        />
-      )}
-      {isCompleted && !isUpgraded && (
-        <UpgradeClassModal
-          cls={cls}
-          onSuccess={onClassChange}
-          inMenu={!isMobile}
-        />
-      )}
+      <EditClassModal
+        cls={cls}
+        onSuccess={onClassChange}
+        inMenu={!isMobile}
+      />
+      <AddStudentModal
+        cls={cls}
+        onSuccess={onClassChange}
+        trigger={
+          isMobile ? (
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+            >
+              <User className="h-4 w-4 mr-2" />
+              Add Student
+            </Button>
+          ) : undefined
+        }
+      />
     </>
   );
 
@@ -1194,12 +881,6 @@ function ClassCard({
     <Card
       className={`relative overflow-hidden border-2 shadow-lg bg-linear-to-br from-card via-card/95 to-card/90 hover:shadow-xl group ${
         isSelected ? "border-primary ring-2 ring-primary/20" : ""
-      } ${
-        isUpgraded
-          ? "border-blue-500/50"
-          : isCompleted
-          ? "border-green-500/50"
-          : ""
       }`}
     >
       {/* Selection checkbox */}
@@ -1234,21 +915,6 @@ function ClassCard({
                   >
                     {studentCount} student{studentCount !== 1 ? "s" : ""}
                   </Badge>
-                  {isUpgraded ? (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 border-blue-300"
-                    >
-                      Upgraded
-                    </Badge>
-                  ) : isCompleted ? (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs px-2 py-0.5 bg-green-100 text-green-800 border-green-300"
-                    >
-                      Completed
-                    </Badge>
-                  ) : null}
                 </div>
               </div>
             </div>
@@ -1335,12 +1001,9 @@ function ClassCard({
             size="sm"
             className="w-full h-10 bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
             onClick={handleTakeAttendance}
-            disabled={isCompleted || isUpgraded}
           >
             <CheckCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-            {isCompleted || isUpgraded
-              ? "Attendance Disabled"
-              : "Take Attendance"}
+            Take Attendance
           </Button>
         </div>
       </CardContent>

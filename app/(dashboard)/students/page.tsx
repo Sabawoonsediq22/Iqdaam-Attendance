@@ -59,7 +59,15 @@ export default function StudentsPage() {
     setIsEditModalOpen(true);
   };
 
-  const filteredStudents = students.filter(
+  // Deduplicate students by ID to prevent duplicate keys
+  const uniqueStudents = students.reduce((acc, student) => {
+    if (!acc.has(student.id)) {
+      acc.set(student.id, student);
+    }
+    return acc;
+  }, new Map());
+
+  const filteredStudents = Array.from(uniqueStudents.values()).filter(
     (student) =>
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (student.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ??
@@ -87,14 +95,25 @@ export default function StudentsPage() {
   };
 
   const studentsByClass = classes
-    .map((cls) => ({
-      class: cls,
-      students: filteredStudents.filter((student) =>
-        studentClasses.some(
-          (sc) => sc.studentId === student.id && sc.classId === cls.id
-        )
-      ),
-    }))
+    .map((cls) => {
+      // Get unique student-class relationships to prevent duplicate keys
+      const uniqueStudentClasses = studentClasses.reduce((acc, sc) => {
+        const key = `${sc.studentId}-${sc.classId}`;
+        if (!acc.has(key)) {
+          acc.set(key, sc);
+        }
+        return acc;
+      }, new Map());
+
+      return {
+        class: cls,
+        students: filteredStudents.filter((student) =>
+          Array.from(uniqueStudentClasses.values()).some(
+            (sc) => sc.studentId === student.id && sc.classId === cls.id
+          )
+        ),
+      };
+    })
     .filter((group) => group.students.length > 0);
 
   return (
@@ -152,7 +171,7 @@ export default function StudentsPage() {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {classStudents.map((student) => (
                       <div
-                        key={student.id}
+                        key={`${cls.id}-${student.id}`}
                         className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-all duration-300"
                         onClick={() => handleStudentClick(student)}
                       >

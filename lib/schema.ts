@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { ALL_CLASS_NAMES } from "./class-names";
 
 // Relationships: Many-to-many with students via studentClasses, one-to-many with attendance
 export const classes = pgTable("classes", {
@@ -22,7 +23,6 @@ export const classes = pgTable("classes", {
   time: text("time").notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
-  status: text("status").notNull().default("active"), // 'active', 'completed', 'upgraded', 'cancelled'
   description: text("description"),
   fee: decimal("fee", { precision: 10, scale: 2 }).notNull().default("0"),
   createdAt: timestamp("created_at")
@@ -242,7 +242,11 @@ export const userPreferences = pgTable("user_preferences", {
 });
 
 export const insertClassSchema = createInsertSchema(classes, {
-  name: (schema) => schema.min(1, "Class name is required"),
+  name: (schema) =>
+    schema.refine(
+      (val) => (ALL_CLASS_NAMES as readonly string[]).includes(val),
+      { message: "Please select a valid class name" }
+    ),
   teacher: (schema) => schema.min(1, "Teacher is required"),
   time: (schema) => schema.min(1, "Time is required"),
   startDate: (schema) => schema.min(1, "Start date is required"),

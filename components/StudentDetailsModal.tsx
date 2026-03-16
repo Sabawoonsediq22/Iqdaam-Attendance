@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -113,6 +113,8 @@ function DeleteStudentModal({
       return res.json();
     },
     onSuccess: () => {
+      // Note: We use the studentId from the closure
+      // The student prop is stable during this modal's lifecycle
       // Optimistically update the cache by removing the deleted student
       queryClient.setQueryData<Student[]>(["/api/students"], (oldStudents) =>
         oldStudents ? oldStudents.filter((s) => s.id !== student.id) : [],
@@ -177,17 +179,78 @@ export default function StudentDetailsModal({
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [selectedFee, setSelectedFee] = useState<FeeWithDetails | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("details");
+  const [tabPositions, setTabPositions] = useState<{ [key: string]: { left: number; width: number } }>({});
 
-  const { data: classes = [] } = useQuery<Class[]>({
+  // Refs for tab elements to calculate positions
+  const detailsTabRef = useRef<HTMLButtonElement>(null);
+  const attendanceTabRef = useRef<HTMLButtonElement>(null);
+  const feesTabRef = useRef<HTMLButtonElement>(null);
+
+  // Calculate tab positions on mount and when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const calculatePositions = () => {
+      const positions: { [key: string]: { left: number; width: number } } = {};
+      
+      if (detailsTabRef.current) {
+        const rect = detailsTabRef.current.getBoundingClientRect();
+        const parent = detailsTabRef.current.parentElement?.getBoundingClientRect();
+        if (parent) {
+          positions.details = {
+            left: rect.left - parent.left,
+            width: rect.width
+          };
+        }
+      }
+      
+      if (attendanceTabRef.current) {
+        const rect = attendanceTabRef.current.getBoundingClientRect();
+        const parent = attendanceTabRef.current.parentElement?.getBoundingClientRect();
+        if (parent) {
+          positions.monthly = {
+            left: rect.left - parent.left,
+            width: rect.width
+          };
+        }
+      }
+      
+      if (feesTabRef.current) {
+        const rect = feesTabRef.current.getBoundingClientRect();
+        const parent = feesTabRef.current.parentElement?.getBoundingClientRect();
+        if (parent) {
+          positions.fees = {
+            left: rect.left - parent.left,
+            width: rect.width
+          };
+        }
+      }
+      
+      setTabPositions(positions);
+    };
+
+    // Delay calculation to ensure DOM is ready
+    const timeoutId = setTimeout(calculatePositions, 100);
+    
+    // Recalculate on resize
+    window.addEventListener('resize', calculatePositions);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', calculatePositions);
+    };
+  }, [isOpen]);
+
+  const { data: classes = [], error: classesError } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
   });
 
-  const { data: studentClasses = [] } = useQuery<StudentClass[]>({
+  const { data: studentClasses = [], error: studentClassesError } = useQuery<StudentClass[]>({
     queryKey: ["/api/student-classes"],
     enabled: !!student?.id && isOpen,
   });
 
-  const { data: attendance = [] } = useQuery<Attendance[]>({
+  const { data: attendance = [], error: attendanceError } = useQuery<Attendance[]>({
     queryKey: ["/api/attendance", student?.id],
     queryFn: async () => {
       if (!student?.id) return [];
@@ -198,7 +261,7 @@ export default function StudentDetailsModal({
     enabled: !!student?.id && isOpen,
   });
 
-  const { data: fees = [] } = useQuery<FeeWithDetails[]>({
+  const { data: fees = [], error: feesError } = useQuery<FeeWithDetails[]>({
     queryKey: ["/api/fees", student?.id],
     queryFn: async () => {
       if (!student?.id) return [];
@@ -214,6 +277,23 @@ export default function StudentDetailsModal({
     enabled: !!student?.id && isOpen,
   });
 
+  // Show toast errors for query failures
+  useEffect(() => {
+    if (classesError) toast.error("Failed to load classes");
+  }, [classesError]);
+
+  useEffect(() => {
+    if (studentClassesError) toast.error("Failed to load student classes");
+  }, [studentClassesError]);
+
+  useEffect(() => {
+    if (attendanceError) toast.error("Failed to load attendance");
+  }, [attendanceError]);
+
+  useEffect(() => {
+    if (feesError) toast.error("Failed to load fees");
+  }, [feesError]);
+
   const studentClassesForStudent = useMemo(() => {
     return student
       ? studentClasses.filter((sc: StudentClass) => sc.studentId === student.id)
@@ -221,13 +301,13 @@ export default function StudentDetailsModal({
   }, [student, studentClasses]);
 
   useEffect(() => {
+    // Save the previous overflow value to restore it properly
+    const previousOverflow = document.body.style.overflow;
     if (isOpen) {
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = previousOverflow || "unset";
     };
   }, [isOpen]);
 
@@ -250,7 +330,7 @@ export default function StudentDetailsModal({
       .slice(0, 2);
   };
 
-  const handleEditFee = (fee: FeeWithDetails) => {
+  const handleEditFee = (fee: FeeWithDetails | null) => {
     setSelectedFee(fee);
     setIsEditModalOpen(true);
   };
@@ -261,11 +341,11 @@ export default function StudentDetailsModal({
   };
 
   const attendanceStats = useMemo(() => {
-    if (!attendance.length) return { present: 0, absent: 0, late: 0, total: 0 };
+    if (!attendance || attendance.length === 0) return { present: 0, absent: 0, late: 0, total: 0 };
 
-    const present = attendance.filter((a) => a.status === "present").length;
-    const absent = attendance.filter((a) => a.status === "absent").length;
-    const late = attendance.filter((a) => a.status === "late").length;
+    const present = attendance.filter((a) => a?.status === "present").length;
+    const absent = attendance.filter((a) => a?.status === "absent").length;
+    const late = attendance.filter((a) => a?.status === "late").length;
 
     return { present, absent, late, total: attendance.length };
   }, [attendance]);
@@ -368,25 +448,76 @@ export default function StudentDetailsModal({
             </div>
           </div>
 
-          <Tabs defaultValue="details" className="flex-1 flex flex-col min-h-0">
+          <Tabs 
+            defaultValue="details" 
+            value={activeTab}
+            onValueChange={(value) => {
+              setActiveTab(value);
+              // Recalculate positions after tab change
+              setTimeout(() => {
+                const calculatePositions = () => {
+                  const positions: { [key: string]: { left: number; width: number } } = {};
+                  const tabRefs = [
+                    { key: 'details', ref: detailsTabRef },
+                    { key: 'monthly', ref: attendanceTabRef },
+                    { key: 'fees', ref: feesTabRef }
+                  ];
+                  
+                  tabRefs.forEach(({ key, ref }) => {
+                    if (ref.current) {
+                      const rect = ref.current.getBoundingClientRect();
+                      const parent = ref.current.parentElement?.getBoundingClientRect();
+                      if (parent) {
+                        positions[key] = {
+                          left: rect.left - parent.left,
+                          width: rect.width
+                        };
+                      }
+                    }
+                  });
+                  setTabPositions(positions);
+                };
+                calculatePositions();
+              }, 50);
+            }}
+            className="flex-1 flex flex-col min-h-0"
+          >
             <div
+              role="tablist"
+              aria-label="Student details sections"
+              className="relative"
             >
+              {/* Animated underline indicator */}
+              <div 
+                className="absolute bottom-0 h-0.5 bg-blue-600 transition-all duration-300 ease-out rounded-full"
+                style={{
+                  left: tabPositions[activeTab]?.left ?? 0,
+                  width: tabPositions[activeTab]?.width ?? 0,
+                  opacity: tabPositions[activeTab] ? 1 : 0,
+                }}
+              />
               <TabsList className="h-12 px-4 sm:py-8 py-6 bg-transparent border-b border-gray-200 gap-2 sm:gap-3 flex justify-center w-full">
                 <TabsTrigger
+                  ref={detailsTabRef}
                   value="details"
-                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
+                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer relative transition-all duration-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  aria-label="View student details"
                 >
                   Details
                 </TabsTrigger>
                 <TabsTrigger
+                  ref={attendanceTabRef}
                   value="monthly"
-                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
+                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer relative transition-all duration-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  aria-label="View attendance records"
                 >
                   Attendance
                 </TabsTrigger>
                 <TabsTrigger
+                  ref={feesTabRef}
                   value="fees"
-                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer"
+                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer relative transition-all duration-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  aria-label="View fee records"
                 >
                   Fees
                 </TabsTrigger>
@@ -565,7 +696,6 @@ export default function StudentDetailsModal({
                   </CardContent>
                 </Card>
 
-                {/* Weekly Attendance Grid */}
                 {effectiveSelectedClass && (
                   <Card className="border-2 border-green-100 bg-linear-to-r from-green-50 to-emerald-50">
                     <CardHeader>
@@ -887,10 +1017,8 @@ export default function StudentDetailsModal({
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() =>
-                                    fee
-                                      && handleEditFee(fee)
-                                  }
+                                  onClick={() => handleEditFee(fee ?? null)}
+                                  disabled={!fee}
                                   className="cursor-pointer w-full sm:w-auto"
                                 >
                                   <Edit className="h-4 w-4 mr-1" />
