@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
+import { PanelLeft, Menu as MenuIcon } from "lucide-react";
 import ClientProviders from "@/components/client-providers";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import { AppSidebar } from "@/components/app-sidebar";
+import { NavProvider, useNav } from "@/components/nav-context";
 import { UserMenu } from "@/components/user-menu";
 import { usePathname } from "next/navigation";
 import type { Session } from "next-auth";
@@ -46,31 +48,62 @@ function PageTitle() {
   );
 }
 
+function NavToggle() {
+  const { isMobile, isCollapsed, mobileOpen, toggleMobile, toggleCollapsed } =
+    useNav();
+
+  if (isMobile) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        data-testid="button-sidebar-toggle"
+        aria-label="Open navigation"
+        aria-expanded={mobileOpen}
+        aria-controls="mobile-navigation"
+        onClick={toggleMobile}
+        className="h-9 w-9"
+      >
+        <MenuIcon className="h-5 w-5" />
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      data-testid="button-sidebar-toggle"
+      aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      aria-expanded={!isCollapsed}
+      onClick={toggleCollapsed}
+      className="h-9 w-9"
+    >
+      <PanelLeft className="h-5 w-5" />
+    </Button>
+  );
+}
+
 interface AppShellProps {
   children: React.ReactNode;
   session?: Session;
 }
 
 export default function AppShell({ children, session }: AppShellProps) {
-  const style = {
-    "--sidebar-width": "16rem",
-    "--sidebar-width-icon": "3rem",
-  } as React.CSSProperties;
-
   return (
     <ClientProviders>
       <ThemeProvider>
         <TooltipProvider>
-          <SidebarProvider style={style}>
+          <NavProvider>
             <div className="flex h-screen w-full overflow-x-hidden">
               <AppSidebar session={session} />
-              <div className="flex flex-col flex-1 min-w-0">
-                <header className="flex items-center justify-between p-4 border-b border-border">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-3 sm:px-4">
+                  <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+                    <NavToggle />
                     <PageTitle />
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex shrink-0 items-center gap-2">
                     <UserMenu session={session} />
                   </div>
                 </header>
@@ -79,8 +112,8 @@ export default function AppShell({ children, session }: AppShellProps) {
                 </main>
               </div>
             </div>
-          </SidebarProvider>
-          <Toaster richColors/>
+          </NavProvider>
+          <Toaster richColors />
         </TooltipProvider>
       </ThemeProvider>
     </ClientProviders>

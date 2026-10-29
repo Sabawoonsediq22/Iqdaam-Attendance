@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-export async function middleware() {
+export async function proxy() {
   // For frontend routes, we rely on client-side session checks in layouts
-  // This middleware mainly handles basic route protection patterns
+  // This proxy mainly handles basic route protection patterns
 
   return NextResponse.next();
 }

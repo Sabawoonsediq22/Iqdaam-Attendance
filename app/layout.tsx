@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Viewport } from "next";
 import { Inter } from "next/font/google";
 import NetworkStatusMonitor from "@/components/NetworkStatusMonitor";
 import ClientProviders from "@/components/client-providers";
@@ -13,13 +14,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Iqdaam Educational Center",
   description: "Track student attendance across classes",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

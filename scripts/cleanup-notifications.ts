@@ -1,9 +1,9 @@
 import { config } from 'dotenv';
 
-config({ path: '../.env.local' });
+config({ path: './.env.local' });
 
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { notifications } from '../lib/schema';
 import { lt } from 'drizzle-orm';
 
@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL environment variable is required");
 }
 
-const sql = neon(process.env.DATABASE_URL);
+const sql = postgres(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 
 async function cleanupNotifications() {
