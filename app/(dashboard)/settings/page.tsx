@@ -333,7 +333,20 @@ export default function SettingsPage() {
   };
 
   if (!session?.user) {
-    return <Loader text="Loading settings..." />;
+    return (
+      <div className="space-y-6">
+        <div>
+          <p className="text-muted-foreground mt-2">
+            Manage your account settings and preferences
+          </p>
+        </div>
+        <Loader
+          variant="skeleton"
+          shape="settings"
+          text="Loading settings..."
+        />
+      </div>
+    );
   }
 
 

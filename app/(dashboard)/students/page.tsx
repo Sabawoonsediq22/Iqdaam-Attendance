@@ -119,42 +119,41 @@ export default function StudentsPage() {
   return (
     <div className="space-y-6">
       <OfflineIndicator />
-      {studentsLoading || classesLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader size="md" text="please wait..." />
+
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-muted-foreground mt-1">
+            Manage student information and class assignments
+          </p>
         </div>
+        <AddStudentModal
+          onSuccess={handleStudentAdded}
+          trigger={
+            <Button className="cursor-pointer">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <p className="hidden sm:block">Add Student</p>
+            </Button>
+          }
+        />
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search students..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Badge variant="secondary">Total {students.length} students</Badge>
+      </div>
+
+      {studentsLoading || classesLoading ? (
+        <Loader variant="skeleton" shape="students" className="max-w-none" />
       ) : (
         <>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground mt-1">
-                Manage student information and class assignments
-              </p>
-            </div>
-            <AddStudentModal
-              onSuccess={handleStudentAdded}
-              trigger={
-                <Button className="cursor-pointer">
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <p className="hidden sm:block">Add Student</p>
-                </Button>
-              }
-            />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search students..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Badge variant="secondary">Total {students.length} students</Badge>
-          </div>
-
           <div className="space-y-6">
             {studentsByClass.map(({ class: cls, students: classStudents }) => (
               <Card key={cls.id}>

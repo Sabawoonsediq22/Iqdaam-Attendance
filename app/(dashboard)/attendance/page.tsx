@@ -427,7 +427,11 @@ function AttendancePageContent() {
             <CardContent>
               {isStudentsLoading ? (
                 <div className="text-center py-12">
-                  <Loader size="md" text="please wait..." />
+                  <Loader
+                    variant="skeleton"
+                    shape="attendance-list"
+                    className="max-w-none"
+                  />
                 </div>
               ) : students.length === 0 ? (
                 <div className="text-center py-12">
@@ -580,7 +584,11 @@ function AttendancePageContent() {
         ) : selectedClass ? (
           <Card>
             <CardContent className="flex items-center justify-center py-12">
-              <Loader size="md" text="please wait..." />
+              <Loader
+                variant="skeleton"
+                shape="attendance-list"
+                className="max-w-none"
+              />
             </CardContent>
           </Card>
         ) : null}
@@ -621,7 +629,7 @@ function AttendancePageContent() {
 
 export default function AttendancePage() {
   return (
-    <Suspense fallback={<Loader size="md" text="Loading..." />}>
+    <Suspense fallback={<Loader variant="skeleton" shape="attendance" />}>
       <AttendancePageContent />
     </Suspense>
   );

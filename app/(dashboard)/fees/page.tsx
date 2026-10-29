@@ -164,18 +164,17 @@ export default function FeesPage() {
   return (
     <div className="space-y-6">
       <OfflineIndicator />
+
+      <div className="flex items-start">
+        <p className="text-muted-foreground mt-1">
+          Track and manage student fee payments
+        </p>
+      </div>
+
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader size="md" text="please wait..." />
-        </div>
+        <Loader variant="skeleton" shape="fees" className="max-w-none" />
       ) : (
         <>
-          <div className="flex items-start">
-              <p className="text-muted-foreground mt-1">
-                Track and manage student fee payments
-              </p>
-          </div>
-
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="border-blue-200 hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

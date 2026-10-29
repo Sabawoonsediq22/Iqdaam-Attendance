@@ -493,7 +493,11 @@ export default function NotificationsPage() {
         {isLoading ? (
           <Card>
             <CardContent className="flex items-center justify-center py-12 min-h-[200px]">
-              <Loader size="md" text="please wait..." />
+              <Loader
+                variant="skeleton"
+                shape="notifications"
+                className="max-w-none"
+              />
             </CardContent>
           </Card>
         ) : filteredNotifications.length === 0 ? (

@@ -279,7 +279,7 @@ export default function Dashboard() {
   if (statsLoading && !stats) {
     return (
       <div className="col-span-full flex justify-center py-12">
-        <Loader size="md" text="please wait..." />
+        <Loader variant="skeleton" shape="dashboard" className="max-w-4xl" />
       </div>
     );
   }

@@ -300,8 +300,14 @@ export default function UsersPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader size="md" text="please wait..." />
+      <div className="space-y-6">
+        <OfflineIndicator />
+        <div>
+          <p className="text-muted-foreground mt-1">
+            Manage all users in the system
+          </p>
+        </div>
+        <Loader variant="skeleton" shape="users" className="max-w-none" />
       </div>
     );
   }

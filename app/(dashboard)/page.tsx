@@ -262,8 +262,8 @@ export default function Dashboard() {
 
   if (statsLoading && !stats) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader size="md" text="please wait..." />
+      <div className="flex w-full items-center justify-center px-4">
+        <Loader variant="skeleton" shape="dashboard" className="max-w-4xl" />
       </div>
     );
   }

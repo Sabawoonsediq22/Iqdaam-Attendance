@@ -833,7 +833,11 @@ export default function ReportsClient({ students, classes }: Props) {
       {loading && (
         <Card>
           <CardContent className="flex items-center justify-center py-12">
-            <Loader text="please wait..." />
+            <Loader
+              variant="skeleton"
+              shape="reports"
+              className="max-w-none"
+            />
           </CardContent>
         </Card>
       )}
