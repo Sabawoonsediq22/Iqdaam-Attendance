@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type {
   Student,
@@ -22,21 +24,7 @@ import type {
   Attendance,
   StudentClass,
 } from "@/lib/schema";
-import {
-  User,
-  Mail,
-  Phone,
-  BookOpen,
-  TrendingUp,
-  CheckCircle,
-  XCircle,
-  Clock,
-  CalendarIcon,
-  Edit,
-  Trash2,
-  Coins,
-  X,
-} from "lucide-react";
+import { Edit, Trash2, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -44,22 +32,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EditFeeModal from "./EditFeeModal";
 import { getStudentAvatarSrc } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type FeeWithDetails = {
   id: string;
@@ -79,6 +57,20 @@ type FeeWithDetails = {
 type RawFee = Omit<FeeWithDetails, "createdAt" | "paymentDate"> & {
   createdAt: string;
   paymentDate: string | null;
+};
+
+/* Status tokens aligned with the app's attendance palette */
+const statusTile: Record<string, string> = {
+  present:
+    "border-attendance-present/30 bg-attendance-present/10 text-attendance-present",
+  absent: "border-attendance-absent/30 bg-attendance-absent/10 text-attendance-absent",
+  late: "border-attendance-late/30 bg-attendance-late/10 text-attendance-late",
+};
+
+const statusDot: Record<string, string> = {
+  present: "bg-attendance-present",
+  absent: "bg-attendance-absent",
+  late: "bg-attendance-late",
 };
 
 interface StudentDetailsModalProps {
@@ -150,8 +142,14 @@ function DeleteStudentModal({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} variant="destructive" size="sm">
-        <Trash2 />
+      <Button
+        onClick={() => setIsOpen(true)}
+        variant="outline"
+        size="icon"
+        aria-label={`Delete ${student.name}`}
+        className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+      >
+        <Trash2 className="h-4 w-4" />
       </Button>
       <DeleteConfirmationModal
         isOpen={isOpen}
@@ -162,6 +160,45 @@ function DeleteStudentModal({
         isDeleting={isDeleting}
       />
     </>
+  );
+}
+
+/* Minimal label-above-value field used in the info grid */
+function InfoField({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <div className="mt-0.5 truncate text-sm font-medium">{children}</div>
+    </div>
+  );
+}
+
+/* Small stat tile for the attendance summary */
+function StatTile({
+  label,
+  value,
+  dot,
+}: {
+  label: string;
+  value: string | number;
+  dot: string;
+}) {
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div className="flex items-center gap-2">
+        <span className={cn("size-2 shrink-0 rounded-full", dot)} />
+        <p className="truncate text-xs font-medium text-muted-foreground">
+          {label}
+        </p>
+      </div>
+      <p className="mt-1.5 text-2xl font-semibold tabular-nums">{value}</p>
+    </div>
   );
 }
 
@@ -179,67 +216,6 @@ export default function StudentDetailsModal({
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [selectedFee, setSelectedFee] = useState<FeeWithDetails | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("details");
-  const [tabPositions, setTabPositions] = useState<{ [key: string]: { left: number; width: number } }>({});
-
-  // Refs for tab elements to calculate positions
-  const detailsTabRef = useRef<HTMLButtonElement>(null);
-  const attendanceTabRef = useRef<HTMLButtonElement>(null);
-  const feesTabRef = useRef<HTMLButtonElement>(null);
-
-  // Calculate tab positions on mount and when modal opens
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const calculatePositions = () => {
-      const positions: { [key: string]: { left: number; width: number } } = {};
-      
-      if (detailsTabRef.current) {
-        const rect = detailsTabRef.current.getBoundingClientRect();
-        const parent = detailsTabRef.current.parentElement?.getBoundingClientRect();
-        if (parent) {
-          positions.details = {
-            left: rect.left - parent.left,
-            width: rect.width
-          };
-        }
-      }
-      
-      if (attendanceTabRef.current) {
-        const rect = attendanceTabRef.current.getBoundingClientRect();
-        const parent = attendanceTabRef.current.parentElement?.getBoundingClientRect();
-        if (parent) {
-          positions.monthly = {
-            left: rect.left - parent.left,
-            width: rect.width
-          };
-        }
-      }
-      
-      if (feesTabRef.current) {
-        const rect = feesTabRef.current.getBoundingClientRect();
-        const parent = feesTabRef.current.parentElement?.getBoundingClientRect();
-        if (parent) {
-          positions.fees = {
-            left: rect.left - parent.left,
-            width: rect.width
-          };
-        }
-      }
-      
-      setTabPositions(positions);
-    };
-
-    // Delay calculation to ensure DOM is ready
-    const timeoutId = setTimeout(calculatePositions, 100);
-    
-    // Recalculate on resize
-    window.addEventListener('resize', calculatePositions);
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', calculatePositions);
-    };
-  }, [isOpen]);
 
   const { data: classes = [], error: classesError } = useQuery<Class[]>({
     queryKey: ["/api/classes"],
@@ -350,25 +326,14 @@ export default function StudentDetailsModal({
     return { present, absent, late, total: attendance.length };
   }, [attendance]);
 
-  const attendanceOverTime = useMemo(() => {
-    const sortedAttendance = [...attendance].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-    );
-    return sortedAttendance.slice(-30).map((a) => ({
-      date: new Date(a.date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-      status: a.status === "present" ? 1 : a.status === "late" ? 0.5 : 0,
-      fullStatus: a.status,
-    }));
-  }, [attendance]);
-
-  const attendanceByStatus = [
-    { name: "Present", value: attendanceStats.present, color: "#00C49F" },
-    { name: "Absent", value: attendanceStats.absent, color: "#FF8042" },
-    { name: "Late", value: attendanceStats.late, color: "#FFBB28" },
-  ];
+  // Late days count as half attendance for the overall rate
+  const attendanceRate = attendanceStats.total
+    ? Math.round(
+        ((attendanceStats.present + attendanceStats.late / 2) /
+          attendanceStats.total) *
+          100,
+      )
+    : 0;
 
   const filteredAttendance = useMemo(() => {
     return effectiveSelectedClass
@@ -388,651 +353,502 @@ export default function StudentDetailsModal({
         dateStr,
         status: record?.status || null,
         dayName: format(date, "EEE"),
-        fullDate: format(date, "MMM dd"),
+        dayNumber: format(date, "d"),
       };
     });
   }, [filteredAttendance, selectedMonth]);
+
+  // Status distribution for the selected month + class
+  const monthlyStats = useMemo(() => {
+    let present = 0;
+    let absent = 0;
+    let late = 0;
+    for (const day of monthlyAttendance) {
+      if (day.status === "present") present += 1;
+      else if (day.status === "absent") absent += 1;
+      else if (day.status === "late") late += 1;
+    }
+    return { present, absent, late, total: present + absent + late };
+  }, [monthlyAttendance]);
+
+  const distributionData = [
+    { name: "Present", value: monthlyStats.present, color: "hsl(142 71% 45%)" },
+    { name: "Absent", value: monthlyStats.absent, color: "hsl(4 90% 58%)" },
+    { name: "Late", value: monthlyStats.late, color: "hsl(45 93% 47%)" },
+  ];
 
   if (!student) return null;
 
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300 animate-out fade-out-0 slide-out-to-bottom-4">
-          <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowImageViewer(true)}
-                className="cursor-pointer hover:opacity-80 transition-opacity"
-              >
-                <Avatar className="h-12 w-12">
-                  <AvatarImage
-                    src={getStudentAvatarSrc(student.avatar, student.gender)}
-                    alt={student.name}
-                  />
-                  <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
-                </Avatar>
-              </button>
-              <div>
-                <p className="font-bold text-lg">{student.name}</p>
-                <p className="text-sm text-muted-foreground">Student Details</p>
+        <div className="fixed inset-0 z-50 flex flex-col bg-background">
+          {/* Header + tabs */}
+          <Tabs defaultValue="details" className="flex min-h-0 flex-1 flex-col">
+          <div className="border-b border-border bg-background">
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <button
+                  onClick={() => setShowImageViewer(true)}
+                  aria-label="View profile picture"
+                  className="cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+                >
+                  <Avatar className="h-10 w-10 ring-2 ring-border">
+                    <AvatarImage
+                      src={getStudentAvatarSrc(student.avatar, student.gender)}
+                      alt={student.name}
+                    />
+                    <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
+                  </Avatar>
+                </button>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold leading-tight">
+                    {student.name}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    Student profile
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {onEdit && (
+                  <Button
+                    onClick={() => {
+                      onClose();
+                      onEdit();
+                    }}
+                    variant="outline"
+                    size="icon"
+                    aria-label="Edit student"
+                    className="cursor-pointer"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                <DeleteStudentModal
+                  student={student!}
+                  onSuccess={() => {
+                    onStudentChange?.();
+                  }}
+                />
+                <Button
+                  onClick={onClose}
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close"
+                  className="cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {onEdit && (
-                <Button
-                  onClick={() => {
-                    onClose();
-                    onEdit();
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-              <DeleteStudentModal
-                student={student!}
-                onSuccess={() => {
-                  onStudentChange?.();
-                }}
-              />
-              <Button
-                onClick={onClose}
-                variant="ghost"
-                size="sm"
-                className="cursor-pointer bg-gray-100"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+
+              <div className="flex justify-center px-4 pb-3">
+                <TabsList className="w-full max-w-md gap-1 rounded-lg bg-muted p-1">
+                  <TabsTrigger
+                    value="details"
+                    aria-label="View student details"
+                    className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                  >
+                    Details
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="monthly"
+                    aria-label="View attendance records"
+                    className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                  >
+                    Attendance
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="fees"
+                    aria-label="View fee records"
+                    className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                  >
+                    Fees
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </div>
-          </div>
 
-          <Tabs 
-            defaultValue="details" 
-            value={activeTab}
-            onValueChange={(value) => {
-              setActiveTab(value);
-              // Recalculate positions after tab change
-              setTimeout(() => {
-                const calculatePositions = () => {
-                  const positions: { [key: string]: { left: number; width: number } } = {};
-                  const tabRefs = [
-                    { key: 'details', ref: detailsTabRef },
-                    { key: 'monthly', ref: attendanceTabRef },
-                    { key: 'fees', ref: feesTabRef }
-                  ];
-                  
-                  tabRefs.forEach(({ key, ref }) => {
-                    if (ref.current) {
-                      const rect = ref.current.getBoundingClientRect();
-                      const parent = ref.current.parentElement?.getBoundingClientRect();
-                      if (parent) {
-                        positions[key] = {
-                          left: rect.left - parent.left,
-                          width: rect.width
-                        };
-                      }
-                    }
-                  });
-                  setTabPositions(positions);
-                };
-                calculatePositions();
-              }, 50);
-            }}
-            className="flex-1 flex flex-col min-h-0"
-          >
-            <div
-              role="tablist"
-              aria-label="Student details sections"
-              className="relative"
-            >
-              {/* Animated underline indicator */}
-              <div 
-                className="absolute bottom-0 h-0.5 bg-blue-600 transition-all duration-300 ease-out rounded-full"
-                style={{
-                  left: tabPositions[activeTab]?.left ?? 0,
-                  width: tabPositions[activeTab]?.width ?? 0,
-                  opacity: tabPositions[activeTab] ? 1 : 0,
-                }}
-              />
-              <TabsList className="h-12 px-4 sm:py-8 py-6 bg-transparent border-b border-gray-200 gap-2 sm:gap-3 flex justify-center w-full">
-                <TabsTrigger
-                  ref={detailsTabRef}
-                  value="details"
-                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer relative transition-all duration-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  aria-label="View student details"
-                >
-                  Details
-                </TabsTrigger>
-                <TabsTrigger
-                  ref={attendanceTabRef}
-                  value="monthly"
-                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer relative transition-all duration-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  aria-label="View attendance records"
-                >
-                  Attendance
-                </TabsTrigger>
-                <TabsTrigger
-                  ref={feesTabRef}
-                  value="fees"
-                  className="text-xs sm:text-sm whitespace-nowrap rounded-3xl border data-[state=active]:border-blue-200 data-[state=active]:text-blue-700 data-[state=active]:bg-blue-100 cursor-pointer relative transition-all duration-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                  aria-label="View fee records"
-                >
-                  Fees
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            <div className="flex-1 overflow-y-auto px-4 py-4">
-              <TabsContent value="details" className="space-y-6 mt-0">
-                {/* Basic Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5" />
-                      Basic Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Full Name
-                          </p>
-                          <p className="font-semibold">{student.name}</p>
-                        </div>
+            <div className="flex min-h-0 flex-1 overflow-y-auto px-4 py-4">
+              <div className="mx-auto w-full max-w-4xl">
+                <TabsContent value="details" className="space-y-4 mt-0">
+                  {/* Student information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Student information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+                        <InfoField label="Full name">
+                          {student.name}
+                        </InfoField>
+                        <InfoField label="Father's name">
+                          {student.fatherName}
+                        </InfoField>
+                        <InfoField label="Gender">
+                          {student.gender}
+                        </InfoField>
+                        {student.studentId && (
+                          <InfoField label="Student ID">
+                            <span className="tabular-nums">
+                              {student.studentId}
+                            </span>
+                          </InfoField>
+                        )}
+                        <InfoField label="Phone">
+                          {student.phone || "Not provided"}
+                        </InfoField>
+                        {student.email && (
+                          <InfoField label="Email">
+                            {student.email}
+                          </InfoField>
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Father&apos;s Name
-                          </p>
-                          <p className="font-semibold">{student.fatherName}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Gender
-                          </p>
-                          <p className="font-semibold">{student.gender}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <BookOpen className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Class
-                          </p>
-                          <p className="font-semibold">
-                            {studentClassesForStudent.length > 0
-                              ? studentClassesForStudent
-                                  .map((sc) => getClassName(sc.classId))
-                                  .join(", ")
-                              : "No classes assigned"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {student.studentId && (
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <User className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">
-                              Student ID
-                            </p>
-                            <p className="font-semibold">{student.studentId}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {student.email && (
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Mail className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">
-                              Email
-                            </p>
-                            <p className="font-semibold">{student.email}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Phone className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Phone
-                          </p>
-                          <p className="font-semibold">
-                            {student.phone || "Not provided"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="monthly" className="space-y-6 mt-0">
-                {/* Date Picker */}
-                <Card className="border-2 border-blue-100">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-blue-900">
-                      <CalendarIcon className="h-5 w-5 text-blue-600" />
-                      Select Month and Class
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 py-6 gap-5 px-4 border border-blue-200 rounded-xl bg-white/70 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex flex-col gap-3">
-                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-blue-600" />
-                          Select Month
-                        </label>
-                        <Input
-                          type="month"
-                          value={format(selectedMonth, "yyyy-MM")}
-                          onChange={(e) => {
-                            const date = new Date(e.target.value + "-01");
-                            if (!isNaN(date.getTime())) {
-                              setSelectedMonth(date);
-                            }
-                          }}
-                          className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                          <BookOpen className="h-4 w-4 text-blue-600" />
-                          Select Class
-                        </label>
-                        <Select
-                          value={effectiveSelectedClass}
-                          onValueChange={setSelectedClass}
-                        >
-                          <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                            <SelectValue placeholder="Choose a class" />
-                          </SelectTrigger>
-                          <SelectContent>
+                      {/* Enrolled classes */}
+                      <div className="mt-5 border-t border-border pt-4">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Classes
+                        </p>
+                        {studentClassesForStudent.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap gap-2">
                             {studentClassesForStudent.map((sc) => (
-                              <SelectItem key={sc.classId} value={sc.classId}>
+                              <Badge
+                                key={sc.id}
+                                variant="secondary"
+                                className="font-medium"
+                              >
                                 {getClassName(sc.classId)}
-                              </SelectItem>
+                              </Badge>
                             ))}
-                          </SelectContent>
-                        </Select>
+                          </div>
+                        ) : (
+                          <p className="mt-1 text-sm font-medium">
+                            No classes assigned
+                          </p>
+                        )}
                       </div>
-                    </div>
-                    <div className="mt-6 p-4 bg-linear-to-r from-blue-100 to-indigo-100 rounded-xl border border-blue-300 shadow-sm">
-                      <p className="text-sm font-semibold text-blue-900">
-                        Selected Filters: {format(selectedMonth, "MMMM yyyy")}
-                        {effectiveSelectedClass && ` | ${getClassName(effectiveSelectedClass)}`}
-                      </p>
-                      <p className="text-xs text-blue-800 mt-1">
-                        Choose both month and class to view detailed attendance records
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-                {effectiveSelectedClass && (
-                  <Card className="border-2 border-green-100 bg-linear-to-r from-green-50 to-emerald-50">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-900">
-                        <CalendarIcon className="h-5 w-5 text-green-600" />
-                        Monthly Attendance for {getClassName(effectiveSelectedClass)}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
-                        {monthlyAttendance.map((day) => (
-                          <div
-                            key={day.dateStr}
-                            className={`p-4 rounded-lg border-2 transition-all ${
-                              day.status === "present"
-                                ? "border-green-500 bg-green-50"
-                                : day.status === "absent"
-                                  ? "border-red-500 bg-red-50"
-                                  : day.status === "late"
-                                    ? "border-amber-500 bg-amber-50"
-                                    : "border-gray-200 bg-gray-50"
-                            }`}
-                          >
-                            <div className="text-center">
-                              <p className="font-semibold text-sm">
-                                {day.dayName}
-                              </p>
-                              <p className="text-xs text-muted-foreground mb-2">
-                                {day.fullDate}
-                              </p>
-                              <div className="flex justify-center">
-                                {day.status ? (
-                                  <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                      day.status === "present"
-                                        ? "bg-green-500"
-                                        : day.status === "absent"
-                                          ? "bg-red-500"
-                                          : "bg-amber-500"
-                                    }`}
-                                  >
-                                    {day.status === "present" ? (
-                                      <CheckCircle className="h-4 w-4 text-white" />
-                                    ) : day.status === "absent" ? (
-                                      <XCircle className="h-4 w-4 text-white" />
-                                    ) : (
-                                      <Clock className="h-4 w-4 text-white" />
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                                    <span className="text-xs text-gray-400">
-                                      -
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                              {day.status && (
-                                <p className="text-xs font-medium mt-1 capitalize text-center">
-                                  {day.status}
-                                </p>
+                <TabsContent value="monthly" className="space-y-4 mt-0 pb-5">
+                  {/* Filters */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <div className="flex flex-1 flex-col gap-1">
+                      <label
+                        htmlFor="attendance-month"
+                        className="text-xs font-medium text-muted-foreground"
+                      >
+                        Month
+                      </label>
+                      <Input
+                        id="attendance-month"
+                        type="month"
+                        value={format(selectedMonth, "yyyy-MM")}
+                        onChange={(e) => {
+                          const date = new Date(e.target.value + "-01");
+                          if (!isNaN(date.getTime())) {
+                            setSelectedMonth(date);
+                          }
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-1">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        Class
+                      </label>
+                      <Select
+                        value={effectiveSelectedClass}
+                        onValueChange={setSelectedClass}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose a class" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {studentClassesForStudent.map((sc) => (
+                            <SelectItem key={sc.classId} value={sc.classId}>
+                              {getClassName(sc.classId)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Calendar — only when a class is chosen */}
+                  {effectiveSelectedClass && (
+                    <>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">
+                          {format(selectedMonth, "MMMM yyyy")} —{" "}
+                          {getClassName(effectiveSelectedClass)}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-7">
+                          {/* Fridays are the school weekend — hide from the grid */}
+                          {monthlyAttendance
+                            .filter((day) => day.date.getDay() !== 5)
+                            .map((day) => (
+                            <div
+                              key={day.dateStr}
+                              className={cn(
+                                "flex flex-col items-center gap-1 rounded-lg border p-2.5 text-center",
+                                day.status
+                                  ? statusTile[day.status]
+                                  : "border-border bg-muted/40 text-muted-foreground",
                               )}
+                            >
+                              <span className="text-[11px] font-medium">
+                                {day.dayName}
+                              </span>
+                              <span className="text-sm font-semibold leading-none">
+                                {day.dayNumber}
+                              </span>
+                              <span
+                                className={cn(
+                                  "size-2 rounded-full",
+                                  day.status
+                                    ? statusDot[day.status]
+                                    : "border border-border bg-transparent",
+                                )}
+                                aria-hidden
+                              />
+                            </div>
+                            ))}
+                          </div>
+
+                        {/* Legend */}
+                        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                          {Object.entries(statusDot).map(([status, dot]) => (
+                            <span
+                              key={status}
+                              className="flex items-center gap-1.5 capitalize"
+                            >
+                              <span
+                                className={cn("size-2 rounded-full", dot)}
+                                aria-hidden
+                              />
+                              {status}
+                            </span>
+                          ))}
+                          <span className="flex items-center gap-1.5">
+                            <span
+                              className="size-2 rounded-full border border-border"
+                              aria-hidden
+                            />
+                            No record
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Distribution — scoped to the selected month + class */}
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium">
+                          Attendance distribution —{" "}
+                          {format(selectedMonth, "MMMM yyyy")} ·{" "}
+                          {getClassName(effectiveSelectedClass)}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {monthlyStats.total > 0 ? (
+                          <div className="flex flex-col items-center gap-6 sm:flex-row">
+                            <ResponsiveContainer
+                              width="100%"
+                              height={200}
+                              className="sm:w-1/2"
+                            >
+                              <PieChart>
+                                <Pie
+                                  data={distributionData}
+                                  cx="50%"
+                                  cy="50%"
+                                  labelLine={false}
+                                  label={({ percent }) =>
+                                    percent > 5
+                                      ? `${(percent * 100).toFixed(0)}%`
+                                      : ""
+                                  }
+                                  outerRadius={65}
+                                  dataKey="value"
+                                >
+                                  {distributionData.map((entry, index) => (
+                                    <Cell
+                                      key={`cell-${index}`}
+                                      fill={entry.color}
+                                    />
+                                  ))}
+                                </Pie>
+                                <Tooltip
+                                  formatter={(value, name) => [
+                                    `${value} days`,
+                                    name,
+                                  ]}
+                                />
+                              </PieChart>
+                            </ResponsiveContainer>
+                            <div className="flex w-full flex-col gap-3 sm:w-1/2">
+                              {distributionData.map((item) => (
+                                <div
+                                  key={item.name}
+                                  className="flex items-center gap-3"
+                                >
+                                  <span
+                                    className="size-3 shrink-0 rounded-full"
+                                    style={{ backgroundColor: item.color }}
+                                  />
+                                  <span className="text-sm font-medium">
+                                    {item.name}
+                                  </span>
+                                  <span className="ml-auto text-xs tabular-nums text-muted-foreground">
+                                    {item.value} days
+                                  </span>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                        ) : (
+                          <p className="py-6 text-center text-sm text-muted-foreground">
+                            No attendance records for this month and class yet.
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                    </>
+                  )}
 
-                {/* Attendance Statistics */}
-                <div className="space-y-4 mt-12">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Overall Attendance Summary</h3>
+                  {/* Overall summary */}
+                  <div>
+                    <h3 className="mb-3 text-sm font-semibold">
+                      Overall attendance summary
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                      <StatTile
+                        label="Present days"
+                        value={attendanceStats.present}
+                        dot="bg-attendance-present"
+                      />
+                      <StatTile
+                        label="Absent days"
+                        value={attendanceStats.absent}
+                        dot="bg-attendance-absent"
+                      />
+                      <StatTile
+                        label="Late days"
+                        value={attendanceStats.late}
+                        dot="bg-attendance-late"
+                      />
+                      <StatTile
+                        label="Attendance rate"
+                        value={`${attendanceRate}%`}
+                        dot="bg-primary"
+                      />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="border-2 border-green-200 bg-linear-to-br from-green-50 to-green-100 hover:shadow-lg transition-shadow">
-                    <CardContent className="flex items-center gap-4 p-6">
-                      <div className="h-14 w-14 bg-green-500 rounded-full flex items-center justify-center shadow-md">
-                        <CheckCircle className="h-7 w-7 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-3xl font-bold text-green-700">
-                          {attendanceStats.present}
-                        </p>
-                        <p className="text-sm font-medium text-green-600">Present Days</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                </TabsContent>
 
-                  <Card className="border-2 border-red-200 bg-linear-to-br from-red-50 to-red-100 hover:shadow-lg transition-shadow">
-                    <CardContent className="flex items-center gap-4 p-6">
-                      <div className="h-14 w-14 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                        <XCircle className="h-7 w-7 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-3xl font-bold text-red-700">
-                          {attendanceStats.absent}
-                        </p>
-                        <p className="text-sm font-medium text-red-600">Absent Days</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-2 border-yellow-200 bg-linear-to-br from-yellow-50 to-yellow-100 hover:shadow-lg transition-shadow">
-                    <CardContent className="flex items-center gap-4 p-6">
-                      <div className="h-14 w-14 bg-yellow-500 rounded-full flex items-center justify-center shadow-md">
-                        <Clock className="h-7 w-7 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-3xl font-bold text-yellow-700">
-                          {attendanceStats.late}
-                        </p>
-                        <p className="text-sm font-medium text-yellow-600">Late Days</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  </div>
-                </div>
-
-                {/* Attendance Charts */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Attendance Analytics</h3>
-                  </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Attendance Over Time */}
-                  <Card className="border-2 border-purple-200 bg-linear-to-br from-purple-50 to-purple-100 hover:shadow-lg transition-shadow">
+                <TabsContent value="fees" className="space-y-4 mt-0">
+                  <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-purple-900">
-                        <TrendingUp className="h-5 w-5 text-purple-600" />
-                        Attendance Trend (Last 30 Days)
-                      </CardTitle>
+                      <CardTitle>Fee management</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={attendanceOverTime}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="date" />
-                          <YAxis
-                            domain={[0, 1]}
-                            tickFormatter={(value) =>
-                              value === 1
-                                ? "Present"
-                                : value === 0.5
-                                  ? "Late"
-                                  : "Absent"
-                            }
-                          />
-                          <Tooltip
-                            formatter={(value: number) => {
-                              if (value === 1) return ["Present", "Status"];
-                              if (value === 0.5) return ["Late", "Status"];
-                              return ["Absent", "Status"];
-                            }}
-                          />
-                          <Line
-                            type="monotone"
-                            dataKey="status"
-                            stroke="#8884d8"
-                            strokeWidth={2}
-                            dot={{ fill: "#8884d8", strokeWidth: 2, r: 4 }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-
-                  {/* Attendance Distribution */}
-                  <Card className="border-2 border-orange-200 bg-linear-to-br from-orange-50 to-orange-100 hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-orange-900">
-                        <TrendingUp className="h-5 w-5 text-orange-600" />
-                        Attendance Distribution
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col lg:flex-row items-center gap-6">
-                        <ResponsiveContainer
-                          width="100%"
-                          height={250}
-                          className="lg:w-2/3"
-                        >
-                          <PieChart>
-                            <Pie
-                              data={attendanceByStatus}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={false}
-                              label={({ percent }) =>
-                                percent > 5
-                                  ? `${(percent * 100).toFixed(0)}%`
-                                  : ""
-                              }
-                              outerRadius={70}
-                              fill="#8884d8"
-                              dataKey="value"
-                            >
-                              {attendanceByStatus.map((entry, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={entry.color}
-                                />
-                              ))}
-                            </Pie>
-                            <Tooltip
-                              formatter={(value, name) => [
-                                `${value} days`,
-                                name,
-                              ]}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className="flex flex-col gap-3 lg:w-1/3">
-                          {attendanceByStatus.map((item) => (
-                            <div
-                              key={item.name}
-                              className="flex items-center gap-3"
-                            >
+                      {studentClassesForStudent.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Student is not enrolled in any classes.
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {studentClassesForStudent.map((sc) => {
+                            const classInfo = classes.find(
+                              (c) => c.id === sc.classId,
+                            );
+                            const fee = fees.find(
+                              (f) => f.classId === sc.classId,
+                            );
+                            const isPaid =
+                              fee && parseFloat(fee.feePaid || "0") > 0;
+                            return (
                               <div
-                                className="w-4 h-4 rounded-full"
-                                style={{ backgroundColor: item.color }}
-                              />
-                              <div>
-                                <p className="font-medium text-sm">
-                                  {item.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {item.value} days
-                                </p>
+                                key={sc.id}
+                                className="rounded-xl border bg-card p-4"
+                              >
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <h4 className="truncate text-sm font-semibold sm:text-base">
+                                        {classInfo?.name || "Unknown Class"}
+                                      </h4>
+                                      {fee && (
+                                        <Badge
+                                          variant="outline"
+                                          className={cn(
+                                            "shrink-0",
+                                            isPaid
+                                              ? "border-attendance-present/30 bg-attendance-present/10 text-attendance-present"
+                                              : "border-attendance-absent/30 bg-attendance-absent/10 text-attendance-absent",
+                                          )}
+                                        >
+                                          {isPaid ? "Paid" : "Pending"}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                      {classInfo?.teacher || "Unknown Teacher"}
+                                    </p>
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditFee(fee ?? null)}
+                                    disabled={!fee}
+                                    className="cursor-pointer w-full sm:w-auto"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    {fee ? "Edit fee" : "Add fee"}
+                                  </Button>
+                                </div>
+
+                                {fee && (
+                                  <div className="mt-3 grid grid-cols-3 gap-3 border-t border-border pt-3">
+                                    <InfoField label="Fee">
+                                      <span className="tabular-nums">
+                                        {fee.feeToBePaid} ؋
+                                      </span>
+                                    </InfoField>
+                                    <InfoField label="Paid">
+                                      <span className="tabular-nums">
+                                        {fee.feePaid || "0"} ؋
+                                      </span>
+                                    </InfoField>
+                                    <InfoField label="Unpaid">
+                                      <span className="tabular-nums">
+                                        {fee.feeUnpaid || "0"} ؋
+                                      </span>
+                                    </InfoField>
+                                    <p className="col-span-3 text-xs text-muted-foreground">
+                                      Created{" "}
+                                      {fee.createdAt.toLocaleDateString()}
+                                      {fee.paymentDate &&
+                                        ` · Paid ${fee.paymentDate.toLocaleDateString()}`}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
-                      </div>
+                      )}
                     </CardContent>
                   </Card>
-                  </div>
-                </div>
-              </TabsContent>
-
-
-              <TabsContent value="fees" className="space-y-6 mt-0">
-                {/* Fee Management */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Coins className="h-5 w-5" />
-                      Fee Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {studentClassesForStudent.length === 0 ? (
-                      <p className="text-muted-foreground">
-                        Student is not enrolled in any classes.
-                      </p>
-                    ) : (
-                      <div className="space-y-4">
-                        {studentClassesForStudent.map((sc) => {
-                          const classInfo = classes.find(
-                            (c) => c.id === sc.classId,
-                          );
-                          const fee = fees.find(
-                            (f) => f.classId === sc.classId,
-                          );
-                          return (
-                            <div
-                              key={sc.id}
-                              className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-4 border rounded-lg"
-                            >
-                              <div className="flex-1 space-y-1 min-w-0">
-                                {fee && (
-                                  <Badge
-                                    variant={
-                                      parseFloat(fee.feePaid || "0") > 0
-                                        ? "default"
-                                        : "destructive"
-                                    }
-                                    className="text-xs"
-                                  >
-                                    {parseFloat(fee.feePaid || "0") > 0
-                                      ? "Paid"
-                                      : "Pending"}
-                                  </Badge>
-                                )}
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-semibold text-sm sm:text-base">
-                                    {classInfo?.name || "Unknown Class"}
-                                  </h4>
-                                  <Badge variant="outline" className="text-xs">
-                                    {classInfo?.teacher || "Unknown Teacher"}
-                                  </Badge>
-                                </div>
-                                {fee ? (
-                                  <>
-                                    <div className="text-sm text-muted-foreground space-y-1">
-                                      <p>
-                                        Fee: {fee.feeToBePaid}؋ | Paid:{" "}
-                                        {fee.feePaid || "0"}؋ | Unpaid:{" "}
-                                        {fee.feeUnpaid || "0"}؋
-                                      </p>
-                                      <p className="text-xs">
-                                        Created:{" "}
-                                        {fee.createdAt.toLocaleDateString()}
-                                        {fee.paymentDate &&
-                                          ` | Paid: ${fee.paymentDate.toLocaleDateString()}`}
-                                      </p>
-                                    </div>
-                                  </>
-                                ) : (
-                                  <p className="text-sm text-muted-foreground">
-                                    No fee set for this class.
-                                  </p>
-                                )}
-                              </div>
-                              <div className="flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleEditFee(fee ?? null)}
-                                  disabled={!fee}
-                                  className="cursor-pointer w-full sm:w-auto"
-                                >
-                                  <Edit className="h-4 w-4 mr-1" />
-                                  {fee ? "Edit Fee" : "Add Fee"}
-                                </Button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                </TabsContent>
+              </div>
             </div>
           </Tabs>
         </div>
@@ -1065,4 +881,3 @@ export default function StudentDetailsModal({
     </>
   );
 }
-

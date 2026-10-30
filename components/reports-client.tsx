@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +40,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Download,
   Calendar as CalendarIcon,
   Filter,
@@ -50,6 +62,8 @@ import {
   Play,
   Square,
   Trash2,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Loader } from "@/components/loader";
 import {
@@ -62,7 +76,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getStudentAvatarSrc } from "@/lib/utils";
+import { getStudentAvatarSrc, cn } from "@/lib/utils";
 import {
   BarChart,
   Bar,
@@ -171,6 +185,21 @@ export default function ReportsClient({ students, classes }: Props) {
   const [endDate, setEndDate] = useState<Date>();
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [selectedStudent, setSelectedStudent] = useState<string>("all");
+  const [studentOpen, setStudentOpen] = useState(false);
+  const [studentQuery, setStudentQuery] = useState("");
+  const selectedStudentData = students.find((s) => s.id === selectedStudent);
+
+  // Client-side filtering so users can find a student quickly among hundreds
+  const filteredStudents = useMemo(() => {
+    const query = studentQuery.trim().toLowerCase();
+    if (!query) return students;
+    return students.filter((student) => {
+      const haystack = `${student.name} ${student.fatherName} ${
+        student.studentId ?? ""
+      }`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [students, studentQuery]);
 
   // Scheduling
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
@@ -795,22 +824,106 @@ export default function ReportsClient({ students, classes }: Props) {
 
             <div>
               <label className="text-sm font-medium">Student</label>
-              <Select
-                value={selectedStudent}
-                onValueChange={setSelectedStudent}
+              <Popover
+                open={studentOpen}
+                onOpenChange={(open) => {
+                  setStudentOpen(open);
+                  if (open) setStudentQuery("");
+                }}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Students" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 overflow-y-auto">
-                  <SelectItem value="all">All Students</SelectItem>
-                  {students.map((student) => (
-                    <SelectItem key={student.id} value={student.id}>
-                      {student.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={studentOpen}
+                    aria-label="Select student"
+                    className="w-full justify-between font-normal"
+                  >
+                    <span className="truncate">
+                      {selectedStudent === "all" || !selectedStudentData
+                        ? "All Students"
+                        : `${selectedStudentData.name}${
+                            selectedStudentData.studentId
+                              ? ` (${selectedStudentData.studentId})`
+                              : ""
+                          }`}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-full p-0 shadow-lg border-0"
+                  align="start"
+                >
+                  <Command shouldFilter={false} className="rounded-lg">
+                    <CommandInput
+                      placeholder="Search by name or student ID..."
+                      className="h-11 border-0 shadow-none focus:ring-0"
+                      value={studentQuery}
+                      onValueChange={setStudentQuery}
+                    />
+                    <CommandList className="max-h-64">
+                      {filteredStudents.length === 0 && (
+                        <div className="py-6 text-center text-sm text-muted-foreground">
+                          No student found.
+                        </div>
+                      )}
+                      <CommandGroup className="p-2">
+                        {!studentQuery.trim() && (
+                          <CommandItem
+                            value="all-students"
+                            onSelect={() => {
+                              setSelectedStudent("all");
+                              setStudentOpen(false);
+                            }}
+                            className="p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                          >
+                            <Check
+                              className={cn(
+                                "h-4 w-4 shrink-0",
+                                selectedStudent === "all"
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            <span className="truncate">All Students</span>
+                          </CommandItem>
+                        )}
+                        {filteredStudents.map((student) => (
+                          <CommandItem
+                            key={student.id}
+                            value={`${student.id} ${student.name} ${student.fatherName} ${
+                              student.studentId ?? ""
+                            }`}
+                            onSelect={() => {
+                              setSelectedStudent(student.id);
+                              setStudentOpen(false);
+                            }}
+                            className="p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                          >
+                            <Check
+                              className={cn(
+                                "h-4 w-4 shrink-0",
+                                selectedStudent === student.id
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            <span className="truncate flex-1">
+                              {student.name}
+                            </span>
+                            {student.studentId && (
+                              <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+                                {student.studentId}
+                              </span>
+                            )}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
