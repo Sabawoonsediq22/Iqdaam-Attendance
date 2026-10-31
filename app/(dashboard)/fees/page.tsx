@@ -1,9 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -15,6 +14,10 @@ import {
 import { Coins, Search, Edit, Users } from "lucide-react";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { Loader } from "@/components/loader";
+import { PageHeader } from "@/components/page-header";
+import { StatsCard } from "@/components/stats-card";
+import { EmptyState } from "@/components/empty-state";
+import { SearchInput } from "@/components/filters/search-input";
 import EditFeeModal from "@/components/EditFeeModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { MonthFilter } from "@/components/filters/month-filter";
@@ -165,103 +168,77 @@ export default function FeesPage() {
     <div className="space-y-6">
       <OfflineIndicator />
 
-      <div className="flex items-start">
-        <p className="text-muted-foreground mt-1">
-          Track and manage student fee payments
-        </p>
-      </div>
+      <PageHeader description="Track and manage student fee payments" />
 
       {isLoading ? (
-        <Loader variant="skeleton" shape="fees" className="max-w-none" />
+        <Card>
+          <CardContent className="py-12">
+            <Loader variant="skeleton" shape="fees" className="max-w-none" />
+          </CardContent>
+        </Card>
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card className="border-blue-200 hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Students Paid ({currentMonthName})
-                </CardTitle>
-                <Users className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-700">
-                  {paidStudentsCount}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-green-200 hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Paid ({currentMonthName})
-                </CardTitle>
-                <Coins className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-700">
-                  {totalPaid.toFixed(2)} ؋
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Unpaid ({currentMonthName})
-                </CardTitle>
-                <Coins className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div
-                  className={`text-2xl font-bold ${
-                    totalUnpaid > 0 ? "text-red-600" : ""
-                  }`}
-                >
-                  {totalUnpaid.toFixed(2)} ؋
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <StatsCard
+              title={`Students Paid (${currentMonthName})`}
+              value={paidStudentsCount}
+              icon={Users}
+              tone="info"
+            />
+            <StatsCard
+              title={`Total Paid (${currentMonthName})`}
+              value={`${totalPaid.toFixed(2)} ؋`}
+              icon={Coins}
+              tone="success"
+            />
+            <StatsCard
+              title={`Total Unpaid (${currentMonthName})`}
+              value={`${totalUnpaid.toFixed(2)} ؋`}
+              icon={Coins}
+              tone="warning"
+            />
           </div>
 
-          <Card className="border-gray-200 p-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name, student ID, class..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <MonthFilter
-                  value={selectedMonth}
-                  onChange={setSelectedMonth}
-                />
-                <Select
-                  value={selectedStatus}
-                  onValueChange={setSelectedStatus}
-                >
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="unpaid">Unpaid</SelectItem>
-                    <SelectItem value="debtors">Debtors</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between rounded-lg border bg-muted/30 p-3 sm:p-4">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search by name, student ID, class..."
+            />
+            <div className="flex items-center gap-2">
+              <MonthFilter
+                value={selectedMonth}
+                onChange={setSelectedMonth}
+              />
+              <Select
+                value={selectedStatus}
+                onValueChange={setSelectedStatus}
+              >
+                <SelectTrigger className="sm:w-48">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                  <SelectItem value="debtors">Debtors</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </Card>
+          </div>
 
           <div className="text-end mr-2">
             <Badge variant="secondary">Total {filteredFees.length} fees</Badge>
           </div>
           <div className="space-y-4">
             {filteredFees.map((fee) => (
-              <Card key={fee.id} className={`hover:shadow-md transition-shadow ${parseFloat(fee.feeUnpaid || "0") > 0 ? "border-red-500" : ""}`}>
-                <CardContent className="p-4 sm:p-6 relative">
+              <Card
+                key={fee.id}
+                className={
+                  parseFloat(fee.feeUnpaid || "0") > 0 ? "border-destructive" : ""
+                }
+              >
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center justify-between">
@@ -280,7 +257,6 @@ export default function FeesPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEditFee(fee)}
-                          className="cursor-pointer"
                         >
                           <Edit className="h-4 w-4" />
                           <p className="hidden sm:block">Edit</p>
@@ -297,12 +273,12 @@ export default function FeesPage() {
                           Paid: {fee.feePaid || "0"} ؋
                         </span>
                         {parseFloat(fee.feeUnpaid || "0") > 0 && (
-                          <span className="whitespace-nowrap text-red-600">
+                          <span className="whitespace-nowrap text-destructive">
                             Unpaid: {fee.feeUnpaid || "0"} ؋
                           </span>
                         )}
                         <Badge
-                          variant={fee.feePaid ? "default" : "destructive"}
+                          variant={fee.feePaid ? "success" : "warning"}
                           className="whitespace-nowrap"
                         >
                           {fee.feePaid ? "Paid" : "Pending"}
@@ -320,17 +296,19 @@ export default function FeesPage() {
             ))}
 
             {filteredFees.length === 0 && searchTerm && (
-              <Card>
-                <CardContent className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium">No fees found</h3>
-                    <p className="text-muted-foreground">
-                      Try adjusting your search terms.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={Search}
+                title="No fees found"
+                description="Try adjusting your search terms."
+              />
+            )}
+
+            {filteredFees.length === 0 && !searchTerm && (
+              <EmptyState
+                icon={Coins}
+                title="No fee records found"
+                description="Try adjusting your filters, or add fee records to get started."
+              />
             )}
           </div>
 

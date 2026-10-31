@@ -1,13 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -30,9 +30,19 @@ interface ResponsiveDialogProps {
   description?: string
   trigger?: React.ReactNode
   footer?: React.ReactNode
+  /**
+   * Width/size only, from the shared dialog scale
+   * (sm:max-w-md | sm:max-w-lg | sm:max-w-xl | sm:max-w-2xl | sm:max-w-4xl).
+   * Never pass padding/rounded/shadow here — the primitives own those.
+   */
   contentClassName?: string
 }
 
+/**
+ * One dialog that renders as a Dialog on desktop and a Drawer on mobile.
+ * Header / body / footer padding and the inter-section gap come from the
+ * `ui/dialog` and `ui/drawer` primitives, so this wrapper only composes them.
+ */
 export function ResponsiveDialog({
   children,
   open,
@@ -53,33 +63,14 @@ export function ResponsiveDialog({
     return (
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-        <AnimatePresence>
-          {dialogOpen && (
-        <DialogContent className={cn("sm:max-w-[425px]", contentClassName)}>
-          <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-              >
-          <DialogHeader className="px-4 pt-4">
+        <DialogContent className={cn("sm:max-w-md", contentClassName)}>
+          <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            {description && (
-              <DialogDescription>{description}</DialogDescription>
-            )}
+            {description && <DialogDescription>{description}</DialogDescription>}
           </DialogHeader>
-          <div className="px-4 py-4">
-            {children}
-          </div>
-          {footer && (
-            <div className="flex justify-end gap-2 px-4 py-4 border-t">
-              {footer}
-            </div>
-          )}
-          </motion.div>
+          <div>{children}</div>
+          {footer && <DialogFooter className="border-t pt-4">{footer}</DialogFooter>}
         </DialogContent>
-        )}
-        </AnimatePresence>
       </Dialog>
     )
   }
@@ -87,22 +78,14 @@ export function ResponsiveDialog({
   return (
     <Drawer open={dialogOpen} onOpenChange={setDialogOpen}>
       {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-      <DrawerContent className="max-h-[90vh] z-[60]">
-        <DrawerHeader className="text-left px-4 py-6 border-b">
-          <DrawerTitle className="text-lg font-semibold">{title}</DrawerTitle>
-          {description && (
-            <DrawerDescription className="text-sm text-muted-foreground mt-1">
-              {description}
-            </DrawerDescription>
-          )}
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader className="border-b text-left">
+          <DrawerTitle>{title}</DrawerTitle>
+          {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
-        <div className="flex-1 overflow-y-auto px-4 py-4 relative z-[70]">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto">{children}</div>
         {footer && (
-          <DrawerFooter className="px-4 py-4 border-t bg-muted/50">
-            {footer}
-          </DrawerFooter>
+          <DrawerFooter className="border-t bg-muted/50">{footer}</DrawerFooter>
         )}
       </DrawerContent>
     </Drawer>

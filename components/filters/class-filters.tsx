@@ -16,6 +16,8 @@ import {
 import {
   Form,
   FormControl,
+  FormField,
+  FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
@@ -133,199 +135,159 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="relative z-10 flex flex-col lg:flex-row h-full w-full max-w-[1200px] mx-auto items-center p-6 sm:p-10 lg:p-16 gap-8 lg:gap-16">
-      <div className="flex-1 flex flex-col justify-center space-y-3 w-full">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-none tracking-[-0.03em]">
-          Add New Class
-        </h2>
-
-        <div className="space-y-4 sm:space-y-6 pt-4">
-          <div className="flex gap-3 sm:gap-4">
-            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
-                Create a new class to organize your students and track
-                attendance efficiently.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3 sm:gap-4">
-            <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <title>Icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm sm:text-base text-muted-foreground leading-[150%]">
-                Set up class schedules, assign teachers, and manage student
-                enrollment.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 w-full border px-4 py-4 sm:px-16 sm:py-6 rounded-lg bg-muted/30 shadow">
+    <div className="relative z-10 flex mx-auto flex-col items-center gap-8 p-6 sm:p-10 lg:p-16 lg:gap-16">
+      <div className="flex-1 rounded-lg border bg-muted/30 px-4 py-4 sm:px-16 sm:py-6">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 sm:space-y-5"
+            className="space-y-4"
           >
-            <div>
-              <FormLabel className="mb-3 text-foreground">
-                CLASS NAME *
-              </FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={(value) => form.setValue("name", value as InsertClass["name"])}
-                  defaultValue={form.getValues("name")}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a class name" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <ScrollArea className="h-[200px] w-full">
-                      <SelectGroup>
-                        <SelectLabel className="font-semibold">
-                          Academic Series
-                        </SelectLabel>
-                        {ACADEMIC_CLASS_NAMES.map((className) => (
-                          <SelectItem key={className} value={className}>
-                            {className}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                      <SelectGroup>
-                        <SelectLabel className="font-semibold mt-2">
-                          Skill Classes
-                        </SelectLabel>
-                        {SKILL_CLASS_NAMES.map((className) => (
-                          <SelectItem key={className} value={className}>
-                            {className}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </ScrollArea>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Class Name *</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a class name" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <ScrollArea className="h-[200px] w-full">
+                          <SelectGroup>
+                            <SelectLabel className="font-semibold">
+                              Academic Series
+                            </SelectLabel>
+                            {ACADEMIC_CLASS_NAMES.map((className) => (
+                              <SelectItem key={className} value={className}>
+                                {className}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectGroup>
+                            <SelectLabel className="font-semibold mt-2">
+                              Skill Classes
+                            </SelectLabel>
+                            {SKILL_CLASS_NAMES.map((className) => (
+                              <SelectItem key={className} value={className}>
+                                {className}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </ScrollArea>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="teacher"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Teacher *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter teacher name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="time"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Time *</FormLabel>
+                  <FormControl>
+                    <Input
+                      ref={(node) => {
+                        inputRef.current = node;
+                        field.ref(node);
+                      }}
+                      type="text"
+                      placeholder="Select time"
+                      value={selectedTime}
+                      readOnly
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Start Date *</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>End Date (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <div>
-              <FormLabel className="mb-3 text-foreground">
-                TEACHER *
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter teacher name"
-                  {...form.register("teacher")}
-                />
-              </FormControl>
-              <FormMessage />
-            </div>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter class description (optional)"
+                      rows={3}
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <div>
-              <FormLabel className="mb-3 text-foreground">
-                TIME *
-              </FormLabel>
-              <FormControl>
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Select time"
-                  value={selectedTime}
-                  readOnly
-                />
-              </FormControl>
-              <FormMessage />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <FormLabel className="mb-3 text-foreground">
-                  START DATE *
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...form.register("startDate")}
-                  />
-                </FormControl>
-                <FormMessage />
-              </div>
-              <div className="flex-1">
-                <FormLabel className="mb-3 text-foreground">
-                  END DATE (OPTIONAL)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...form.register("endDate")}
-                  />
-                </FormControl>
-                <FormMessage />
-              </div>
-            </div>
-
-            <div>
-              <FormLabel className="mb-3 text-foreground">
-                DESCRIPTION
-              </FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter class description (optional)"
-                  rows={3}
-                  {...form.register("description")}
-                />
-              </FormControl>
-              <FormMessage />
-            </div>
-
-            <div className="flex gap-3 mb-6">
+            <div className="flex gap-2 pb-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={collapse}
                 disabled={isSubmitting}
-                className="flex-1 px-8 py-2.5 rounded-full transition-colors tracking-[-0.03em] h-10 cursor-pointer"
+                className="flex-1"
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 px-8 py-2.5 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors tracking-[-0.03em] h-10 cursor-pointer"
-              >
-                {isSubmitting && (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                )}
+              <Button type="submit" disabled={isSubmitting} className="flex-1">
+                {isSubmitting && <Loader2 className="animate-spin" />}
                 {isSubmitting ? "Creating..." : "Create Class"}
               </Button>
             </div>
@@ -342,8 +304,8 @@ function AddClassForm({ onSuccess }: { onSuccess: () => void }) {
       layoutId="add-class-screen"
     >
       <ExpandableScreenTrigger>
-        <Button variant="default" className="cursor-pointer w-full">
-          <Plus className="h-4 w-4" />
+        <Button variant="default" className="w-full">
+          <Plus />
           Add Class
         </Button>
       </ExpandableScreenTrigger>
@@ -390,7 +352,7 @@ export function ClassFilters({
   return (
     <div className="space-y-4">
       {/* Filter Bar */}
-      <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 p-4 bg-muted/30 rounded-lg border">
+      <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:p-4">
         <SearchInput
           value={filters.search}
           onChange={(value) => updateFilter("search", value)}
@@ -413,9 +375,9 @@ export function ClassFilters({
             variant="ghost"
             size="sm"
             onClick={clearAllFilters}
-            className="text-muted-foreground hover:text-foreground cursor-pointer"
+            className="text-muted-foreground hover:text-foreground"
           >
-            <Paintbrush className="h-4 w-4" />
+            <Paintbrush />
             <span className="hidden sm:block">Clear All</span>
           </Button>
         </div>

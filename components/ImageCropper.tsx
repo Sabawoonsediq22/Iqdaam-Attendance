@@ -4,7 +4,16 @@ import { useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Area {
   x: number;
@@ -68,15 +77,24 @@ export default function ImageCropper({ image, onCrop, onCancel, open, isProcessi
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-[500px] max-w-[430px]">
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        // Escape / overlay / close button all cancel the crop
+        if (!nextOpen) onCancel();
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Crop Image (Square Only)</DialogTitle>
+          <DialogTitle>Crop image</DialogTitle>
+          <DialogDescription>
+            Crop the picture to a square. Only the cropped area is saved.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Crop Area */}
-          <div className="relative h-64 bg-muted rounded-lg overflow-hidden">
+          <div className="relative h-64 overflow-hidden rounded-lg bg-muted">
             <Cropper
               image={image}
               crop={crop}
@@ -92,8 +110,9 @@ export default function ImageCropper({ image, onCrop, onCancel, open, isProcessi
 
           {/* Zoom Slider */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Zoom</label>
+            <Label htmlFor="crop-zoom">Zoom</Label>
             <Slider
+              id="crop-zoom"
               value={[zoom]}
               onValueChange={(value) => setZoom(value[0])}
               min={1}
@@ -102,32 +121,28 @@ export default function ImageCropper({ image, onCrop, onCancel, open, isProcessi
               className="w-full"
             />
           </div>
-
-          {/* Buttons */}
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isProcessing}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={createCroppedImage}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                "Crop & Save"
-              )}
-            </Button>
-          </div>
         </div>
+
+        <DialogFooter className="border-t pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isProcessing}
+          >
+            Cancel
+          </Button>
+          <Button onClick={createCroppedImage} disabled={isProcessing}>
+            {isProcessing ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Crop & Save"
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

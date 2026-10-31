@@ -4,7 +4,6 @@ import React from "react";
 import { PanelLeft, Menu as MenuIcon } from "lucide-react";
 import ClientProviders from "@/components/client-providers";
 import { ThemeProvider } from "@/hooks/use-theme";
-import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -42,7 +41,10 @@ function PageTitle() {
   };
 
   return (
-    <h1 className="text-2xl font-semibold" data-testid="page-title">
+    <h1
+      className="truncate text-xl font-semibold tracking-tight"
+      data-testid="page-title"
+    >
       {getPageTitle()}
     </h1>
   );
@@ -62,7 +64,6 @@ function NavToggle() {
         aria-expanded={mobileOpen}
         aria-controls="mobile-navigation"
         onClick={toggleMobile}
-        className="h-9 w-9"
       >
         <MenuIcon className="h-5 w-5" />
       </Button>
@@ -77,7 +78,6 @@ function NavToggle() {
       aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       aria-expanded={!isCollapsed}
       onClick={toggleCollapsed}
-      className="h-9 w-9"
     >
       <PanelLeft className="h-5 w-5" />
     </Button>
@@ -108,12 +108,14 @@ export default function AppShell({ children, session }: AppShellProps) {
                   </div>
                 </header>
                 <main className="flex-1 overflow-auto p-4 sm:p-6">
-                  <div className="w-full max-w-none">{children}</div>
+                  {/* One content width for every page in the application */}
+                  <div className="mx-auto w-full max-w-[1600px]">
+                    {children}
+                  </div>
                 </main>
               </div>
             </div>
           </NavProvider>
-          <Toaster richColors />
         </TooltipProvider>
       </ThemeProvider>
     </ClientProviders>

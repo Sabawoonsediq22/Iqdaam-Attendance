@@ -99,14 +99,14 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-green-50 via-white to-blue-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
+              <CheckCircle className="w-8 h-8 text-success" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Password Reset!</CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardTitle>Password Reset!</CardTitle>
+            <CardDescription>
               Your password has been successfully updated
             </CardDescription>
           </CardHeader>
@@ -124,14 +124,14 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8 text-blue-600" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Lock className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Reset Password</CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardTitle>Reset Password</CardTitle>
+          <CardDescription>
             Enter your new password below
           </CardDescription>
         </CardHeader>
@@ -141,7 +141,7 @@ function ResetPasswordForm() {
             <div className="space-y-2">
               <Label htmlFor="newPassword">New Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="newPassword"
                   type={showPassword ? "text" : "password"}
@@ -154,8 +154,9 @@ function ResetPasswordForm() {
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -165,7 +166,7 @@ function ResetPasswordForm() {
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
@@ -178,15 +179,16 @@ function ResetPasswordForm() {
                 />
                 <button
                   type="button"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="text-sm text-gray-600 space-y-1">
+            <div className="text-sm text-muted-foreground space-y-1">
               <p>Password requirements:</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
                 <li>At least 6 characters long</li>
@@ -210,7 +212,7 @@ function ResetPasswordForm() {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="animate-spin" />
                   Resetting Password...
                 </>
               ) : (
@@ -222,7 +224,7 @@ function ResetPasswordForm() {
           <div className="mt-6 text-center">
             <Link
               href="/auth"
-              className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
@@ -236,7 +238,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center p-8">
             <Loader className="w-6 h-6" />

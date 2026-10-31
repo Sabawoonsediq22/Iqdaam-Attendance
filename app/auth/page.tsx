@@ -159,25 +159,25 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 border border-primary/20">
-              <Image src="/iqdaam.jpg" alt="Logo" width={66} height={66} className="text-primary" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
+              <Image src="/iqdaam.jpg" alt="Logo" width={66} height={66} />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {isSignUp ? "Create Account" : "Welcome Back"}
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-muted-foreground">
             {isSignUp ? "Sign up to get started with StudentTracker" : "Sign in to access StudentTracker"}
           </p>
         </div>
 
         {/* Auth Forms */}
-        <Card className="shadow-xl border-0">
+        <Card>
           <CardContent className="p-6">
             {isSignUp ? (
               <form onSubmit={handleSignUp} className="space-y-4">
@@ -187,7 +187,7 @@ export default function AuthPage() {
                     Full Name
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="signup-name"
                       type="text"
@@ -205,7 +205,7 @@ export default function AuthPage() {
                     Email
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="signup-email"
                       type="email"
@@ -223,7 +223,7 @@ export default function AuthPage() {
                     Password
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="signup-password"
                       type={showSignupPassword ? "text" : "password"}
@@ -235,13 +235,14 @@ export default function AuthPage() {
                     />
                     <button
                       type="button"
+                      aria-label={showSignupPassword ? "Hide password" : "Show password"}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       onClick={() => setShowSignupPassword(!showSignupPassword)}
                     >
                       {showSignupPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                       )}
                     </button>
                   </div>
@@ -252,7 +253,7 @@ export default function AuthPage() {
                     Confirm Password
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
@@ -264,13 +265,14 @@ export default function AuthPage() {
                     />
                     <button
                       type="button"
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                       )}
                     </button>
                   </div>
@@ -281,7 +283,7 @@ export default function AuthPage() {
                     Role
                   </Label>
                   <div className="relative">
-                    <UserCheck className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                    <UserCheck className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                     <Select value={signupRole} onValueChange={setSignupRole}>
                       <SelectTrigger className="pl-10">
                         <SelectValue placeholder="Select your role" />
@@ -299,12 +301,12 @@ export default function AuthPage() {
                   className="w-full"
                   disabled={signupIsLoading}
                 >
-                  {signupIsLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {signupIsLoading && <Loader2 className="animate-spin" />}
                   {signupIsLoading ? "Creating Account..." : "Sign Up"}
                 </Button>
 
                 <div className="text-center mt-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     Already have an account?{" "}
                     <Button
                       type="button"
@@ -325,7 +327,7 @@ export default function AuthPage() {
                     Email
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
@@ -345,7 +347,7 @@ export default function AuthPage() {
                     </Label>
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -357,13 +359,14 @@ export default function AuthPage() {
                     />
                     <button
                       type="button"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                       )}
                     </button>
                   </div>
@@ -384,7 +387,7 @@ export default function AuthPage() {
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="animate-spin" />
                       Signing In...
                     </>
                   ) : (
@@ -393,7 +396,7 @@ export default function AuthPage() {
                 </Button>
 
                 <div className="text-center mt-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     Don&apos;t have an account?{" "}
                     <Button
                       type="button"
@@ -412,7 +415,7 @@ export default function AuthPage() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Student Attendance Tracking System
           </p>
         </div>

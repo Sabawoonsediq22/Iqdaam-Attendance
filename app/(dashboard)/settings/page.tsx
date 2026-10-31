@@ -26,6 +26,7 @@ import { User, Mail, Shield, Moon, Sun, Bell, Camera, AlertTriangle, Trash2, Loa
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
 import { Loader } from "@/components/loader";
+import { PageHeader } from "@/components/page-header";
 import ImageCropper from "@/components/ImageCropper";
 import { generateReactHelpers } from "@uploadthing/react";
 
@@ -335,16 +336,16 @@ export default function SettingsPage() {
   if (!session?.user) {
     return (
       <div className="space-y-6">
-        <div>
-          <p className="text-muted-foreground mt-2">
-            Manage your account settings and preferences
-          </p>
-        </div>
-        <Loader
-          variant="skeleton"
-          shape="settings"
-          text="Loading settings..."
-        />
+        <PageHeader description="Manage your account settings and preferences" />
+        <Card>
+          <CardContent className="py-12">
+            <Loader
+              variant="skeleton"
+              shape="settings"
+              className="max-w-none"
+            />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -352,11 +353,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-muted-foreground mt-2">
-          Manage your account settings and preferences
-        </p>
-      </div>
+      <PageHeader description="Manage your account settings and preferences" />
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Profile Settings */}
@@ -385,7 +382,6 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="hover:bg-primary/5 hover:border-primary/20 transition-colors"
                   onClick={handleAvatarChange}
                   disabled={isUploading}
                 >
@@ -400,20 +396,18 @@ export default function SettingsPage() {
 
             <div className="grid gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                <Label htmlFor="name">Full Name</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="transition-colors focus:ring-2 focus:ring-primary/20"
                 />
               </div>
                
               <Button
               onClick={handleSaveProfile}
               disabled={isUploading}
-              className="bg-primary hover:bg-primary/90 transition-all duration-200 hover:shadow-lg"
             >
               <User className="h-4 w-4 mr-2" />
               {isUploading ? (
@@ -424,7 +418,7 @@ export default function SettingsPage() {
             </Button>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -442,11 +436,15 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Role</Label>
+                <Label>Role</Label>
                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 border">
                   <Shield className="h-4 w-4 text-muted-foreground" />
                   <Badge
-                    variant={(session?.user as ExtendedUser)?.role === "admin" ? "default" : "secondary"}
+                    variant={
+                      (session?.user as ExtendedUser)?.role === "admin"
+                        ? "info"
+                        : "secondary"
+                    }
                     className="capitalize"
                   >
                     {(session?.user as ExtendedUser)?.role}
@@ -476,7 +474,7 @@ export default function SettingsPage() {
                     <div className="p-1.5 rounded-md bg-primary/10">
                       <Sun className="h-4 w-4 text-primary" />
                     </div>
-                    <Label className="text-base font-medium">Theme</Label>
+                    <Label>Theme</Label>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Choose your preferred theme
@@ -487,7 +485,6 @@ export default function SettingsPage() {
                     variant={theme === "light" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setTheme("light")}
-                    className="transition-all duration-200 hover:scale-105"
                   >
                     <Sun className="h-4 w-4 mr-2" />
                     Light
@@ -496,7 +493,6 @@ export default function SettingsPage() {
                     variant={theme === "dark" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setTheme("dark")}
-                    className="transition-all duration-200 hover:scale-105"
                   >
                     <Moon className="h-4 w-4 mr-2" />
                     Dark
@@ -511,10 +507,10 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-md bg-blue-500/10">
-                          <Bell className="h-4 w-4 text-blue-600" />
+                        <div className="p-1.5 rounded-md bg-primary/10">
+                          <Bell className="h-4 w-4 text-primary" />
                         </div>
-                        <Label className="text-base font-medium">Push Notifications</Label>
+                        <Label>Push Notifications</Label>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         Receive notifications about attendance updates
@@ -522,13 +518,12 @@ export default function SettingsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {!preferencesLoaded && (
-                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       )}
                       <Switch
                         checked={notifications}
                         onCheckedChange={setNotifications}
                         disabled={!preferencesLoaded || isSavingPreferences}
-                        className="data-[state=checked]:bg-blue-600"
                       />
                     </div>
                   </div>
@@ -536,10 +531,10 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-md bg-green-500/10">
-                          <Mail className="h-4 w-4 text-green-600" />
+                        <div className="p-1.5 rounded-md bg-success/10">
+                          <Mail className="h-4 w-4 text-success" />
                         </div>
-                        <Label className="text-base font-medium">Email Updates</Label>
+                        <Label>Email Updates</Label>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         Receive email summaries of attendance reports
@@ -547,13 +542,12 @@ export default function SettingsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {!preferencesLoaded && (
-                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       )}
                       <Switch
                         checked={emailUpdates}
                         onCheckedChange={setEmailUpdates}
                         disabled={!preferencesLoaded || isSavingPreferences}
-                        className="data-[state=checked]:bg-green-600"
                       />
                     </div>
                   </div>
@@ -565,7 +559,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSavePreferences}
                 disabled={isSavingPreferences || !preferencesLoaded}
-                className="w-full bg-primary hover:bg-primary/90 transition-all duration-200 hover:shadow-lg"
+                className="w-full"
               >
                 <Bell className="h-4 w-4 mr-2" />
                 {isSavingPreferences ? "Saving..." : "Save Preferences"}
@@ -576,11 +570,11 @@ export default function SettingsPage() {
       </div>
 
       {/* Account Security */}
-      <Card className="border-amber-200/50 ">
+      <Card className="border-warning/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-amber-500/10">
-              <Shield className="h-5 w-5 text-amber-600" />
+            <div className="p-2 rounded-lg bg-warning/10">
+              <Shield className="h-5 w-5 text-warning" />
             </div>
             Account Security
           </CardTitle>
@@ -591,7 +585,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
            <div className="space-y-2">
-             <Label htmlFor="current-password" className="text-sm font-medium">Current Password</Label>
+             <Label htmlFor="current-password">Current Password</Label>
              <div className="relative">
                <Input
                  id="current-password"
@@ -599,7 +593,7 @@ export default function SettingsPage() {
                  value={currentPassword}
                  onChange={(e) => setCurrentPassword(e.target.value)}
                  placeholder="Enter current password"
-                 className="pr-10 transition-colors focus:ring-2 focus:ring-amber-500/20"
+                 className="pr-10"
                />
                <button
                  type="button"
@@ -616,7 +610,7 @@ export default function SettingsPage() {
            </div>
 
            <div className="space-y-2">
-             <Label htmlFor="new-password" className="text-sm font-medium">New Password</Label>
+             <Label htmlFor="new-password">New Password</Label>
              <div className="relative">
                <Input
                  id="new-password"
@@ -624,7 +618,7 @@ export default function SettingsPage() {
                  value={newPassword}
                  onChange={(e) => setNewPassword(e.target.value)}
                  placeholder="Enter new password"
-                 className="pr-10 transition-colors focus:ring-2 focus:ring-amber-500/20"
+                 className="pr-10"
                />
                <button
                  type="button"
@@ -643,7 +637,7 @@ export default function SettingsPage() {
 
           <Button
             variant="outline"
-            className="w-full sm:w-auto hover:bg-amber-500/10 hover:border-amber-500/20 transition-colors"
+            className="w-full sm:w-auto hover:bg-warning/10 hover:border-warning/30 transition-colors"
             onClick={handleChangePassword}
             disabled={isChangingPassword}
           >
@@ -656,7 +650,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="border-destructive/50 ">
+      <Card className="border-destructive/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-destructive">
             <div className="p-2 rounded-lg bg-destructive/10">
@@ -682,7 +676,7 @@ export default function SettingsPage() {
                 size="sm"
                 disabled={isDeleting}
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="cursor-pointer mt-3 w-full md:w-auto hover:bg-destructive/90 transition-colors md:ml-auto"
+                className="mt-3 w-full md:w-auto md:ml-auto"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 {isDeleting ? "Deleting..." : "Delete Account"}

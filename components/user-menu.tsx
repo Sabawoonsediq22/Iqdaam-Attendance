@@ -68,31 +68,27 @@ export function UserMenu({ session: propSession }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-10 rounded-full hover:bg-accent/50 transition-all duration-200 border-2 border-transparent hover:border-primary/20"
+          className="relative h-10 w-10 rounded-full transition-colors hover:bg-accent/50"
         >
-          <Avatar className="h-10 w-10 rounded-full ring-2 ring-background shadow-lg">
+          <Avatar className="h-10 w-10 rounded-full ring-2 ring-background">
             <AvatarImage
               src={avatar || (effectiveSession.user as ExtendedUser).image || undefined}
               alt={effectiveSession.user.name || ""}
               className="rounded-full"
             />
-            <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/10 text-primary font-bold text-sm rounded-full">
+            <AvatarFallback className="rounded-full bg-primary/10 text-sm font-semibold text-primary">
               {getInitials(effectiveSession.user.name || "U")}
             </AvatarFallback>
           </Avatar>
           {(effectiveSession.user as ExtendedUser).role === "admin" && (
-            <div className="absolute -top-1 -right-1 h-4 w-4 bg-yellow-500 rounded-full flex items-center justify-center ring-2 ring-background">
-              <Crown className="h-2.5 w-2.5 text-white" />
+            <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-warning ring-2 ring-background">
+              <Crown className="h-2.5 w-2.5 text-warning-foreground" />
             </div>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-64 p-0 shadow-xl border-0 bg-background/95 backdrop-blur-xl"
-        align="end"
-        forceMount
-      >
-        <div className="p-4 bg-linear-to-br from-primary/5 via-primary/3 to-transparent border-b">
+      <DropdownMenuContent className="w-64 p-0" align="end" forceMount>
+        <div className="border-b bg-primary/5 p-4">
           <DropdownMenuLabel className="p-0">
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12 rounded-full ring-2 ring-primary/20">
@@ -101,7 +97,7 @@ export function UserMenu({ session: propSession }: UserMenuProps) {
                   alt={effectiveSession.user.name || ""}
                   className="rounded-full"
                 />
-                <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/10 text-primary font-bold rounded-full">
+                <AvatarFallback className="rounded-full bg-primary/10 font-semibold text-primary">
                   {getInitials(effectiveSession.user.name || "U")}
                 </AvatarFallback>
               </Avatar>
@@ -115,7 +111,7 @@ export function UserMenu({ session: propSession }: UserMenuProps) {
                     {(effectiveSession.user as ExtendedUser).role}
                   </span>
                   {(effectiveSession.user as ExtendedUser).role === "admin" && (
-                    <Crown className="h-3 w-3 text-yellow-500" />
+                    <Crown className="h-3 w-3 text-warning" />
                   )}
                 </div>
               </div>
@@ -131,9 +127,9 @@ export function UserMenu({ session: propSession }: UserMenuProps) {
             <div className="flex items-center space-x-3 w-full">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent/50">
                 {changeIcon ? (
-                  <Sun className="h-4 w-4 text-yellow-500" />
+                  <Sun className="h-4 w-4 text-warning" />
                 ) : (
-                  <Moon className="h-4 w-4 text-blue-500" />
+                  <Moon className="h-4 w-4 text-primary" />
                 )}
               </div>
               <span className="font-medium">Toggle theme</span>
@@ -148,7 +144,7 @@ export function UserMenu({ session: propSession }: UserMenuProps) {
           >
             <div className="flex items-center space-x-3 w-full">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent/50">
-                <Settings className="h-4 w-4 text-gray-600" />
+                <Settings className="h-4 w-4 text-muted-foreground" />
               </div>
               <span className="font-medium">Settings</span>
             </div>

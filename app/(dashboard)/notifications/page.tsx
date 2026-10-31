@@ -4,11 +4,9 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Bell,
-  Search,
   CheckCircle,
   XCircle,
   BookOpen,
@@ -25,6 +23,10 @@ import {
 import type { Notification } from "@/lib/schema";
 import { toast } from "sonner";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import { PageHeader } from "@/components/page-header";
+import { StatsCard } from "@/components/stats-card";
+import { EmptyState } from "@/components/empty-state";
+import { SearchInput } from "@/components/filters/search-input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -268,42 +270,42 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "success":
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-5 h-5 text-success" />;
       case "error":
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-destructive" />;
       case "warning":
-        return <AlertTriangle className="w-5 h-5 text-amber-600" />;
+        return <AlertTriangle className="w-5 h-5 text-warning" />;
       case "class":
-        return <BookOpen className="w-5 h-5 text-blue-600" />;
+        return <BookOpen className="w-5 h-5 text-primary" />;
       case "student":
-        return <Users className="w-5 h-5 text-purple-600" />;
+        return <Users className="w-5 h-5 text-info" />;
       case "attendance":
-        return <UserCheck className="w-5 h-5 text-indigo-600" />;
+        return <UserCheck className="w-5 h-5 text-info" />;
       case "fee":
-        return <Coins className="w-5 h-5 text-green-600" />;
+        return <Coins className="w-5 h-5 text-success" />;
       default:
-        return <Info className="w-5 h-5 text-gray-600" />;
+        return <Info className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
   const getNotificationColor = (type: string) => {
     switch (type) {
       case "success":
-        return "border-green-200";
+        return "border-success/40";
       case "error":
-        return "border-red-200";
+        return "border-destructive/40";
       case "warning":
-        return "border-amber-200";
+        return "border-warning/40";
       case "class":
-        return "border-blue-200";
+        return "border-primary/40";
       case "student":
-        return "border-purple-200";
+        return "border-info/40";
       case "attendance":
-        return "border-indigo-200";
+        return "border-info/40";
       case "fee":
-        return "border-green-200";
+        return "border-success/40";
       default:
-        return "border-gray-200";
+        return "border-border";
     }
   };
 
@@ -343,133 +345,94 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <OfflineIndicator />
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <p className="text-muted-foreground mt-1">
-            Stay updated with all your attendance management activities
-          </p>
+      <PageHeader
+        description="Stay updated with all your attendance management activities"
+        actions={
           <Popover>
             <PopoverTrigger asChild>
-              <Info className="sm:w-5 sm:h-5 text-muted-foreground cursor-pointer w-7 h-7" />
+              <Info className="h-5 w-5 text-muted-foreground" />
             </PopoverTrigger>
             <PopoverContent>
               <p>Notifications are automatically deleted after 7 days</p>
             </PopoverContent>
           </Popover>
-        </div>
-      </div>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <Bell className="w-8 h-8 text-blue-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">Total</p>
-              <p className="text-2xl font-bold">{notifications.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
-              <span className="text-red-600 dark:text-red-400 font-bold text-sm">
-                {unreadCount}
-              </span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">
-                Unread
-              </p>
-              <p className="text-2xl font-bold">{unreadCount}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">Read</p>
-              <p className="text-2xl font-bold">
-                {notifications.length - unreadCount}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <AlertTriangle className="w-8 h-8 text-amber-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">
-                This Week
-              </p>
-              <p className="text-2xl font-bold">
-                {
-                  notifications.filter((n) => isThisWeek(new Date(n.createdAt)))
-                    .length
-                }
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <StatsCard title="Total" value={notifications.length} icon={Bell} />
+        <StatsCard
+          title="Unread"
+          value={unreadCount}
+          icon={Bell}
+          tone="danger"
+        />
+        <StatsCard
+          title="Read"
+          value={notifications.length - unreadCount}
+          icon={CheckCircle}
+          tone="success"
+        />
+        <StatsCard
+          title="This Week"
+          value={
+            notifications.filter((n) => isThisWeek(new Date(n.createdAt)))
+              .length
+          }
+          icon={AlertTriangle}
+          tone="warning"
+        />
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search notifications..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="success">Success</SelectItem>
-                <SelectItem value="error">Error</SelectItem>
-                <SelectItem value="warning">Warning</SelectItem>
-                <SelectItem value="class">Class</SelectItem>
-                <SelectItem value="student">Student</SelectItem>
-                <SelectItem value="attendance">Attendance</SelectItem>
-                <SelectItem value="fee">Fee</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={filterReadStatus}
-              onValueChange={setFilterReadStatus}
-            >
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Read status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="unread">Unread</SelectItem>
-                <SelectItem value="read">Read</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={filterDate} onValueChange={setFilterDate}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Date range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="yesterday">Yesterday</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between rounded-lg border bg-muted/30 p-3 sm:p-4">
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search notifications..."
+        />
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="sm:w-48">
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="success">Success</SelectItem>
+            <SelectItem value="error">Error</SelectItem>
+            <SelectItem value="warning">Warning</SelectItem>
+            <SelectItem value="class">Class</SelectItem>
+            <SelectItem value="student">Student</SelectItem>
+            <SelectItem value="attendance">Attendance</SelectItem>
+            <SelectItem value="fee">Fee</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={filterReadStatus}
+          onValueChange={setFilterReadStatus}
+        >
+          <SelectTrigger className="sm:w-48">
+            <SelectValue placeholder="Read status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="unread">Unread</SelectItem>
+            <SelectItem value="read">Read</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterDate} onValueChange={setFilterDate}>
+          <SelectTrigger className="sm:w-48">
+            <SelectValue placeholder="Date range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="yesterday">Yesterday</SelectItem>
+            <SelectItem value="week">This Week</SelectItem>
+            <SelectItem value="month">This Month</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="w-full flex justify-end">
         {unreadCount > 0 && (
@@ -477,12 +440,11 @@ export default function NotificationsPage() {
             onClick={handleMarkAllAsRead}
             variant="outline"
             disabled={markAllAsReadMutation.isPending}
-            className="cursor-pointer"
           >
             {markAllAsReadMutation.isPending ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="animate-spin" />
             ) : (
-              <CheckCheck className="w-4 h-4 mr-2" />
+              <CheckCheck />
             )}
             {markAllAsReadMutation.isPending ? "Marking..." : "Mark All Read"}
           </Button>
@@ -492,7 +454,7 @@ export default function NotificationsPage() {
       <div className="space-y-4">
         {isLoading ? (
           <Card>
-            <CardContent className="flex items-center justify-center py-12 min-h-[200px]">
+            <CardContent className="py-12">
               <Loader
                 variant="skeleton"
                 shape="notifications"
@@ -502,23 +464,24 @@ export default function NotificationsPage() {
           </Card>
         ) : filteredNotifications.length === 0 ? (
           <Card>
-            <CardContent className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium">No notifications found</h3>
-                <p className="text-muted-foreground">
-                  {notifications.length === 0
+            <CardContent>
+              <EmptyState
+                bare
+                icon={Bell}
+                title="No notifications found"
+                description={
+                  notifications.length === 0
                     ? "You don't have any notifications yet."
-                    : "Try adjusting your filters to see more notifications."}
-                </p>
-              </div>
+                    : "Try adjusting your filters to see more notifications."
+                }
+              />
             </CardContent>
           </Card>
         ) : (
           filteredNotifications.map((notification) => (
             <Card
               key={notification.id}
-              className={`transition-all duration-200 hover:shadow-md ${
+              className={`transition-colors ${
                 !notification.isRead
                   ? getNotificationColor(notification.type)
                   : ""
@@ -532,10 +495,10 @@ export default function NotificationsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-base mb-1">
+                        <h3 className="text-sm font-semibold mb-1">
                           {notification.title}
                         </h3>
-                        <p className="text-sm text-muted-foreground mb-2 dark:text-black">
+                        <p className="text-sm text-muted-foreground mb-2">
                           {notification.message
                             .split("**")
                             .map((part, index) =>
@@ -565,12 +528,11 @@ export default function NotificationsPage() {
                                 disabled={approvingNotifications.has(
                                   notification.id
                                 )}
-                                className="cursor-pointer"
                               >
                                 {approvingNotifications.has(notification.id) ? (
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  <Loader2 className="animate-spin" />
                                 ) : (
-                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  <CheckCircle />
                                 )}
                                 {approvingNotifications.has(notification.id)
                                   ? "Approving..."
@@ -588,12 +550,11 @@ export default function NotificationsPage() {
                                 disabled={rejectingNotifications.has(
                                   notification.id
                                 )}
-                                className="cursor-pointer"
                               >
                                 {rejectingNotifications.has(notification.id) ? (
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  <Loader2 className="animate-spin" />
                                 ) : (
-                                  <XCircle className="w-4 h-4 mr-2" />
+                                  <XCircle />
                                 )}
                                 {rejectingNotifications.has(notification.id)
                                   ? "Rejecting..."
@@ -604,19 +565,15 @@ export default function NotificationsPage() {
                       </div>
                       <div className="flex items-center gap-2 ml-0 md:ml-4">
                         {!notification.isRead && (
-                          <Badge variant="destructive" className="text-xs">
+                          <Badge variant="danger" className="text-xs">
                             Unread
                           </Badge>
                         )}
                         {!notification.isRead && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                              >
-                                <MoreVertical className="h-4 w-4" />
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" side="bottom">
@@ -627,7 +584,7 @@ export default function NotificationsPage() {
                                 className="cursor-pointer"
                                 disabled={markAsReadMutation.isPending}
                               >
-                                <Check className="w-4 h-4 mr-2" />
+                                <Check className="mr-2" />
                                 Mark as Read
                               </DropdownMenuItem>
                             </DropdownMenuContent>

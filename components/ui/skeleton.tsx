@@ -4,9 +4,11 @@ function Skeleton({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
+  // `.skeleton` is the shared shimmer from app/globals.css — the same one
+  // components/loader.tsx uses, so all skeletons animate identically.
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
+      className={cn("skeleton rounded-md", className)}
       {...props}
     />
   )

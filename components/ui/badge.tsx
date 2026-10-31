@@ -17,6 +17,12 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground shadow-xs",
 
         outline: " border [border-color:var(--badge-outline)] shadow-xs",
+        // Tonal status badges — the one approved way to render a status.
+        // (solid primary/destructive remain available as default/destructive)
+        success: "border-success/20 bg-success/10 text-success",
+        warning: "border-warning/20 bg-warning/10 text-warning",
+        info: "border-info/20 bg-info/10 text-info",
+        danger: "border-destructive/20 bg-destructive/10 text-destructive",
       },
     },
     defaultVariants: {

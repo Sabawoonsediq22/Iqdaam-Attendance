@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -169,17 +172,24 @@ export default function EditStudentModal({
   if (!student) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-w-[430px] rounded-2xl max-h-[90vh] overflow-y-auto p-0 border-0 shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <Edit className="w-5 h-5 text-blue-400" />
-            Edit Student
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      {/* Edit form dialog: standard width scale (sm:max-w-xl) */}
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"
+            >
+              <Edit className="h-4 w-4" />
+            </span>
+            <span>Edit Student</span>
           </DialogTitle>
-        </div>
-        
-        <div className="p-6">
+          <DialogDescription>
+            Update the student&apos;s personal details and contact information.
+          </DialogDescription>
+        </DialogHeader>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -317,30 +327,22 @@ export default function EditStudentModal({
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-2">
+            <DialogFooter className="border-t pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="cursor-pointer"
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="cursor-pointer"
-              >
-                {isSubmitting && (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                )}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="animate-spin" />}
                 {isSubmitting ? "Updating..." : "Update Student"}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
-        </div>
       </DialogContent>
     </Dialog>
   );

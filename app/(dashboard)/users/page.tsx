@@ -27,6 +27,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Loader } from "@/components/loader";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/empty-state";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { toast } from "sonner";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
@@ -218,14 +220,14 @@ export default function UsersPage() {
   const getStatusBadge = (user: ExtendedUser) => {
     if (user.isApproved) {
       return (
-        <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+        <Badge variant="success">
           <CheckCircle className="h-3 w-3 mr-1" />
           Approved
         </Badge>
       );
     } else {
       return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+        <Badge variant="warning">
           <Clock className="h-3 w-3 mr-1" />
           Pending
         </Badge>
@@ -235,17 +237,9 @@ export default function UsersPage() {
 
   const getRoleBadge = (role: string) => {
     if (role === "admin") {
-      return (
-        <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
-          Admin
-        </Badge>
-      );
+      return <Badge variant="danger">Admin</Badge>;
     } else {
-      return (
-        <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-          Teacher
-        </Badge>
-      );
+      return <Badge variant="info">Teacher</Badge>;
     }
   };
 
@@ -259,7 +253,7 @@ export default function UsersPage() {
             disabled={approveMutation.isPending}
             className="cursor-pointer"
           >
-            <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+            <CheckCircle className="mr-2 text-success" />
             Approve
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -267,7 +261,7 @@ export default function UsersPage() {
             disabled={approveMutation.isPending}
             className="cursor-pointer"
           >
-            <XCircle className="h-4 w-4 mr-2 text-red-600" />
+            <XCircle className="mr-2 text-destructive" />
             Reject
           </DropdownMenuItem>
         </>
@@ -281,7 +275,7 @@ export default function UsersPage() {
             disabled={upgradeMutation.isPending}
             className="cursor-pointer"
           >
-            <Crown className="h-4 w-4 mr-2 text-yellow-600" />
+            <Crown className="mr-2 text-warning" />
             Upgrade to Admin
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -302,12 +296,12 @@ export default function UsersPage() {
     return (
       <div className="space-y-6">
         <OfflineIndicator />
-        <div>
-          <p className="text-muted-foreground mt-1">
-            Manage all users in the system
-          </p>
-        </div>
-        <Loader variant="skeleton" shape="users" className="max-w-none" />
+        <PageHeader description="Manage all users in the system" />
+        <Card>
+          <CardContent className="py-12">
+            <Loader variant="skeleton" shape="users" className="max-w-none" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -315,11 +309,7 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <OfflineIndicator />
-      <div>
-        <p className="text-muted-foreground mt-1">
-          Manage all users in the system
-        </p>
-      </div>
+      <PageHeader description="Manage all users in the system" />
 
       <Card>
         <CardHeader>
@@ -330,16 +320,13 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
-            <div className="text-center py-12">
-              <Users className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-              <p className="text-muted-foreground text-lg">No users found</p>
-            </div>
+            <EmptyState bare icon={Users} title="No users found" />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {users.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg sm:rounded-xl hover:shadow-md sm:hover:shadow-lg transition-all duration-200 bg-card hover:bg-card/50"
+                  className="flex items-center gap-3 sm:gap-4 rounded-lg border bg-card p-3 sm:p-4 transition-colors hover:bg-card/50"
                 >
                   {/* User Avatar */}
                   <Avatar className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 ring-2 ring-muted shrink-0">
@@ -347,14 +334,14 @@ export default function UsersPage() {
                       src={user.avatar || undefined}
                       alt={user.name}
                     />
-                    <AvatarFallback className="text-sm sm:text-base font-semibold bg-primary/10 text-primary">
+                    <AvatarFallback className="text-sm font-semibold bg-primary/10 text-primary">
                       {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
 
                   {/* User Information */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm sm:text-base md:text-lg leading-tight truncate">
+                    <h3 className="text-sm font-semibold leading-tight truncate">
                       {user.name}
                     </h3>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed truncate">
@@ -371,8 +358,8 @@ export default function UsersPage() {
                     {getUserActions(user) && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">

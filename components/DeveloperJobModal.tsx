@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Play, Check, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type JobStatus = "idle" | "loading" | "success" | "error";
 
@@ -18,6 +24,21 @@ interface Job {
   description: string;
   status: JobStatus;
 }
+
+/** Per-status card tint + button treatment, kept token-based for dark mode. */
+const jobStatusStyles: Record<
+  JobStatus,
+  { card: string; button: "default" | "destructive" | "secondary"; buttonClass?: string }
+> = {
+  idle: { card: "", button: "default" },
+  loading: { card: "border-info/40", button: "secondary" },
+  success: {
+    card: "border-success/40 bg-success/5",
+    button: "default",
+    buttonClass: "bg-success text-success-foreground hover:bg-success/90",
+  },
+  error: { card: "border-destructive/40 bg-destructive/5", button: "destructive" },
+};
 
 export default function DeveloperJobModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -109,121 +130,96 @@ export default function DeveloperJobModal() {
   }, []);
 
   return (
-    <AnimatePresence>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-md w-full max-h-[80vh] overflow-y-auto p-0 border-0 shadow-2xl rounded-2xl">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
-              <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                <Play className="w-5 h-5 text-blue-400" />
-                Developer Job Runner
-              </DialogTitle>
-            </div>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"
+            >
+              <Play className="h-4 w-4" />
+            </span>
+            <span>Developer Job Runner</span>
+          </DialogTitle>
+          <DialogDescription>
+            Execute maintenance jobs manually. Jobs run in the background.
+          </DialogDescription>
+        </DialogHeader>
 
-            {/* Content */}
-            <div className="p-6">
-              {isLoadingJobs ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                  <span className="ml-2 text-gray-500">Loading jobs...</span>
-                </div>
-              ) : jobs.length === 0 ? (
-                <div className="text-center py-12">
-                  <AlertCircle className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                  <p className="text-gray-500">No jobs available</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-500 mb-4">
-                    Select a job to execute manually. Jobs will run in the
-                    background.
-                  </p>
+        {isLoadingJobs ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Loading jobs...</span>
+          </div>
+        ) : jobs.length === 0 ? (
+          <div className="py-12 text-center">
+            <AlertCircle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">No jobs available</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {jobs.map((job) => {
+              const styles = jobStatusStyles[job.status];
+              return (
+                <Card key={job.id} className={`p-4 ${styles.card}`}>
+                  <div className="mb-3">
+                    <h3 className="text-sm font-medium">{job.name}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {job.description}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Schedule: {job.schedule}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => executeJob(job.id)}
+                    disabled={job.status === "loading"}
+                    size="sm"
+                    variant={styles.button}
+                    className={cn("w-full", styles.buttonClass)}
+                  >
+                    {job.status === "loading" ? (
+                      <>
+                        <Loader2 className="animate-spin" />
+                        Running...
+                      </>
+                    ) : job.status === "success" ? (
+                      <>
+                        <Check />
+                        Success
+                      </>
+                    ) : job.status === "error" ? (
+                      <>
+                        <AlertCircle />
+                        Failed
+                      </>
+                    ) : (
+                      <>
+                        <Play />
+                        Run Job
+                      </>
+                    )}
+                  </Button>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
-                  {jobs.map((job) => (
-                    <Card
-                      key={job.id}
-                      className={`p-4 border transition-all duration-300 ${
-                        job.status === "success"
-                          ? "border-green-500 bg-green-50"
-                          : job.status === "error"
-                            ? "border-red-500 bg-red-50"
-                            : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                            {job.name}
-                          </h3>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {job.description}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Schedule: {job.schedule}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          onClick={() => executeJob(job.id)}
-                          disabled={job.status === "loading"}
-                          size="sm"
-                          className={`flex-1 ${
-                            job.status === "loading"
-                              ? "bg-blue-500 text-white"
-                              : job.status === "success"
-                                ? "bg-green-500 text-white"
-                                : job.status === "error"
-                                  ? "bg-red-500 text-white"
-                                  : "bg-gray-900 text-white hover:bg-gray-800"
-                          }`}
-                        >
-                          {job.status === "loading" ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                              Running...
-                            </>
-                          ) : job.status === "success" ? (
-                            <>
-                              <Check className="w-4 h-4 mr-2" />
-                              Success
-                            </>
-                          ) : job.status === "error" ? (
-                            <>
-                              <AlertCircle className="w-4 h-4 mr-2" />
-                              Failed
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-4 h-4 mr-2" />
-                              Run Job
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="p-4 border-t bg-gray-50 text-xs text-gray-500 text-center rounded-b-2xl">
-              <p>Press <strong>Ctrl+Shift+J</strong> or <strong>Cmd+Shift+J</strong> to open/close</p>
-              <p className="mt-1">Press <strong>Esc</strong>, click <strong>X</strong>, or triple-tap on screen to close</p>
-              <p className="mt-1 text-xs text-gray-400">
-                Mobile: Triple-tap anywhere to open/close
-              </p>
-            </div>
-          </motion.div>
-        </DialogContent>
-      </Dialog>
-    </AnimatePresence>
+        <CardContent className="rounded-md bg-muted/50 p-3 text-center text-xs text-muted-foreground">
+          <p>
+            Press <strong className="font-semibold">Ctrl+Shift+J</strong> or{" "}
+            <strong className="font-semibold">Cmd+Shift+J</strong> to open/close
+          </p>
+          <p className="mt-1">
+            Press <strong className="font-semibold">Esc</strong>, click{" "}
+            <strong className="font-semibold">X</strong>, or triple-tap on screen to
+            close
+          </p>
+          <p className="mt-1">Mobile: Triple-tap anywhere to open/close</p>
+        </CardContent>
+      </DialogContent>
+    </Dialog>
   );
 }

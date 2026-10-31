@@ -37,7 +37,13 @@ export default function RootLayout({
           {children}
           <DeveloperJobModal />
         </ClientProviders>
-        <Toaster richColors />
+        {/* Single toast host for the whole application (rich colours, closable,
+            14px text to match the app typography scale) */}
+        <Toaster
+          richColors
+          closeButton
+          toastOptions={{ style: { fontSize: "0.875rem" } }}
+        />
       </body>
     </html>
   );

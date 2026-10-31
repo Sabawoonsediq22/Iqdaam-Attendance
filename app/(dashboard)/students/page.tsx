@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Users, Search, Plus } from "lucide-react";
@@ -14,6 +13,9 @@ import EditStudentModal from "@/components/EditStudentModal";
 import { useQueryClient } from "@tanstack/react-query";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { Loader } from "@/components/loader";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/empty-state";
+import { SearchInput } from "@/components/filters/search-input";
 import { getStudentAvatarSrc } from "@/lib/utils";
 
 export default function StudentsPage() {
@@ -120,38 +122,36 @@ export default function StudentsPage() {
     <div className="space-y-6">
       <OfflineIndicator />
 
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground mt-1">
-            Manage student information and class assignments
-          </p>
-        </div>
-        <AddStudentModal
-          onSuccess={handleStudentAdded}
-          trigger={
-            <Button className="cursor-pointer">
-              <Plus className="h-4 w-4 sm:mr-2" />
-              <p className="hidden sm:block">Add Student</p>
-            </Button>
-          }
-        />
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search students..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+      <PageHeader
+        description="Manage student information and class assignments"
+        actions={
+          <AddStudentModal
+            onSuccess={handleStudentAdded}
+            trigger={
+              <Button>
+                <Plus className="sm:mr-2" />
+                <p className="hidden sm:block">Add Student</p>
+              </Button>
+            }
           />
-        </div>
+        }
+      />
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search students..."
+        />
         <Badge variant="secondary">Total {students.length} students</Badge>
       </div>
 
       {studentsLoading || classesLoading ? (
-        <Loader variant="skeleton" shape="students" className="max-w-none" />
+        <Card>
+          <CardContent className="py-12">
+            <Loader variant="skeleton" shape="students" className="max-w-none" />
+          </CardContent>
+        </Card>
       ) : (
         <>
           <div className="space-y-6">
@@ -171,7 +171,7 @@ export default function StudentsPage() {
                     {classStudents.map((student) => (
                       <div
                         key={`${cls.id}-${student.id}`}
-                        className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-all duration-300"
+                        className="flex items-center gap-3 rounded-lg border p-4 cursor-pointer transition-colors hover:bg-muted/50"
                         onClick={() => handleStudentClick(student)}
                       >
                         <Avatar className="h-12 w-12">
@@ -200,17 +200,19 @@ export default function StudentsPage() {
             ))}
 
             {studentsByClass.length === 0 && searchTerm && (
-              <Card>
-                <CardContent className="flex items-center justify-center py-12">
-                  <div className="text-center">
-                    <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium">No students found</h3>
-                    <p className="text-muted-foreground">
-                      Try adjusting your search terms or add new students.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={Search}
+                title="No students found"
+                description="Try adjusting your search terms or add new students."
+              />
+            )}
+
+            {studentsByClass.length === 0 && !searchTerm && (
+              <EmptyState
+                icon={Users}
+                title="No students yet"
+                description="Add students to see them organized by class."
+              />
             )}
           </div>
 

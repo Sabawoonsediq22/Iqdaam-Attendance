@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -115,37 +118,48 @@ export default function EditFeeModal({
   if (!fee) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full sm:max-w-[500px] h-screen sm:max-h-[90vh] overflow-y-auto sm:rounded-2xl rounded-none p-0 border-0 shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-blue-400" />
-            Edit Fee Payment
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      {/* Edit form dialog: standard width scale (sm:max-w-lg) */}
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"
+            >
+              <DollarSign className="h-4 w-4" />
+            </span>
+            <span>Edit Fee Payment</span>
           </DialogTitle>
-        </div>
-        
-        <div className="mb-4 p-4 rounded-lg bg-muted/30 shadow-sm border m-6">
-          <div className="flex items-center gap-2 mb-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <h4 className="font-medium text-foreground">{fee.studentName}</h4>
+          <DialogDescription>
+            Update the amounts and payment date for this fee record.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Fee summary */}
+        <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <h4 className="text-sm font-medium text-foreground">
+              {fee.studentName}
+            </h4>
           </div>
-          <div className="flex items-center gap-2 mb-1">
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               Class: {fee.className} | Teacher: {fee.teacherName}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               Total Fee: {parseFloat(fee.feeToBePaid).toLocaleString()}؋
             </p>
           </div>
         </div>
-        <div className="p-2 sm:p-4 rounded-lg py-4 bg-muted/30 shadow border">
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="feeToBePaid"
@@ -224,30 +238,27 @@ export default function EditFeeModal({
                 </FormItem>
               )}
             />
-            <div className="flex sm:justify-end justify-center items-center space-x-2 mt-3">
+            <DialogFooter className="border-t pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="cursor-pointer w-full sm:w-auto"
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="cursor-pointer w-full sm:w-auto"
+                className="w-full sm:w-auto"
               >
-                {isSubmitting && (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                )}
+                {isSubmitting && <Loader2 className="animate-spin" />}
                 {isSubmitting ? "Updating..." : "Update Fee"}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
         </Form>
-        </div>
       </DialogContent>
     </Dialog>
   );

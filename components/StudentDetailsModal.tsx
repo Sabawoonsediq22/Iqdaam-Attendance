@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -24,7 +25,7 @@ import type {
   Attendance,
   StudentClass,
 } from "@/lib/schema";
-import { Edit, Trash2, X } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -147,7 +148,7 @@ function DeleteStudentModal({
         variant="outline"
         size="icon"
         aria-label={`Delete ${student.name}`}
-        className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
@@ -190,7 +191,7 @@ function StatTile({
   dot: string;
 }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-lg border bg-card p-4">
       <div className="flex items-center gap-2">
         <span className={cn("size-2 shrink-0 rounded-full", dot)} />
         <p className="truncate text-xs font-medium text-muted-foreground">
@@ -275,17 +276,6 @@ export default function StudentDetailsModal({
       ? studentClasses.filter((sc: StudentClass) => sc.studentId === student.id)
       : [];
   }, [student, studentClasses]);
-
-  useEffect(() => {
-    // Save the previous overflow value to restore it properly
-    const previousOverflow = document.body.style.overflow;
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = previousOverflow || "unset";
-    };
-  }, [isOpen]);
 
   // Effective selected class: use user selection or auto-select first
   const effectiveSelectedClass = useMemo(() => {
@@ -372,107 +362,91 @@ export default function StudentDetailsModal({
   }, [monthlyAttendance]);
 
   const distributionData = [
-    { name: "Present", value: monthlyStats.present, color: "hsl(142 71% 45%)" },
-    { name: "Absent", value: monthlyStats.absent, color: "hsl(4 90% 58%)" },
-    { name: "Late", value: monthlyStats.late, color: "hsl(45 93% 47%)" },
+    { name: "Present", value: monthlyStats.present, color: "hsl(var(--success))" },
+    { name: "Absent", value: monthlyStats.absent, color: "hsl(var(--destructive))" },
+    { name: "Late", value: monthlyStats.late, color: "hsl(var(--warning))" },
   ];
 
   if (!student) return null;
 
   return (
     <>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background">
-          {/* Header + tabs */}
-          <Tabs defaultValue="details" className="flex min-h-0 flex-1 flex-col">
-          <div className="border-b border-border bg-background">
-            <div className="flex items-center justify-between gap-3 px-4 py-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <button
-                  onClick={() => setShowImageViewer(true)}
-                  aria-label="View profile picture"
-                  className="cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
-                >
-                  <Avatar className="h-10 w-10 ring-2 ring-border">
-                    <AvatarImage
-                      src={getStudentAvatarSrc(student.avatar, student.gender)}
-                      alt={student.name}
-                    />
-                    <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
-                  </Avatar>
-                </button>
-                <div className="min-w-0">
-                  <p className="truncate font-semibold leading-tight">
-                    {student.name}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    Student profile
-                  </p>
-                </div>
+      {/* Detail dialog: standard width scale (sm:max-w-4xl) */}
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="sm:max-w-4xl">
+          <DialogHeader className="flex-row items-center justify-between space-y-0 pr-12">
+            <div className="flex min-w-0 items-center gap-3">
+              <button
+                onClick={() => setShowImageViewer(true)}
+                aria-label="View profile picture"
+                className="cursor-zoom-in rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Avatar className="h-10 w-10 ring-2 ring-border">
+                  <AvatarImage
+                    src={getStudentAvatarSrc(student.avatar, student.gender)}
+                    alt={student.name}
+                  />
+                  <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
+                </Avatar>
+              </button>
+              <div className="min-w-0">
+                <DialogTitle className="truncate">{student.name}</DialogTitle>
+                <p className="truncate text-xs text-muted-foreground">
+                  Student profile
+                </p>
               </div>
-              <div className="flex items-center gap-1.5">
-                {onEdit && (
-                  <Button
-                    onClick={() => {
-                      onClose();
-                      onEdit();
-                    }}
-                    variant="outline"
-                    size="icon"
-                    aria-label="Edit student"
-                    className="cursor-pointer"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                )}
+            </div>
+            {onEdit && (
+              <div className="flex shrink-0 items-center gap-1.5">
+                <Button
+                  onClick={() => {
+                    onClose();
+                    onEdit();
+                  }}
+                  variant="outline"
+                  size="icon"
+                  aria-label="Edit student"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
                 <DeleteStudentModal
                   student={student!}
                   onSuccess={() => {
                     onStudentChange?.();
                   }}
                 />
-                <Button
-                  onClick={onClose}
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Close"
-                  className="cursor-pointer"
+              </div>
+            )}
+          </DialogHeader>
+
+          <Tabs defaultValue="details" className="mt-0">
+            <div className="flex justify-center">
+              <TabsList className="w-full max-w-md gap-1 rounded-lg bg-muted p-1">
+                <TabsTrigger
+                  value="details"
+                  aria-label="View student details"
+                  className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
                 >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+                  Details
+                </TabsTrigger>
+                <TabsTrigger
+                  value="monthly"
+                  aria-label="View attendance records"
+                  className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                >
+                  Attendance
+                </TabsTrigger>
+                <TabsTrigger
+                  value="fees"
+                  aria-label="View fee records"
+                  className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
+                >
+                  Fees
+                </TabsTrigger>
+              </TabsList>
             </div>
 
-              <div className="flex justify-center px-4 pb-3">
-                <TabsList className="w-full max-w-md gap-1 rounded-lg bg-muted p-1">
-                  <TabsTrigger
-                    value="details"
-                    aria-label="View student details"
-                    className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
-                  >
-                    Details
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="monthly"
-                    aria-label="View attendance records"
-                    className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
-                  >
-                    Attendance
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="fees"
-                    aria-label="View fee records"
-                    className="flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs"
-                  >
-                    Fees
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </div>
-
-            <div className="flex min-h-0 flex-1 overflow-y-auto px-4 py-4">
-              <div className="mx-auto w-full max-w-4xl">
-                <TabsContent value="details" className="space-y-4 mt-0">
+            <TabsContent value="details" className="mt-4 space-y-4">
                   {/* Student information */}
                   <Card>
                     <CardHeader>
@@ -533,7 +507,7 @@ export default function StudentDetailsModal({
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="monthly" className="space-y-4 mt-0 pb-5">
+                <TabsContent value="monthly" className="mt-4 space-y-4">
                   {/* Filters */}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                     <div className="flex flex-1 flex-col gap-1">
@@ -603,7 +577,7 @@ export default function StudentDetailsModal({
                                   : "border-border bg-muted/40 text-muted-foreground",
                               )}
                             >
-                              <span className="text-[11px] font-medium">
+                              <span className="text-xs font-medium">
                                 {day.dayName}
                               </span>
                               <span className="text-sm font-semibold leading-none">
@@ -753,7 +727,7 @@ export default function StudentDetailsModal({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="fees" className="space-y-4 mt-0">
+                <TabsContent value="fees" className="mt-4 space-y-4">
                   <Card>
                     <CardHeader>
                       <CardTitle>Fee management</CardTitle>
@@ -777,7 +751,7 @@ export default function StudentDetailsModal({
                             return (
                               <div
                                 key={sc.id}
-                                className="rounded-xl border bg-card p-4"
+                                className="rounded-lg border bg-card p-4"
                               >
                                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                   <div className="min-w-0">
@@ -787,13 +761,8 @@ export default function StudentDetailsModal({
                                       </h4>
                                       {fee && (
                                         <Badge
-                                          variant="outline"
-                                          className={cn(
-                                            "shrink-0",
-                                            isPaid
-                                              ? "border-attendance-present/30 bg-attendance-present/10 text-attendance-present"
-                                              : "border-attendance-absent/30 bg-attendance-absent/10 text-attendance-absent",
-                                          )}
+                                          variant={isPaid ? "success" : "warning"}
+                                          className="shrink-0"
                                         >
                                           {isPaid ? "Paid" : "Pending"}
                                         </Badge>
@@ -848,11 +817,9 @@ export default function StudentDetailsModal({
                     </CardContent>
                   </Card>
                 </TabsContent>
-              </div>
-            </div>
           </Tabs>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <EditFeeModal
         fee={selectedFee}
@@ -862,18 +829,19 @@ export default function StudentDetailsModal({
       />
       {/* Image Viewer Modal */}
       <Dialog open={showImageViewer} onOpenChange={setShowImageViewer}>
-        <DialogContent className="sm:max-w-[600px] max-w-[430px] p-0">
-          <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="text-center">
-              {student.name} - Profile Picture
-            </DialogTitle>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{student.name} — Profile Picture</DialogTitle>
+            <DialogDescription>
+              Full-size profile picture for {student.name}.
+            </DialogDescription>
           </DialogHeader>
-          <div className="relative w-full h-[70vh]">
+          <div className="relative h-[60vh] w-full">
             <Image
               src={getStudentAvatarSrc(student.avatar, student.gender) || ""}
               alt={`${student.name} avatar`}
               fill
-              className="object-contain rounded-b-lg"
+              className="rounded-lg object-contain"
             />
           </div>
         </DialogContent>

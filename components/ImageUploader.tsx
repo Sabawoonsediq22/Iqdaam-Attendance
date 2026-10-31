@@ -6,7 +6,14 @@ import { Camera, Upload, SwitchCamera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ImageCropper from "./ImageCropper";
 import Webcam from "react-webcam";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ImageUploaderProps {
   onUpload?: (url: string) => void;
@@ -188,35 +195,36 @@ export default function ImageUploader({ onUpload, onCrop, mode = 'immediate' }: 
 
       {/* Camera Dialog */}
       <Dialog open={showCameraDialog} onOpenChange={setShowCameraDialog}>
-        <DialogContent className="sm:max-w-[400px] max-w-[90vw]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Take Photo</DialogTitle>
+            <DialogDescription>
+              Position the student in the frame, then capture.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="relative sm:w-64 sm:h-64 w-48 h-48 mx-auto bg-muted rounded-full overflow-hidden">
+            <div className="relative mx-auto h-48 w-48 overflow-hidden rounded-full bg-muted sm:h-64 sm:w-64">
               <Webcam
                 key={facingMode}
                 ref={webcamRef}
                 audio={false}
                 screenshotFormat="image/jpeg"
                 videoConstraints={videoConstraints}
-                className="w-full h-full object-cover rounded-full"
+                className="h-full w-full rounded-full object-cover"
               />
             </div>
-            <div className="flex justify-between items-center">
+            <DialogFooter className="border-t pt-4">
               <Button onClick={toggleCamera} variant="outline" size="sm">
-                <SwitchCamera className="h-4 w-4 mr-2" />
-                 <span className="hidden sm:inline">Switch Camera</span>
+                <SwitchCamera />
+                <span className="hidden sm:inline">Switch Camera</span>
               </Button>
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <Button onClick={stopCamera} variant="outline">
                   Cancel
                 </Button>
-                <Button onClick={capturePhoto}>
-                  Capture
-                </Button>
+                <Button onClick={capturePhoto}>Capture</Button>
               </div>
-            </div>
+            </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>

@@ -62,21 +62,19 @@ export default function ForgotPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
+              <CheckCircle className="w-8 h-8 text-success" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
-              Check Your Email
-            </CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardTitle>Check Your Email</CardTitle>
+            <CardDescription>
               We&apos;ve sent a password reset code to <strong>{email}</strong>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert>
+            <Alert variant="info">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 The code will expire in 10 minutes. Check your spam folder if
@@ -109,16 +107,14 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Mail className="w-8 h-8 text-blue-600" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Mail className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            Forgot Password?
-          </CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardTitle>Forgot Password?</CardTitle>
+          <CardDescription>
             Enter your email address and we&apos;ll send you a code to reset
             your password
           </CardDescription>
@@ -129,7 +125,7 @@ export default function ForgotPasswordPage() {
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -152,12 +148,12 @@ export default function ForgotPasswordPage() {
 
             <Button
               type="submit"
-              className="w-full cursor-pointer"
+              className="w-full"
               disabled={isLoading || !email.trim()}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="animate-spin" />
                   Sending Code...
                 </>
               ) : (
@@ -169,7 +165,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6 text-center">
             <Link
               href="/auth"
-              className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login

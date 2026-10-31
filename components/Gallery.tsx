@@ -41,16 +41,16 @@ export default function Gallery() {
   ];
 
   return (
-    <section id="gallery" className="py-20 bg-white">
+    <section id="gallery" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <div className="inline-block bg-amber-100 text-amber-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+          <div className="inline-block bg-warning/10 text-warning border border-warning/20 px-4 py-2 rounded-full text-sm font-semibold mb-6">
             Gallery
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-4">
             Our Center in Pictures
           </h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Take a visual tour of our modern facilities and vibrant learning
             environment
           </p>
@@ -60,7 +60,7 @@ export default function Gallery() {
           {images.map((image, index) => (
             <div
               key={index}
-              className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300"
+              className="group relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300"
               onClick={() => setSelectedImage(image.url)}
             >
               <Image
@@ -101,7 +101,7 @@ export default function Gallery() {
             height={600}
             src={selectedImage}
             alt="Full size"
-            className="max-w-full max-h-full rounded-2xl shadow-2xl"
+            className="max-w-full max-h-full rounded-xl shadow-lg"
             onClick={(e) => e.stopPropagation()}
           />
         </div>

@@ -23,6 +23,11 @@ import {
 } from "@/components/ui/table";
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PageHeader } from "@/components/page-header";
+import { StatsCard } from "@/components/stats-card";
+import { EmptyState } from "@/components/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -41,6 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Command,
+  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -64,11 +70,18 @@ import {
   Trash2,
   Check,
   ChevronsUpDown,
+  Hash,
+  Percent,
+  UserCheck,
+  UserX,
+  Inbox,
 } from "lucide-react";
 import { Loader } from "@/components/loader";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -162,7 +175,14 @@ interface Props {
   classes: Class[];
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+/* Chart palette derived from the design tokens so charts match the app
+   in both light and dark mode. */
+const COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+];
 
 export default function ReportsClient({ students, classes }: Props) {
   const router = useRouter();
@@ -418,82 +438,87 @@ export default function ReportsClient({ students, classes }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <p className="text-muted-foreground mt-1">
-            View and analyze attendance data with comprehensive reports
-          </p>
-        </div>
-        <div className="flex gap-2 flex-wrap ml-auto">
-          <Button variant="outline" onClick={fetchReport} disabled={loading}>
-            {loading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            Refresh
-          </Button>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Clock className="h-4 w-4" />
-                Schedule Reports
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>Schedule Options</DropdownMenuLabel>
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setScheduleType("weekly");
-                    setScheduleDialogOpen(true);
-                  }}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Schedule Weekly Report
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setScheduleType("monthly");
-                    setScheduleDialogOpen(true);
-                  }}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Schedule Monthly Report
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => fetchScheduledReports()}>
-                  <Clock className="h-4 w-4 mr-2" />
-                  Manage Scheduled Reports
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Dialog
-            open={scheduleDialogOpen}
-            onOpenChange={setScheduleDialogOpen}
-          >
-            <DialogContent className="p-8">
-              <DialogHeader>
-                <DialogTitle>Schedule Email Report</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter email address"
-                    value={scheduleEmail}
-                    onChange={(e) => setScheduleEmail(e.target.value)}
-                  />
+      <PageHeader
+        description="View and analyze attendance data with comprehensive reports"
+        actions={
+          <>
+            <Button variant="outline" onClick={fetchReport} disabled={loading}>
+              {loading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+              Refresh
+            </Button>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Clock />
+                  Schedule Reports
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuLabel>Schedule Options</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setScheduleType("weekly");
+                      setScheduleDialogOpen(true);
+                    }}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Schedule Weekly Report
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setScheduleType("monthly");
+                      setScheduleDialogOpen(true);
+                    }}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Schedule Monthly Report
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => fetchScheduledReports()}>
+                    <Clock className="h-4 w-4 mr-2" />
+                    Manage Scheduled Reports
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Dialog
+              open={scheduleDialogOpen}
+              onOpenChange={setScheduleDialogOpen}
+            >
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </span>
+                    <span>Schedule Email Report</span>
+                  </DialogTitle>
+                  <DialogDescription>
+                    Reports are sent automatically using the filters currently
+                    applied.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter email address"
+                      value={scheduleEmail}
+                      onChange={(e) => setScheduleEmail(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {scheduleType === "weekly"
+                      ? "Weekly reports are sent every Sunday at 9 AM."
+                      : "Monthly reports are sent on the 1st of each month at 9 AM."}
+                  </p>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Reports will be sent automatically based on current filters.
-                  {scheduleType === "weekly"
-                    ? "Weekly reports are sent every Sunday at 9 AM."
-                    : "Monthly reports are sent on the 1st of each month at 9 AM."}
-                </div>
-                <div className="flex gap-2 justify-end">
+                <DialogFooter className="border-t pt-4">
                   <Button
                     variant="outline"
                     onClick={() => setScheduleDialogOpen(false)}
@@ -504,211 +529,213 @@ export default function ReportsClient({ students, classes }: Props) {
                     onClick={scheduleReport}
                     disabled={scheduling || !scheduleEmail}
                   >
-                    {scheduling && (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    )}
+                    {scheduling && <Loader2 className="animate-spin" />}
                     {scheduling ? "Scheduling..." : "Schedule Report"}
                   </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
-            <DialogContent className="w-[95vw] sm:w-full sm:max-w-4xl h-[95vh] max-h-[95vh] p-4 sm:p-6">
-              <DialogHeader className="pb-4">
-                <DialogTitle className="text-lg sm:text-xl">
-                  Manage Scheduled Reports
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 overflow-y-auto max-h-[calc(95vh-140px)]">
-                {scheduledReports.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    No scheduled reports found
-                  </p>
-                ) : (
-                  <>
-                    {/* Desktop Table View */}
-                    <div className="hidden md:block rounded-md border border-card-border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Next Run</TableHead>
-                            <TableHead>Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {scheduledReports.map((report: ScheduledReport) => (
-                            <TableRow key={report.id}>
-                              <TableCell
-                                className="font-medium max-w-[200px] truncate"
-                                title={report.email}
-                              >
-                                {report.email}
-                              </TableCell>
-                              <TableCell className="capitalize">
-                                {report.type}
-                              </TableCell>
-                              <TableCell>
-                                <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                    report.isActive
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-red-100 text-red-800"
-                                  }`}
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
+              <DialogContent className="sm:max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"
+                    >
+                      <Clock className="h-4 w-4" />
+                    </span>
+                    <span>Manage Scheduled Reports</span>
+                  </DialogTitle>
+                  <DialogDescription>
+                    Pause, resume or remove recurring email reports.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  {scheduledReports.length === 0 ? (
+                    <EmptyState
+                      bare
+                      icon={Inbox}
+                      title="No scheduled reports"
+                      description="Schedule a weekly or monthly report from the Schedule Reports menu."
+                    />
+                  ) : (
+                    <>
+                      {/* Desktop Table View */}
+                      <div className="hidden md:block rounded-md border border-card-border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Email</TableHead>
+                              <TableHead>Type</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Next Run</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {scheduledReports.map((report: ScheduledReport) => (
+                              <TableRow key={report.id}>
+                                <TableCell
+                                  className="font-medium max-w-[200px] truncate"
+                                  title={report.email}
                                 >
-                                  {report.isActive ? "Active" : "Stopped"}
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
-                                {format(new Date(report.nextRun), "PPP 'at' p")}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex gap-1">
-                                  {report.isActive ? (
+                                  {report.email}
+                                </TableCell>
+                                <TableCell className="capitalize">
+                                  {report.type}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant={report.isActive ? "success" : "danger"}
+                                  >
+                                    {report.isActive ? "Active" : "Stopped"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                  {format(new Date(report.nextRun), "PPP 'at' p")}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-1">
+                                    {report.isActive ? (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() =>
+                                          manageScheduledReport(report.id, "stop")
+                                        }
+                                        className="h-8 w-8 p-0"
+                                        title="Stop report"
+                                      >
+                                        <Square className="h-3 w-3" />
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() =>
+                                          manageScheduledReport(
+                                            report.id,
+                                            "resume"
+                                          )
+                                        }
+                                        className="h-8 w-8 p-0"
+                                        title="Resume report"
+                                      >
+                                        <Play className="h-3 w-3" />
+                                      </Button>
+                                    )}
                                     <Button
                                       size="sm"
                                       variant="outline"
                                       onClick={() =>
-                                        manageScheduledReport(report.id, "stop")
+                                        manageScheduledReport(report.id, "remove")
                                       }
-                                      className="h-8 w-8 p-0"
-                                      title="Stop report"
+                                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                      title="Remove report"
                                     >
-                                      <Square className="h-3 w-3" />
+                                      <Trash2 className="h-3 w-3" />
                                     </Button>
-                                  ) : (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() =>
-                                        manageScheduledReport(
-                                          report.id,
-                                          "resume"
-                                        )
-                                      }
-                                      className="h-8 w-8 p-0"
-                                      title="Resume report"
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Mobile Card View */}
+                      <div className="md:hidden space-y-4">
+                        {scheduledReports.map((report: ScheduledReport) => (
+                          <Card key={report.id}>
+                            <div className="space-y-4 p-4">
+                              {/* Header with email and status */}
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <p
+                                    className="text-sm font-semibold leading-tight"
+                                    title={report.email}
+                                  >
+                                    {report.email}
+                                  </p>
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <Badge variant="secondary" className="capitalize">
+                                      {report.type}
+                                    </Badge>
+                                    <Badge
+                                      variant={report.isActive ? "success" : "danger"}
                                     >
-                                      <Play className="h-3 w-3" />
-                                    </Button>
-                                  )}
+                                      {report.isActive ? "Active" : "Stopped"}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Next run info */}
+                              <div className="rounded-lg bg-muted/50 p-3">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                                  <div>
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                      Next Run
+                                    </p>
+                                    <p className="text-sm font-semibold">
+                                      {format(
+                                        new Date(report.nextRun),
+                                        "MMM dd, yyyy 'at' HH:mm"
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Action buttons */}
+                              <div className="flex gap-2 border-t border-border/50 pt-3">
+                                {report.isActive ? (
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() =>
-                                      manageScheduledReport(report.id, "remove")
+                                      manageScheduledReport(report.id, "stop")
                                     }
-                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                                    title="Remove report"
+                                    className="flex-1"
                                   >
-                                    <Trash2 className="h-3 w-3" />
+                                    <Square />
+                                    Stop
                                   </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    {/* Mobile Card View */}
-                    <div className="md:hidden space-y-4">
-                      {scheduledReports.map((report: ScheduledReport) => (
-                        <Card key={report.id} className="p-4 shadow-sm">
-                          <div className="space-y-4">
-                            {/* Header with email and status */}
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <p
-                                  className="font-semibold text-sm wrap-break-word leading-tight"
-                                  title={report.email}
-                                >
-                                  {report.email}
-                                </p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <span className="capitalize text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
-                                    {report.type}
-                                  </span>
-                                  <span
-                                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                                      report.isActive
-                                        ? "bg-green-50 text-green-700 border border-green-200"
-                                        : "bg-red-50 text-red-700 border border-red-200"
-                                    }`}
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      manageScheduledReport(report.id, "resume")
+                                    }
+                                    className="flex-1"
                                   >
-                                    {report.isActive ? "Active" : "Stopped"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Next run info */}
-                            <div className="bg-muted/50 rounded-lg p-3">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <div>
-                                  <p className="text-xs font-medium text-muted-foreground">
-                                    Next Run
-                                  </p>
-                                  <p className="text-sm font-semibold">
-                                    {format(
-                                      new Date(report.nextRun),
-                                      "MMM dd, yyyy 'at' HH:mm"
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Action buttons */}
-                            <div className="flex gap-2 pt-3 border-t border-border/50">
-                              {report.isActive ? (
+                                    <Play />
+                                    Resume
+                                  </Button>
+                                )}
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() =>
-                                    manageScheduledReport(report.id, "stop")
+                                    manageScheduledReport(report.id, "remove")
                                   }
-                                  className="flex-1 h-9 text-xs font-medium"
+                                  className="flex-1 border-destructive/20 text-destructive hover:border-destructive/40 hover:text-destructive"
                                 >
-                                  <Square className="h-3 w-3 mr-1.5" />
-                                  Stop
+                                  <Trash2 />
+                                  Remove
                                 </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    manageScheduledReport(report.id, "resume")
-                                  }
-                                  className="flex-1 h-9 text-xs font-medium"
-                                >
-                                  <Play className="h-3 w-3 mr-1.5" />
-                                  Resume
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  manageScheduledReport(report.id, "remove")
-                                }
-                                className="flex-1 h-9 text-xs font-medium text-destructive hover:text-destructive border-destructive/20 hover:border-destructive/40"
-                              >
-                                <Trash2 className="h-3 w-3 mr-1.5" />
-                                Remove
-                              </Button>
+                              </div>
                             </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </>
-                )}
-                <div className="flex gap-2 justify-end pt-4 border-t mt-4">
+                          </Card>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <DialogFooter className="border-t pt-4">
                   <Button
                     variant="outline"
                     onClick={() => setManageDialogOpen(false)}
@@ -716,36 +743,37 @@ export default function ReportsClient({ students, classes }: Props) {
                   >
                     Close
                   </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="cursor-pointer bg-gray-100">
-                <Download className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40" align="end">
-              <DropdownMenuLabel>Export Options</DropdownMenuLabel>
-              <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={exportToCSV}>
-                  <Download className="h-4 w-4 mr-2" />
-                  CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={exportToExcel}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Excel
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={exportToPDF}>
-                  <Download className="h-4 w-4 mr-2" />
-                  PDF
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" aria-label="Export report">
+                  <Download />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40" align="end">
+                <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onSelect={exportToCSV}>
+                    <Download className="h-4 w-4 mr-2" />
+                    CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={exportToExcel}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={exportToPDF}>
+                    <Download className="h-4 w-4 mr-2" />
+                    PDF
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      />
 
       {/* Filters */}
       <Card>
@@ -757,10 +785,10 @@ export default function ReportsClient({ students, classes }: Props) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <div>
-              <label className="text-sm font-medium">Report Type</label>
+            <div className="space-y-2">
+              <Label htmlFor="report-type">Report Type</Label>
               <Select value={reportType} onValueChange={setReportType}>
-                <SelectTrigger>
+                <SelectTrigger id="report-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -771,9 +799,10 @@ export default function ReportsClient({ students, classes }: Props) {
               </Select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Start Date</label>
+            <div className="space-y-2">
+              <Label htmlFor="start-date">Start Date</Label>
               <Input
+                id="start-date"
                 type="date"
                 value={startDate ? format(startDate, "yyyy-MM-dd") : ""}
                 onChange={(e) => {
@@ -788,9 +817,10 @@ export default function ReportsClient({ students, classes }: Props) {
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium">End Date</label>
+            <div className="space-y-2">
+              <Label htmlFor="end-date">End Date</Label>
               <Input
+                id="end-date"
                 type="date"
                 value={endDate ? format(endDate, "yyyy-MM-dd") : ""}
                 onChange={(e) => {
@@ -805,10 +835,10 @@ export default function ReportsClient({ students, classes }: Props) {
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Class</label>
+            <div className="space-y-2">
+              <Label htmlFor="class-filter">Class</Label>
               <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger>
+                <SelectTrigger id="class-filter">
                   <SelectValue placeholder="All Classes" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60 overflow-y-auto">
@@ -822,8 +852,8 @@ export default function ReportsClient({ students, classes }: Props) {
               </Select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Student</label>
+            <div className="space-y-2">
+              <Label>Student</Label>
               <Popover
                 open={studentOpen}
                 onOpenChange={(open) => {
@@ -851,10 +881,7 @@ export default function ReportsClient({ students, classes }: Props) {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="w-full p-0 shadow-lg border-0"
-                  align="start"
-                >
+                <PopoverContent className="w-full p-0" align="start">
                   <Command shouldFilter={false} className="rounded-lg">
                     <CommandInput
                       placeholder="Search by name or student ID..."
@@ -864,9 +891,7 @@ export default function ReportsClient({ students, classes }: Props) {
                     />
                     <CommandList className="max-h-64">
                       {filteredStudents.length === 0 && (
-                        <div className="py-6 text-center text-sm text-muted-foreground">
-                          No student found.
-                        </div>
+                        <CommandEmpty>No student found.</CommandEmpty>
                       )}
                       <CommandGroup className="p-2">
                         {!studentQuery.trim() && (
@@ -936,11 +961,9 @@ export default function ReportsClient({ students, classes }: Props) {
       </Card>
 
       {error && (
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <p className="text-destructive">{error}</p>
-          </CardContent>
-        </Card>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {loading && (
@@ -958,70 +981,38 @@ export default function ReportsClient({ students, classes }: Props) {
       {reportData && !loading && (
         <>
           {/* Summary Statistics */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-medium text-muted-foreground">
-                  Total Records
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold text-primary">
-                  {reportData.summary.totalRecords}
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {reportData.startDate} to {reportData.endDate}
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title="Total Records"
+              value={reportData.summary.totalRecords}
+              icon={Hash}
+              tone="primary"
+              description={`${reportData.startDate} to ${reportData.endDate}`}
+            />
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-medium text-muted-foreground">
-                  Attendance Rate
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold text-primary">
-                  {reportData.summary.attendanceRate.toFixed(1)}%
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Present + Late / Total
-                </p>
-              </CardContent>
-            </Card>
+            <StatsCard
+              title="Attendance Rate"
+              value={`${reportData.summary.attendanceRate.toFixed(1)}%`}
+              icon={Percent}
+              tone="primary"
+              description="Present + Late / Total"
+            />
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-medium text-muted-foreground">
-                  Total Present
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold text-attendance-present">
-                  {reportData.summary.presentCount}
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Student days
-                </p>
-              </CardContent>
-            </Card>
+            <StatsCard
+              title="Total Present"
+              value={reportData.summary.presentCount}
+              icon={UserCheck}
+              tone="success"
+              description="Student days"
+            />
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-medium text-muted-foreground">
-                  Total Absent
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold text-attendance-absent">
-                  {reportData.summary.absentCount}
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Student days
-                </p>
-              </CardContent>
-            </Card>
+            <StatsCard
+              title="Total Absent"
+              value={reportData.summary.absentCount}
+              icon={UserX}
+              tone="danger"
+              description="Student days"
+            />
           </div>
 
           {/* Charts */}
@@ -1044,9 +1035,21 @@ export default function ReportsClient({ students, classes }: Props) {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="present" stackId="a" fill="#00C49F" />
-                      <Bar dataKey="late" stackId="a" fill="#FFBB28" />
-                      <Bar dataKey="absent" stackId="a" fill="#FF8042" />
+                      <Bar
+                        dataKey="present"
+                        stackId="a"
+                        fill="hsl(var(--success))"
+                      />
+                      <Bar
+                        dataKey="late"
+                        stackId="a"
+                        fill="hsl(var(--warning))"
+                      />
+                      <Bar
+                        dataKey="absent"
+                        stackId="a"
+                        fill="hsl(var(--destructive))"
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -1091,7 +1094,7 @@ export default function ReportsClient({ students, classes }: Props) {
                             cx="50%"
                             cy="50%"
                             outerRadius={80}
-                            fill="#8884d8"
+                            fill="hsl(var(--chart-1))"
                             dataKey="present"
                           >
                             {classes
@@ -1162,7 +1165,7 @@ export default function ReportsClient({ students, classes }: Props) {
                                             COLORS[globalIndex % COLORS.length],
                                         }}
                                       />
-                                      <span className="text-[0.60rem] font-medium">
+                                      <span className="text-xs font-medium">
                                         {cls.name}
                                       </span>
                                     </div>
@@ -1185,60 +1188,51 @@ export default function ReportsClient({ students, classes }: Props) {
                     </p>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={[
-                            {
-                              name: "Present",
-                              value: reportData.summary.presentCount,
-                              color: "#00C49F",
-                            },
-                            {
-                              name: "Late",
-                              value: reportData.summary.lateCount,
-                              color: "#FFBB28",
-                            },
-                            {
-                              name: "Absent",
-                              value: reportData.summary.absentCount,
-                              color: "#FF8042",
-                            },
-                          ]}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {[
-                            {
-                              name: "Present",
-                              value: reportData.summary.presentCount,
-                              color: "#00C49F",
-                            },
-                            {
-                              name: "Late",
-                              value: reportData.summary.lateCount,
-                              color: "#FFBB28",
-                            },
-                            {
-                              name: "Absent",
-                              value: reportData.summary.absentCount,
-                              color: "#FF8042",
-                            },
-                          ].map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend
-                          layout="horizontal"
-                          verticalAlign="bottom"
-                          align="center"
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    {(() => {
+                      const statusDistribution = [
+                        {
+                          name: "Present",
+                          value: reportData.summary.presentCount,
+                          color: "hsl(var(--success))",
+                        },
+                        {
+                          name: "Late",
+                          value: reportData.summary.lateCount,
+                          color: "hsl(var(--warning))",
+                        },
+                        {
+                          name: "Absent",
+                          value: reportData.summary.absentCount,
+                          color: "hsl(var(--destructive))",
+                        },
+                      ];
+                      return (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                            <Pie
+                              data={statusDistribution}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={80}
+                              dataKey="value"
+                            >
+                              {statusDistribution.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend
+                              layout="horizontal"
+                              verticalAlign="bottom"
+                              align="center"
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </div>
@@ -1250,9 +1244,12 @@ export default function ReportsClient({ students, classes }: Props) {
                 </CardHeader>
                 <CardContent>
                   {reportData.attendance.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      No attendance records found for the selected filters
-                    </p>
+                    <EmptyState
+                      bare
+                      icon={Inbox}
+                      title="No attendance records"
+                      description="No records match the selected filters. Try widening the date range or clearing the filters."
+                    />
                   ) : (
                     <div className="rounded-md border border-card-border">
                       <Table>

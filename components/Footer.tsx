@@ -34,7 +34,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer id="footer" className="bg-slate-900 text-white relative">
+    <footer id="footer" className="bg-foreground text-background relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           <div>
@@ -44,7 +44,7 @@ export default function Footer() {
               </div>
               <span className="font-bold text-2xl">Iqdaam</span>
             </div>
-            <p className="text-slate-400 mb-6 leading-relaxed">
+            <p className="text-background/70 mb-6 leading-relaxed">
               Empowering students through quality education and innovative
               teaching methods since 2014.
             </p>
@@ -57,15 +57,15 @@ export default function Footer() {
               </button>
               <a href="https://www.facebook.com/profile.php?id=61554649776632&mibextid=ZbWKwL"
               target="_blank"
-                className="hover:scale-110 transition-transform hover:bg-blue-600 rounded w-8 h-8 flex items-center justify-center bg-slate-800"
+                className="hover:scale-110 transition-transform hover:bg-primary rounded-md w-8 h-8 flex items-center justify-center bg-background/10"
               >
-                <Facebook className="w-8 h-8 p-1 text-white" />
+                <Facebook className="w-8 h-8 p-1 text-background" />
               </a>
               <a href="https://www.instagram.com/abas_danish25?igsh=MWZ0NXNxNTNmZGI4bA=="
               target="_blank"
-                className="hover:scale-110 transition-transform hover:bg-blue-600 rounded w-8 h-8 flex items-center justify-center bg-slate-800"
+                className="hover:scale-110 transition-transform hover:bg-primary rounded-md w-8 h-8 flex items-center justify-center bg-background/10"
               >
-                <Instagram className="w-8 h-8 p-1 text-red-400" />
+                <Instagram className="w-8 h-8 p-1 text-destructive" />
               </a>
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function Footer() {
                 <li key={link.id}>
                   <button
                     onClick={() => scrollToSection(link.id)}
-                    className="text-slate-400 hover:text-white transition-colors"
+                    className="text-background/70 hover:text-background transition-colors"
                   >
                     {link.name}
                   </button>
@@ -88,7 +88,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-xl font-bold mb-6">Our Programs</h3>
-            <ul className="space-y-3 text-slate-400">
+            <ul className="space-y-3 text-background/70">
               <li>General English</li>
               <li>Grammar Classes</li>
               <li>Speaking Classes</li>
@@ -102,43 +102,43 @@ export default function Footer() {
             <h3 className="text-xl font-bold mb-6">Contact Us</h3>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-blue-400 mt-1 shrink-0" />
-                <span className="text-slate-400">
+                <MapPin className="w-5 h-5 text-primary mt-1 shrink-0" />
+                <span className="text-background/70">
                   Near Najaraan Street, Behsood District, Nangarhar Province,
                   Afghanistan
                 </span>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-blue-400 mt-1 shrink-0" />
-                <span className="text-slate-400">+93 711 163 551</span>
+                <Phone className="w-5 h-5 text-primary mt-1 shrink-0" />
+                <span className="text-background/70">+93 711 163 551</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-blue-400 mt-1 shrink-0" />
-                <span className="text-slate-400">iqdaam.info@gamil.com</span>
+                <Mail className="w-5 h-5 text-primary mt-1 shrink-0" />
+                <span className="text-background/70">iqdaam.info@gamil.com</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-800 pt-8">
+        <div className="border-t border-background/10 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-slate-400 text-sm mb-4 md:mb-0">
+            <p className="text-background/70 text-sm mb-4 md:mb-0">
               &copy; {new Date().getFullYear()} Iqdaam Educational Center. All
               rights reserved.
             </p>
             <div className="mb-4 md:mb-0">
               <Link
                 href="/auth"
-                className="text-slate-400 hover:text-white border-slate-700 hover:border-white underline"
+                className="text-background/70 hover:text-background border-background/20 hover:border-background underline"
               >
                 Admin/Teacher Login
               </Link>
             </div>
-            <div className="flex space-x-6 text-sm text-slate-400">
-              <a href="#" className="hover:text-white transition-colors">
+            <div className="flex space-x-6 text-sm text-background/70">
+              <a href="#" className="hover:text-background transition-colors">
                 Privacy Policy
               </a>
-              <a href="#" className="hover:text-white transition-colors">
+              <a href="#" className="hover:text-background transition-colors">
                 Terms of Service
               </a>
             </div>
@@ -146,15 +146,15 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-slate-800 pt-6 pb-4">
+      <div className="border-t border-background/10 pt-6 pb-4">
         <div className="text-center">
-          <p className="text-slate-500 font-medium">
+          <p className="text-background/60 font-medium">
             Developed with ❤️ and lots of coffee☕ by
             <a
               href="https://sabawoonsediqi.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 transition-colors ml-1 underline"
+              className="text-primary hover:text-primary/80 transition-colors ml-1 underline"
             >
               Eng. Sabawoon Sediqi
             </a>
@@ -164,7 +164,7 @@ export default function Footer() {
 
       <button
         onClick={openWhatsApp}
-        className="fixed bottom-8 right-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all z-40 cursor-pointer animate-bounce"
+        className="fixed bottom-8 right-8 rounded-full shadow-md hover:shadow-xl transform hover:scale-110 transition-all z-40 cursor-pointer animate-bounce"
         aria-label="Contact us on WhatsApp"
       >
         <Image

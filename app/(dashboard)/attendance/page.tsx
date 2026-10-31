@@ -7,6 +7,9 @@ import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/empty-state";
 import { AttendanceBadge } from "@/components/attendance-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -254,11 +257,11 @@ function AttendancePageContent() {
   const getBorderClass = (status?: string) => {
     switch (status) {
       case "present":
-        return "border-green-500";
+        return "border-success";
       case "absent":
-        return "border-red-500";
+        return "border-destructive";
       case "late":
-        return "border-amber-500";
+        return "border-warning";
       default:
         return "border-border";
     }
@@ -314,35 +317,30 @@ function AttendancePageContent() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-4 sm:space-y-6 sm:px-0">
+      <div className="space-y-6">
         <OfflineIndicator />
-        <div>
-          <p className="text-muted-foreground mt-1">
-            Mark student attendance for classes
-          </p>
-        </div>
+        <PageHeader description="Mark student attendance for classes" />
 
-        <div className="border rounded-lg p-3 sm:p-4 bg-muted/30 backdrop-blur-sm overflow-hidden">
-          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:items-end">
-            {/* Class Selector */}
-            <div className="flex-1">
-              <AttendanceClassSelector
-                classes={classes}
-                selectedClass={selectedClass}
-                onClassChange={setSelectedClass}
-              />
-            </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between rounded-lg border bg-muted/30 p-3 sm:p-4">
+          {/* Class Selector */}
+          <div className="min-w-0 flex-1">
+            <AttendanceClassSelector
+              classes={classes}
+              selectedClass={selectedClass}
+              onClassChange={setSelectedClass}
+            />
+          </div>
 
-            {/* Date Input */}
-            <div className="flex-3">
-              <label className="text-sm font-medium">Date</label>
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full sm:w-auto h-10"
-              />
-            </div>
+          {/* Date Input */}
+          <div className="min-w-0 space-y-2">
+            <Label htmlFor="attendance-date">Date</Label>
+            <Input
+              id="attendance-date"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full sm:w-auto"
+            />
           </div>
         </div>
 
@@ -361,7 +359,7 @@ function AttendancePageContent() {
                       </TooltipTrigger>
                       <TooltipContent
                         side="top"
-                        className="bg-red-50 text-red-700 border-red-200"
+                        className="bg-destructive text-destructive-foreground border-destructive"
                       >
                         <p className="text-xs font-medium">Attendance Taken</p>
                       </TooltipContent>
@@ -384,17 +382,13 @@ function AttendancePageContent() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary">
                     {students.length} students
                   </Badge>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 cursor-pointer p-0"
-                      >
-                        <MoreVertical className="h-4 w-4" />
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40">
@@ -402,21 +396,21 @@ function AttendancePageContent() {
                         onClick={() => handleBulkStatusChange("present")}
                         className="cursor-pointer"
                       >
-                        <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                        <CheckCircle className="mr-2 text-success" />
                         Present
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleBulkStatusChange("late")}
                         className="cursor-pointer"
                       >
-                        <Clock className="h-4 w-4 mr-2 text-yellow-600" />
+                        <Clock className="mr-2 text-warning" />
                         Late
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleBulkStatusChange("absent")}
                         className="cursor-pointer"
                       >
-                        <XCircle className="h-4 w-4 mr-2 text-red-600" />
+                        <XCircle className="mr-2 text-destructive" />
                         Absent
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -424,33 +418,32 @@ function AttendancePageContent() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              {isStudentsLoading ? (
-                <div className="text-center py-12">
-                  <Loader
-                    variant="skeleton"
-                    shape="attendance-list"
-                    className="max-w-none"
-                  />
-                </div>
-              ) : students.length === 0 ? (
-                <div className="text-center py-12">
-                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-                  <p className="text-muted-foreground text-lg">
-                    No students found in this class
-                  </p>
-                  <p className="text-muted-foreground/70 text-sm mt-2">
-                    Add students to this class to start taking attendance
-                  </p>
-                </div>
-              ) : (
+            {isStudentsLoading ? (
+              <CardContent className="py-12">
+                <Loader
+                  variant="skeleton"
+                  shape="attendance-list"
+                  className="max-w-none"
+                />
+              </CardContent>
+            ) : students.length === 0 ? (
+              <CardContent>
+                <EmptyState
+                  bare
+                  icon={Users}
+                  title="No students found in this class"
+                  description="Add students to this class to start taking attendance"
+                />
+              </CardContent>
+            ) : (
+              <CardContent>
                 <div className="grid grid-cols-1 gap-3 sm:gap-4">
                   {students.map((student) => {
                     const studentAttendance = getStudentAttendance(student.id);
                     return (
                       <div
                         key={student.id}
-                        className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg sm:rounded-xl hover:shadow-md sm:hover:shadow-lg transition-all duration-200 bg-card hover:bg-card/50 ${getBorderClass(
+                        className={`flex items-center gap-3 sm:gap-4 rounded-lg border bg-card p-3 sm:p-4 transition-colors hover:bg-card/50 ${getBorderClass(
                           studentAttendance?.status
                         )}`}
                       >
@@ -463,7 +456,7 @@ function AttendancePageContent() {
                             src={getStudentAvatarSrc(student.avatar, student.gender)}
                             alt={student.name}
                           />
-                          <AvatarFallback className="text-sm sm:text-base font-semibold bg-primary/10 text-primary">
+                          <AvatarFallback className="text-sm font-semibold bg-primary/10 text-primary">
                             {getInitials(student.name)}
                           </AvatarFallback>
                         </Avatar>
@@ -471,7 +464,7 @@ function AttendancePageContent() {
                         {/* Student Information */}
                         <div className="flex-1 min-w-0">
                           <h3
-                            className="font-semibold text-sm sm:text-base md:text-lg leading-tight truncate cursor-pointer hover:text-primary transition-colors"
+                            className="text-sm font-semibold leading-tight truncate cursor-pointer hover:text-primary transition-colors"
                             onClick={() => handleStudentClick(student)}
                           >
                             {student.name}
@@ -502,7 +495,7 @@ function AttendancePageContent() {
                         {/* Attendance Action Buttons */}
                         <div className="flex gap-1 shrink-0">
                           <Button
-                            size="sm"
+                            size="icon"
                             variant={
                               studentAttendance?.status === "present"
                                 ? "default"
@@ -511,13 +504,13 @@ function AttendancePageContent() {
                             onClick={() =>
                               handleStatusChange(student.id, "present")
                             }
-                            className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:scale-105 transition-transform"
+                            className="hover:scale-105 transition-transform"
                             title="Mark Present"
                           >
-                            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <CheckCircle />
                           </Button>
                           <Button
-                            size="sm"
+                            size="icon"
                             variant={
                               studentAttendance?.status === "late"
                                 ? "default"
@@ -526,13 +519,13 @@ function AttendancePageContent() {
                             onClick={() =>
                               handleStatusChange(student.id, "late")
                             }
-                            className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:scale-105 transition-transform"
+                            className="hover:scale-105 transition-transform"
                             title="Mark Late"
                           >
-                            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <Clock />
                           </Button>
                           <Button
-                            size="sm"
+                            size="icon"
                             variant={
                               studentAttendance?.status === "absent"
                                 ? "destructive"
@@ -541,18 +534,18 @@ function AttendancePageContent() {
                             onClick={() =>
                               handleStatusChange(student.id, "absent")
                             }
-                            className="h-8 w-8 sm:h-9 sm:w-9 p-0 hover:scale-105 transition-transform"
+                            className="hover:scale-105 transition-transform"
                             title="Mark Absent"
                           >
-                            <XCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <XCircle />
                           </Button>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              )}
-            </CardContent>
+              </CardContent>
+            )}
 
             {/* Save Attendance Button */}
             <div className="flex justify-center items-center py-6 border-t">
@@ -561,14 +554,9 @@ function AttendancePageContent() {
                 disabled={
                   !hasPendingChanges || isSavingAttendance || isFutureDate
                 }
-                className="px-8 py-2 cursor-pointer hover:scale-105 transition-transform"
                 size="lg"
               >
-                {isSavingAttendance ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
+                {isSavingAttendance ? <Loader2 className="animate-spin" /> : <Save />}
                 {isFutureDate
                   ? "Future Date Not Allowed"
                   : isSavingAttendance
@@ -583,7 +571,7 @@ function AttendancePageContent() {
           </Card>
         ) : selectedClass ? (
           <Card>
-            <CardContent className="flex items-center justify-center py-12">
+            <CardContent className="py-12">
               <Loader
                 variant="skeleton"
                 shape="attendance-list"

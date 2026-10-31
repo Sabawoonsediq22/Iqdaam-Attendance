@@ -91,14 +91,14 @@ function VerifyCodeForm() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-green-50 via-white to-blue-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
+              <CheckCircle className="w-8 h-8 text-success" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Code Verified!</CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardTitle>Code Verified!</CardTitle>
+            <CardDescription>
               Your verification code has been confirmed
             </CardDescription>
           </CardHeader>
@@ -124,14 +124,14 @@ function VerifyCodeForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Shield className="w-8 h-8 text-blue-600" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Shield className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Verify Code</CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardTitle>Verify Code</CardTitle>
+          <CardDescription>
             Enter the 6-digit code sent to <strong>{email}</strong>
           </CardDescription>
         </CardHeader>
@@ -156,7 +156,7 @@ function VerifyCodeForm() {
                 disabled={isLoading}
                 autoFocus
               />
-              <p className="text-sm text-gray-500 text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Enter the 6-digit code from your email
               </p>
             </div>
@@ -175,7 +175,7 @@ function VerifyCodeForm() {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
+                  <Loader2 className="animate-spin" />
                   Verifying...
                 </>
               ) : (
@@ -186,22 +186,24 @@ function VerifyCodeForm() {
 
           <div className="mt-6 space-y-4">
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Didn&apos;t receive the code?{" "}
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={handleResendCode}
                   disabled={isLoading}
-                  className="text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50 cursor-pointer"
                 >
                   Resend Code
-                </button>
+                </Button>
               </p>
             </div>
 
             <div className="text-center">
               <Link
                 href="/auth/forgot-password"
-                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Try Different Email
@@ -216,7 +218,7 @@ function VerifyCodeForm() {
 export default function VerifyCodePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center p-8">
             <Loader className="w-6 h-6" />

@@ -58,28 +58,28 @@ export default function PendingApprovalPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-background p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-amber-100 to-orange-100 border border-amber-200">
-              <Clock className="h-8 w-8 text-amber-600" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-warning/20 bg-warning/10">
+              <Clock className="h-8 w-8 text-warning" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Account Pending Approval
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-muted-foreground">
             Your account is being reviewed by an administrator
           </p>
         </div>
 
         {/* Main Card */}
-        <Card className="shadow-xl border-0">
+        <Card>
           <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2 text-xl">
-              <Shield className="h-5 w-5 text-amber-500" />
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Shield className="h-5 w-5 text-warning" />
               Approval Required
             </CardTitle>
             <CardDescription>
@@ -88,7 +88,7 @@ export default function PendingApprovalPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Info Alert */}
-            <Alert>
+            <Alert variant="info">
               <Clock className="h-4 w-4" />
               <AlertDescription>
                 Please check back later. You will receive access once an administrator approves your account.
@@ -98,13 +98,13 @@ export default function PendingApprovalPage() {
 
             {/* Status Message */}
             {statusMessage && (
-              <Alert className={isApproved ? "border-green-200 bg-green-50 dark:border-green-700 dark:bg-green-950" : "border-blue-200 bg-blue-50 dark:border-blue-700 dark:bg-blue-950"}>
+              <Alert variant={isApproved ? "success" : "info"}>
                 {isApproved ? (
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4" />
                 ) : (
-                  <Clock className="h-4 w-4 text-blue-600" />
+                  <Clock className="h-4 w-4" />
                 )}
-                <AlertDescription className={isApproved ? "text-green-800 dark:text-green-200" : "text-blue-800 dark:text-blue-200"}>
+                <AlertDescription>
                   {statusMessage}
                 </AlertDescription>
               </Alert>
@@ -120,7 +120,7 @@ export default function PendingApprovalPage() {
               >
                 {isCheckingStatus ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin text-primary" />
+                    <Loader2 className="animate-spin" />
                     Checking...
                   </>
                 ) : (
@@ -140,7 +140,7 @@ export default function PendingApprovalPage() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Student Attendance Tracking System
           </p>
         </div>

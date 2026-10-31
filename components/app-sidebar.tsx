@@ -166,7 +166,7 @@ export function AppSidebar({ session: propSession }: AppSidebarProps) {
           aria-modal="true"
           aria-label="Navigation"
           className={cn(
-            "fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl outline-none transition-transform duration-200 ease-out md:hidden",
+            "fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-md outline-none transition-transform duration-200 ease-out md:hidden",
             mobileOpen ? "translate-x-0" : "-translate-x-full"
           )}
           style={{
@@ -228,7 +228,7 @@ export function AppSidebar({ session: propSession }: AppSidebarProps) {
         aria-label="Main"
       >
         {!isCollapsed && (
-          <span className="block px-3 pb-1 pt-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <span className="block px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Menu
           </span>
         )}
@@ -269,10 +269,10 @@ function Brand({ collapsed = false }: { collapsed?: boolean }) {
       />
       {!collapsed && (
         <span className="flex min-w-0 flex-col">
-          <span className="truncate text-[15px] font-semibold leading-tight">
+          <span className="truncate text-sm font-semibold leading-tight">
             Iqdaam
           </span>
-          <span className="truncate text-[11px] leading-tight text-muted-foreground">
+          <span className="truncate text-xs leading-tight text-muted-foreground">
             Attendance Portal
           </span>
         </span>
@@ -358,7 +358,7 @@ function NavLinkItem({
 
       {/* Count badge (expanded) / dot (collapsed) */}
       {badge !== null && !collapsed && (
-        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-semibold text-destructive-foreground">
+        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
           {badge}
         </span>
       )}

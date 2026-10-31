@@ -19,9 +19,13 @@ export function ThemeToggle() {
       size="icon"
       onClick={handleClick}
       data-testid="button-theme-toggle"
-      className="cursor-pointer border rounded-full border-gray-300 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+      className="rounded-full border-border transition-colors hover:border-foreground/40"
     >
-      {changeIcon ? <Sun className="h-5 w-5 transition-all" /> : <Moon className="h-6 w-6 transition-all dark:text-black" />}
+      {changeIcon ? (
+        <Sun className="transition-all" />
+      ) : (
+        <Moon className="transition-all" />
+      )}
       <span className="sr-only">Toggle theme</span>
     </Button>
   );

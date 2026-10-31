@@ -23,14 +23,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { Class, Student, StudentClass } from "@/lib/schema";
 import { Input } from "./ui/input";
 import { useState, useMemo, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
+import { PageHeader } from "@/components/page-header";
+import { EmptyState as SharedEmptyState } from "@/components/empty-state";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -225,13 +229,13 @@ function ViewStudentsModal({
         open={open}
         onOpenChange={setOpen}
         title="Class Students"
-        contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
+        contentClassName="sm:max-w-2xl"
       >
-        <div className="space-y-6 mt-4">
+        <div className="space-y-4">
           {/* Class Header */}
-          <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-4 border">
-            <h3 className="font-bold text-xl text-primary mb-1">{cls.name}</h3>
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-lg border bg-primary/5 p-4">
+            <h3 className="text-lg font-semibold text-primary">{cls.name}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               {enrolledStudents.length} student{enrolledStudents.length !== 1 ? "s" : ""} enrolled
             </p>
           </div>
@@ -240,12 +244,12 @@ function ViewStudentsModal({
           {enrolledStudents.length > 0 ? (
             <div className="space-y-3">
               {enrolledStudents.map((student) => (
-                <div key={student.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                  <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <div key={student.id} className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                     <User className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold">{student.name}</p>
+                    <p className="text-sm font-semibold">{student.name}</p>
                     <p className="text-sm text-muted-foreground">
                       {student.fatherName}
                     </p>
@@ -257,13 +261,12 @@ function ViewStudentsModal({
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">No students enrolled</h3>
-              <p className="text-muted-foreground mt-2">
-                This class currently has no enrolled students.
-              </p>
-            </div>
+            <SharedEmptyState
+              bare
+              icon={Users}
+              title="No students enrolled"
+              description="This class currently has no enrolled students."
+            />
           )}
         </div>
       </ResponsiveDialog>
@@ -325,53 +328,53 @@ function ViewDetailsModal({
         open={open}
         onOpenChange={setOpen}
         title="Class Details"
-        contentClassName="sm:max-w-[600px] max-w-[430px] rounded-lg max-h-[90vh] overflow-y-auto"
+        contentClassName="sm:max-w-2xl"
       >
-        <div className="space-y-6 mt-4">
+        <div className="space-y-4">
           {/* Class Header */}
-          <div className="bg-linear-to-r from-primary/10 to-primary/5 rounded-lg p-4 border">
-            <h3 className="font-bold text-xl text-primary mb-1">{cls.name}</h3>
+          <div className="rounded-lg border bg-primary/5 p-4">
+            <h3 className="text-lg font-semibold text-primary">{cls.name}</h3>
           </div>
 
           {/* Class Information Grid */}
           <div className="grid gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Teacher */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                   <UserCheck className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Teacher
                   </p>
-                  <p className="font-semibold">{cls.teacher}</p>
+                  <p className="text-sm font-semibold">{cls.teacher}</p>
                 </div>
               </div>
 
               {/* Time */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                   <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Schedule
                   </p>
-                  <p className="font-semibold">{cls.time}</p>
+                  <p className="text-sm font-semibold">{cls.time}</p>
                 </div>
               </div>
 
               {/* Start Date */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                   <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Start Date
                   </p>
-                  <p className="font-semibold">
+                  <p className="text-sm font-semibold">
                     {new Date(cls.startDate).toLocaleDateString("en-US", {
                       weekday: "long",
                       year: "numeric",
@@ -383,15 +386,15 @@ function ViewDetailsModal({
               </div>
 
               {/* End Date */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                   <Calendar className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     End Date
                   </p>
-                  <p className="font-semibold">
+                  <p className="text-sm font-semibold">
                     {cls.endDate
                       ? new Date(cls.endDate).toLocaleDateString("en-US", {
                           weekday: "long",
@@ -405,15 +408,15 @@ function ViewDetailsModal({
               </div>
 
               {/* Student Count */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Enrolled Students
                   </p>
-                  <p className="font-semibold">
+                  <p className="text-sm font-semibold">
                     {studentCount} student{studentCount !== 1 ? "s" : ""}
                   </p>
                 </div>
@@ -422,13 +425,13 @@ function ViewDetailsModal({
 
             {/* Description */}
             {cls.description && (
-              <div className="p-4 bg-muted/30 rounded-lg border">
+              <div className="rounded-lg border bg-muted/30 p-4">
                 <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-muted-foreground mb-2">
+                    <p className="mb-2 text-sm font-medium text-muted-foreground">
                       Description
                     </p>
                     <p className="text-sm leading-relaxed">{cls.description}</p>
@@ -535,207 +538,198 @@ function EditClassModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <AnimatePresence>
-        {open && (
-          <DialogContent className="max-w-full w-full h-full sm:h-auto sm:max-w-4xl sm:rounded-lg p-0 border-0 shadow-2xl md:h-[90vh]">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b bg-linear-to-r from-gray-900 to-gray-800 text-white">
-              <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
-                <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                Edit Class
-              </DialogTitle>
-            </div>
-            <div className="flex flex-col lg:flex-row h-full overflow-hidden">
-              {/* Left side - information section */}
-              <div className="sm:flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-                <div className="max-w-lg mx-auto">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-tight mb-6">
-                    Edit Class
-                  </h2>
+      {/* Split form dialog: standard width scale (sm:max-w-4xl) */}
+      <DialogContent className="sm:max-w-4xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary"
+            >
+              <PencilIcon className="h-4 w-4" />
+            </span>
+            <span>Edit Class</span>
+          </DialogTitle>
+          <DialogDescription>
+            Modify class details such as name, teacher, schedule, and dates.
+          </DialogDescription>
+        </DialogHeader>
 
-                  <div className="space-y-4 sm:space-y-6">
-                    <div className="flex gap-3 sm:gap-4">
-                      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <BookOpen
-                          className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                          Modify class details such as name, teacher, schedule, and dates.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 sm:gap-4">
-                      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <FileText
-                          className="w-5 h-5 sm:w-6 sm:h-6 text-primary"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                          Ensure all information is accurate before saving changes.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-[1fr_1.25fr] lg:items-start">
+              {/* Guidance panel */}
+              <div className="space-y-3 rounded-lg border bg-muted/30 p-4 sm:p-6">
+                <div className="flex gap-3">
+                  <span
+                    aria-hidden
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+                  >
+                    <BookOpen className="h-5 w-5" />
+                  </span>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Modify class details such as name, teacher, schedule, and
+                    dates.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <span
+                    aria-hidden
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+                  >
+                    <FileText className="h-5 w-5" />
+                  </span>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    Ensure all information is accurate before saving changes.
+                  </p>
                 </div>
               </div>
-              {/* Right side - form section */}
-              <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-white dark:bg-gray-950">
-                <div className="max-w-md mx-auto">
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-4 sm:space-y-6"
-                    >
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Class Name *</FormLabel>
-                            <FormControl>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a class name" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <ScrollArea className="h-[200px] w-full">
-                                    <SelectGroup>
-                                      <SelectLabel className="font-semibold">
-                                        Academic Series
-                                      </SelectLabel>
-                                      {ACADEMIC_CLASS_NAMES.map((className) => (
-                                        <SelectItem key={className} value={className}>
-                                          {className}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectGroup>
-                                    <SelectGroup>
-                                      <SelectLabel className="font-semibold mt-2">
-                                        Skill Classes
-                                      </SelectLabel>
-                                      {SKILL_CLASS_NAMES.map((className) => (
-                                        <SelectItem key={className} value={className}>
-                                          {className}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectGroup>
-                                  </ScrollArea>
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="teacher"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Teacher *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter teacher name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="time"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Time *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Select time" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="startDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Start Date *</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="endDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>End Date (Optional)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="date"
-                                {...field}
-                                value={field.value || ""}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Textarea
-                                placeholder="Enter class description (optional)"
-                                className="resize-none"
-                                {...field}
-                                value={field.value || ""}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setOpen(false)}
-                          disabled={isSubmitting}
-                          className="w-full sm:w-auto"
+
+              {/* Form */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class Name *</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
                         >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full sm:w-auto"
-                        >
-                          {isSubmitting && (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          )}
-                          {isSubmitting ? "Updating..." : "Update Class"}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </div>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a class name" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <ScrollArea className="h-[200px] w-full">
+                              <SelectGroup>
+                                <SelectLabel className="font-semibold">
+                                  Academic Series
+                                </SelectLabel>
+                                {ACADEMIC_CLASS_NAMES.map((className) => (
+                                  <SelectItem key={className} value={className}>
+                                    {className}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                              <SelectGroup>
+                                <SelectLabel className="font-semibold mt-2">
+                                  Skill Classes
+                                </SelectLabel>
+                                {SKILL_CLASS_NAMES.map((className) => (
+                                  <SelectItem key={className} value={className}>
+                                    {className}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </ScrollArea>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="teacher"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Teacher *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter teacher name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Select time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date *</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Date (Optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter class description (optional)"
+                          className="resize-none"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
-          </DialogContent>
-        )}
-      </AnimatePresence>
+
+            <DialogFooter className="border-t pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto"
+              >
+                {isSubmitting && <Loader2 className="animate-spin" />}
+                {isSubmitting ? "Updating..." : "Update Class"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
     </Dialog>
   );
 }
@@ -879,7 +873,7 @@ function ClassCard({
 
   return (
     <Card
-      className={`relative overflow-hidden border-2 shadow-lg bg-linear-to-br from-card via-card/95 to-card/90 hover:shadow-xl group ${
+      className={`relative group ${
         isSelected ? "border-primary ring-2 ring-primary/20" : ""
       }`}
     >
@@ -890,119 +884,84 @@ function ClassCard({
           onCheckedChange={() => onSelect?.(cls.id)}
         />
       </div>
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-0" />
 
-      {/* Beautiful light background header */}
-      <div className="bg-linear-to-r from-primary/5 via-primary/8 to-primary/5 border-b border-primary/10">
-        <CardHeader className="relative pb-4">
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10 border border-primary/20 shadow-sm">
-                <BookOpenCheck className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-bold text-lg bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                  {cls.name}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-secondary/50">
-                    <Users className="h-3 w-3 text-muted-foreground" />
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
-                  >
-                    {studentCount} student{studentCount !== 1 ? "s" : ""}
-                  </Badge>
-                </div>
-              </div>
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <BookOpenCheck className="h-5 w-5" />
             </div>
-            <div className="flex items-center gap-2">
-              {isMobile ? (
-                <Drawer>
-                  <DrawerTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent className="max-h-[90vh]">
-                    <DrawerHeader>
-                      <DrawerTitle>Actions</DrawerTitle>
-                    </DrawerHeader>
-                    <div className="p-4 space-y-2">{menuItems}</div>
-                  </DrawerContent>
-                </Drawer>
-              ) : (
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    asChild
-                    className="cursor-pointer rounded-full"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    {menuItems}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </CardTitle>
-        </CardHeader>
-      </div>
-
-      <CardContent className="space-y-2 mt-3 relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-center gap-3 px-3 bg-muted/30 rounded-lg border border-border/50">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Teacher
-              </p>
-              <p className="font-semibold text-sm truncate">{cls.teacher}</p>
+            <div>
+              <p className="text-lg font-semibold">{cls.name}</p>
+              <div className="mt-1">
+                <Badge variant="secondary">
+                  {studentCount} student{studentCount !== 1 ? "s" : ""}
+                </Badge>
+              </div>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            {isMobile ? (
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Class actions">
+                    <MoreVertical />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent className="max-h-[90vh]">
+                  <DrawerHeader>
+                    <DrawerTitle>Actions</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="p-4 space-y-2">{menuItems}</div>
+                </DrawerContent>
+              </Drawer>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Class actions">
+                    <MoreVertical />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {menuItems}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </CardTitle>
+      </CardHeader>
 
-          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Schedule
-              </p>
-              <p className="font-semibold text-sm truncate">{cls.time}</p>
-            </div>
+      <CardContent className="space-y-2 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="rounded-lg border bg-muted/40 p-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              Teacher
+            </p>
+            <p className="mt-0.5 truncate text-sm font-semibold">{cls.teacher}</p>
+          </div>
+
+          <div className="rounded-lg border bg-muted/40 p-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              Schedule
+            </p>
+            <p className="mt-0.5 truncate text-sm font-semibold">{cls.time}</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-3 p-3 bg-muted/20 rounded-lg border border-border/40">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Duration
-            </p>
-            <p className="font-semibold text-sm">
-              {new Date(cls.startDate).toLocaleDateString()}
-              {cls.endDate &&
-                ` - ${new Date(cls.endDate).toLocaleDateString()}`}
-            </p>
-          </div>
+        <div className="rounded-lg border bg-muted/40 p-3">
+          <p className="text-xs font-medium text-muted-foreground">
+            Duration
+          </p>
+          <p className="mt-0.5 text-sm font-semibold">
+            {new Date(cls.startDate).toLocaleDateString()}
+            {cls.endDate &&
+              ` - ${new Date(cls.endDate).toLocaleDateString()}`}
+          </p>
         </div>
 
         <div className="pt-2">
-          <Button
-            variant="default"
-            size="sm"
-            className="w-full h-10 bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group"
-            onClick={handleTakeAttendance}
-          >
-            <CheckCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+          <Button className="w-full" onClick={handleTakeAttendance}>
+            <CheckCircle />
             Take Attendance
           </Button>
         </div>
@@ -1011,39 +970,29 @@ function ClassCard({
   );
 }
 
-// Empty State Component
+// Empty State Component — delegates to the shared EmptyState so the classes
+// grid matches every other page (offline keeps its destructive tint + wording).
 function EmptyState({ isOffline = false }: { isOffline?: boolean }) {
   if (isOffline) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <WifiOff className="w-6 h-6 text-red-600" />
-            </div>
-            <h3 className="text-lg font-medium">No Internet Connection</h3>
-            <p className="text-muted-foreground mb-4">
-              Unable to load classes. Please check your internet connection and
-              try again.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="col-span-full">
+        <SharedEmptyState
+          icon={WifiOff}
+          title="No Internet Connection"
+          description="Unable to load classes. Please check your internet connection and try again."
+        />
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium">No classes yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Get started by creating your first class.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="col-span-full">
+      <SharedEmptyState
+        icon={BookOpen}
+        title="No classes yet"
+        description="Get started by creating your first class."
+      />
+    </div>
   );
 }
 
@@ -1184,28 +1133,24 @@ export default function ClassesClient() {
   return (
     <div className="space-y-6">
       <OfflineIndicator />
+      <PageHeader description="Create and manage your classes, schedules, and rosters" />
       {/* Bulk delete control bar */}
       {selectedClassIds.length > 0 && (
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border rounded">
-          <div className="flex sm:flex-row flex-col items-center justify-between px-4 py-3 space-y-4 sm:space-y-0">
+        <div className="sticky top-0 z-30 rounded-lg border bg-background/95 backdrop-blur">
+          <div className="flex flex-col items-center justify-between gap-4 px-4 py-3 sm:flex-row sm:space-y-0">
             <div className="flex items-center gap-3">
-              <p className="font-medium">
+              <p className="text-sm font-medium">
                 {selectedClassIds.length} class{selectedClassIds.length > 1 ? "es" : ""} selected
               </p>
-              <div>
-              {selectedClassIds.length > 0 && (
-            <Button onClick={handleSelectAll} variant="outline" size="sm">
-              Select All Classes
-            </Button>
-          )}
-            </div>
+              <Button onClick={handleSelectAll} variant="outline" size="sm">
+                Select All Classes
+              </Button>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedClassIds([])}
-                className="cursor-pointer"
               >
                 Clear Selection
               </Button>
@@ -1213,7 +1158,6 @@ export default function ClassesClient() {
                 variant="destructive"
                 size="sm"
                 onClick={() => setIsBulkDeleteModalOpen(true)}
-                className="cursor-pointer"
               >
                 Delete Selected
               </Button>
