@@ -141,7 +141,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="w-full">
+        <Button variant="default" className="sm:w-40 w-full">
           <Plus />
           Add Class
         </Button>

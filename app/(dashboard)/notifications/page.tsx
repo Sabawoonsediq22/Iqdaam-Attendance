@@ -488,7 +488,7 @@ export default function NotificationsPage() {
               }`}
             >
               <CardContent className="p-6">
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4 pt-6">
                   <div className="shrink-0">
                     {getNotificationIcon(notification.type)}
                   </div>

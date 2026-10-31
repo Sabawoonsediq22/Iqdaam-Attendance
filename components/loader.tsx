@@ -241,10 +241,9 @@ function StudentsSkeleton() {
         {[3, 3].map((count, i) => (
           <div
             key={i}
-            className="rounded-xl border border-card-border bg-card p-4"
           >
             {/* Class header */}
-            <div className="mb-3 flex items-center gap-2">
+            <div className="my-3 flex items-center gap-2">
               <SkeletonBlock className="h-5 w-5 shrink-0 rounded-md" />
               <SkeletonBlock className="h-3.5 w-28 rounded-lg" />
               <SkeletonBlock className="ml-auto h-5 w-14 rounded-full" />

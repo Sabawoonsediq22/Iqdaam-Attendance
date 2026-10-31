@@ -128,9 +128,9 @@ export default function StudentsPage() {
           <AddStudentModal
             onSuccess={handleStudentAdded}
             trigger={
-              <Button>
+              <Button className="w-full ">
                 <Plus className="sm:mr-2" />
-                <p className="hidden sm:block">Add Student</p>
+                <p>Add Student</p>
               </Button>
             }
           />
@@ -143,7 +143,7 @@ export default function StudentsPage() {
           onChange={setSearchTerm}
           placeholder="Search students..."
         />
-        <Badge variant="secondary">Total {students.length} students</Badge>
+        <Badge variant="secondary" className="w-30 ml-auto">Total {students.length} students</Badge>
       </div>
 
       {studentsLoading || classesLoading ? (

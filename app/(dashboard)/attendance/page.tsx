@@ -321,9 +321,9 @@ function AttendancePageContent() {
         <OfflineIndicator />
         <PageHeader description="Mark student attendance for classes" />
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between rounded-lg border bg-muted/30 p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row rounded-lg border bg-muted/30 p-3 sm:p-4">
           {/* Class Selector */}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 sm:w-64 sm:flex-none">
             <AttendanceClassSelector
               classes={classes}
               selectedClass={selectedClass}
@@ -332,14 +332,14 @@ function AttendancePageContent() {
           </div>
 
           {/* Date Input */}
-          <div className="min-w-0 space-y-2">
+          <div className="min-w-0 space-y-2 sm:w-48 sm:flex-none">
             <Label htmlFor="attendance-date">Date</Label>
             <Input
               id="attendance-date"
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full sm:w-auto"
+              className="w-full"
             />
           </div>
         </div>

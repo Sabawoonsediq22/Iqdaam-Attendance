@@ -168,17 +168,17 @@ export default function DashboardView() {
     {
       name: "Present",
       value: stats?.presentToday || 0,
-      color: "hsl(var(--attendance-present))",
+      color: "hsl(var(--success))",
     },
     {
       name: "Late",
       value: stats?.lateToday || 0,
-      color: "hsl(var(--attendance-late))",
+      color: "hsl(var(--warning))",
     },
     {
       name: "Absent",
       value: stats?.absentToday || 0,
-      color: "hsl(var(--attendance-absent))",
+      color: "hsl(var(--destructive))",
     },
   ];
 
@@ -357,7 +357,7 @@ export default function DashboardView() {
               <Users className="h-5 w-5" />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-14 sm:pb-0">
             <div
               className="text-2xl font-semibold tracking-tight"
               data-testid="value-students"
@@ -372,7 +372,7 @@ export default function DashboardView() {
             </div>
             <Link
               href={"/students"}
-              className="absolute bottom-2 right-2 text-xs text-muted-foreground hover:underline"
+              className="absolute bottom-4 right-4 text-xs text-muted-foreground hover:underline sm:right-6"
             >
               View list
               <ArrowRight className="inline-block h-3 w-3 ml-1" />
@@ -444,7 +444,7 @@ export default function DashboardView() {
           </CardContent>
         </Card>
 
-        <Card data-testid="stats-absent-today" className="relative bg-card">
+        <Card data-testid="stats-absent-today" className="flex flex-col bg-card">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Absent Today
@@ -453,7 +453,7 @@ export default function DashboardView() {
               <UserX className="h-5 w-5" />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-1 flex-col">
             <div
               className="text-2xl font-semibold tracking-tight"
               data-testid="value-absent-today"
@@ -475,7 +475,7 @@ export default function DashboardView() {
             <Button
               variant="ghost"
               size="sm"
-              className="absolute -bottom-4 -right-34 h-auto px-2"
+              className="mt-1 self-end px-2"
               onClick={() => setIsAbsentModalOpen(true)}
             >
               View list

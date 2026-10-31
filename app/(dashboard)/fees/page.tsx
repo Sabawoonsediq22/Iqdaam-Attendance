@@ -214,7 +214,7 @@ export default function FeesPage() {
                 value={selectedStatus}
                 onValueChange={setSelectedStatus}
               >
-                <SelectTrigger className="sm:w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>

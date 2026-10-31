@@ -32,7 +32,7 @@ export function MonthFilter({ value, onChange }: MonthFilterProps) {
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-32">
+      <SelectTrigger className="w-full sm:w-48">
         <SelectValue placeholder="Month" />
       </SelectTrigger>
       <SelectContent>
