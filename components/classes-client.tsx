@@ -538,8 +538,8 @@ function EditClassModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      {/* Split form dialog: standard width scale (sm:max-w-4xl) */}
-      <DialogContent className="sm:max-w-4xl">
+      {/* Split form dialog: standard width scale (sm:max-w-xl) */}
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span
@@ -557,34 +557,7 @@ function EditClassModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid gap-4 lg:grid-cols-[1fr_1.25fr] lg:items-start">
-              {/* Guidance panel */}
-              <div className="space-y-3 rounded-lg border bg-muted/30 p-4 sm:p-6">
-                <div className="flex gap-3">
-                  <span
-                    aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
-                  >
-                    <BookOpen className="h-5 w-5" />
-                  </span>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    Modify class details such as name, teacher, schedule, and
-                    dates.
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <span
-                    aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
-                  >
-                    <FileText className="h-5 w-5" />
-                  </span>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    Ensure all information is accurate before saving changes.
-                  </p>
-                </div>
-              </div>
-
+            <div className="border bg-muted/30 p-4 rounded shadow">
               {/* Form */}
               <div className="space-y-4">
                 <FormField
@@ -657,11 +630,12 @@ function EditClassModal({
                     </FormItem>
                   )}
                 />
+              <div className="flex flex-col gap-4 sm:flex-row">
                 <FormField
                   control={form.control}
                   name="startDate"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex-1">
                       <FormLabel>Start Date *</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
@@ -674,7 +648,7 @@ function EditClassModal({
                   control={form.control}
                   name="endDate"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex-1">
                       <FormLabel>End Date (Optional)</FormLabel>
                       <FormControl>
                         <Input
@@ -687,6 +661,8 @@ function EditClassModal({
                     </FormItem>
                   )}
                 />
+              </div>
+
                 <FormField
                   control={form.control}
                   name="description"
@@ -953,7 +929,7 @@ function ClassCard({
             Duration
           </p>
           <p className="mt-0.5 text-sm font-semibold">
-            {new Date(cls.startDate).toLocaleDateString()}
+            {new Date(cls.startDate).toLocaleDateString()} -
             {cls.endDate &&
               ` - ${new Date(cls.endDate).toLocaleDateString()}`}
           </p>

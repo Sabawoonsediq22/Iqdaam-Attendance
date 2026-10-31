@@ -187,7 +187,7 @@ export default function AddStudentModal({
         {/* Form */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="border p-4 rounded shadow">
+            <div className="border bg-muted/30 p-4 rounded shadow">
               <div className="space-y-4">
               <FormField
                 control={form.control}

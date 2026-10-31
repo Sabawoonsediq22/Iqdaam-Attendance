@@ -32,7 +32,7 @@ import { insertClassSchema } from "@/lib/schema";
 import { ACADEMIC_CLASS_NAMES, SKILL_CLASS_NAMES } from "@/lib/class-names";
 import { toast } from "sonner";
 import type { InsertClass } from "@/lib/schema";
-import { BookOpen, FileText, Plus, Loader2, Paintbrush } from "lucide-react";
+import { BookOpen, Plus, Loader2, Paintbrush } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
 import { TimepickerUI } from "timepicker-ui";
@@ -146,7 +146,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
           Add Class
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span
@@ -164,34 +164,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid gap-4 lg:grid-cols-[1fr_1.25fr] lg:items-start">
-              <div className="space-y-3 rounded-lg border bg-muted/30 p-4 sm:p-6">
-                <div className="flex gap-3">
-                  <span
-                    aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
-                  >
-                    <BookOpen className="h-5 w-5" />
-                  </span>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    Add a class by choosing its name and entering the teacher
-                    and schedule details.
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <span
-                    aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
-                  >
-                    <FileText className="h-5 w-5" />
-                  </span>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    Check the class dates before creating it. The end date and
-                    description are optional.
-                  </p>
-                </div>
-              </div>
-
+            <div className="border bg-muted/30 p-4 rounded shadow">
               <div className="space-y-4">
                 <FormField
                   control={form.control}

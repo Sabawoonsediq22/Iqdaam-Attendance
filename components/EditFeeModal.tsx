@@ -159,7 +159,8 @@ export default function EditFeeModal({
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="space-y-4 border bg-muted/30 p-4 rounded shadow">
             <FormField
               control={form.control}
               name="feeToBePaid"
@@ -238,6 +239,7 @@ export default function EditFeeModal({
                 </FormItem>
               )}
             />
+          </div>
             <DialogFooter className="border-t pt-4">
               <Button
                 type="button"

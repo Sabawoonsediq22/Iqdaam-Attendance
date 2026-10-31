@@ -19,7 +19,7 @@ interface HourFilterProps {
 export function HourFilter({ value, onChange }: HourFilterProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-32">
+      <SelectTrigger className="w-full sm:w-48">
         <SelectValue placeholder="Hour" />
       </SelectTrigger>
       <SelectContent>
