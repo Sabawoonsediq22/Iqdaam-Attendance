@@ -475,7 +475,7 @@ export default function DashboardView() {
             <Button
               variant="ghost"
               size="sm"
-              className="absolute bottom-1 right-1 h-auto px-2"
+              className="absolute -bottom-4 -right-34 h-auto px-2"
               onClick={() => setIsAbsentModalOpen(true)}
             >
               View list

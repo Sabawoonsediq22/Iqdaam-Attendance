@@ -184,7 +184,7 @@ function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-4" aria-hidden>
       {/* Key metrics grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-4">
         <SkeletonBlock className="h-24 rounded-xl sm:h-28" />
         <SkeletonBlock className="h-24 rounded-xl sm:h-28" />
         <SkeletonBlock className="h-24 rounded-xl sm:h-28" />
@@ -211,7 +211,7 @@ function UsersSkeleton({ rows }: { rows: number }) {
   return (
     <div className="flex flex-col gap-3" aria-hidden>
       {/* User tiles */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 pt-4">
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
@@ -304,7 +304,7 @@ function FeesSkeleton() {
   return (
     <div className="flex flex-col gap-4" aria-hidden>
       {/* Monthly summary cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 pt-4">
         <SkeletonBlock className="h-24 rounded-xl" />
         <SkeletonBlock className="h-24 rounded-xl" />
         <SkeletonBlock className="h-24 rounded-xl" />
@@ -335,7 +335,7 @@ function FeesSkeleton() {
 /* Notifications: list rows — filters/toolbar above are static */
 function NotificationsSkeleton({ rows }: { rows: number }) {
   return (
-    <div className="flex flex-col gap-3" aria-hidden>
+    <div className="flex flex-col gap-3 pt-4" aria-hidden>
       {/* Notification rows */}
       <div className="space-y-3">
         {Array.from({ length: rows }).map((_, i) => (
@@ -423,7 +423,7 @@ function ReportsSkeleton() {
   return (
     <div className="flex flex-col gap-4" aria-hidden>
       {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5 pt-4">
         {Array.from({ length: 5 }).map((_, i) => (
           <SkeletonBlock
             key={i}
@@ -479,7 +479,7 @@ function ReportsTableSkeleton({ rows }: { rows: number }) {
 /* Settings: profile card with avatar, fields and preference switches */
 function SettingsSkeleton() {
   return (
-    <div className="flex flex-col gap-4" aria-hidden>
+    <div className="flex flex-col gap-4 pt-4" aria-hidden>
       {/* Profile card */}
       <div className="rounded-xl border border-card-border bg-card p-4 sm:p-6">
         <div className="flex items-center gap-3 sm:gap-4">
