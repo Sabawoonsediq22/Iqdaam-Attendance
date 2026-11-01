@@ -12,6 +12,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { ALL_CLASS_NAMES } from "./class-names";
+import { parseTime, timeToMinutes } from "./time";
 
 // Relationships: Many-to-many with students via studentClasses, one-to-many with attendance
 export const classes = pgTable("classes", {
@@ -20,7 +21,10 @@ export const classes = pgTable("classes", {
     .default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   teacher: text("teacher").notNull(),
+  // Class start time — canonical `h:mm A` text format (e.g. "4:30 PM").
   time: text("time").notNull(),
+  // Optional class end time, same text format as `time` (e.g. "6:00 PM").
+  endTime: text("end_time"),
   startDate: date("start_date").notNull(),
   endDate: date("end_date"),
   description: text("description"),
@@ -249,11 +253,46 @@ export const insertClassSchema = createInsertSchema(classes, {
     ),
   teacher: (schema) => schema.min(1, "Teacher is required"),
   time: (schema) => schema.min(1, "Time is required"),
+  endTime: (schema) => schema.nullable().optional(),
   startDate: (schema) => schema.min(1, "Start date is required"),
   fee: (schema) => schema.min(0, "Fee must be non-negative"),
-}).omit({
-  id: true,
-});
+})
+  .omit({
+    id: true,
+  })
+  .superRefine((data, ctx) => {
+    // Times are plain `h:mm A` text — validate the format and make sure the
+    // end time is actually later than the start time (server- and client-side).
+    const start = parseTime(data.time);
+
+    if (data.time && !start) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["time"],
+        message: "Enter a valid time (e.g., 4:30 PM)",
+      });
+    }
+
+    if (!data.endTime) return; // end time is optional
+
+    const end = parseTime(data.endTime);
+    if (!end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["endTime"],
+        message: "Enter a valid time (e.g., 6:00 PM)",
+      });
+      return;
+    }
+
+    if (start && timeToMinutes(end) <= timeToMinutes(start)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["endTime"],
+        message: "End time must be later than start time",
+      });
+    }
+  });
 
 export const insertStudentSchema = createInsertSchema(students, {
   name: (schema) => schema.min(1, "Name is required"),

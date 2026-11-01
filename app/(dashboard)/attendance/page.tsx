@@ -437,7 +437,7 @@ function AttendancePageContent() {
               </CardContent>
             ) : (
               <CardContent>
-                <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid lg:grid-cols-2 gap-3 sm:gap-4">
                   {students.map((student) => {
                     const studentAttendance = getStudentAttendance(student.id);
                     return (

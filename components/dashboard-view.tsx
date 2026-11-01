@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import {
   Users,
@@ -367,9 +366,6 @@ export default function DashboardView() {
             <p className="mt-1 text-xs text-muted-foreground">
               Currently active students
             </p>
-            <div className="mt-3">
-              <Progress value={85} className="h-1" />
-            </div>
             <Link
               href={"/students"}
               className="absolute bottom-4 right-4 text-xs text-muted-foreground hover:underline sm:right-6"
@@ -403,12 +399,6 @@ export default function DashboardView() {
               <TrendingUp className="h-3 w-3" />
               {todayTrendText} from yesterday
             </p>
-            <div className="mt-3">
-              <Progress
-                value={parseFloat(stats?.todayAttendanceRate || "0")}
-                className="h-1"
-              />
-            </div>
           </CardContent>
         </Card>
 
@@ -435,12 +425,6 @@ export default function DashboardView() {
               <TrendingUp className={cn("h-3 w-3", weekTrendRotation)} />
               {weekTrendText} from last week
             </p>
-            <div className="mt-3">
-              <Progress
-                value={parseFloat(stats?.weekAttendanceRate || "0")}
-                className="h-1"
-              />
-            </div>
           </CardContent>
         </Card>
 
@@ -463,15 +447,6 @@ export default function DashboardView() {
             <p className="mt-1 text-xs text-muted-foreground">
               Students marked absent
             </p>
-            <div className="mt-3">
-              <Progress
-                value={
-                  ((stats?.absentToday || 0) / (stats?.totalStudents || 1)) *
-                  100
-                }
-                className="h-1"
-              />
-            </div>
             <Button
               variant="ghost"
               size="sm"

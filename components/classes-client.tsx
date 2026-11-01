@@ -76,6 +76,8 @@ import { parseISO, isWithinInterval, startOfMonth, endOfMonth } from "date-fns";
 import { ClassFilters } from "./filters";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
+import { ClassTimeFields } from "@/components/class-time-fields";
+import { formatTimeRange } from "@/lib/time";
 import AddStudentModal from "./AddStudentModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { Loader } from "./loader";
@@ -361,7 +363,9 @@ function ViewDetailsModal({
                   <p className="text-sm font-medium text-muted-foreground">
                     Schedule
                   </p>
-                  <p className="text-sm font-semibold">{cls.time}</p>
+                  <p className="text-sm font-semibold">
+                    {formatTimeRange(cls.time, cls.endTime)}
+                  </p>
                 </div>
               </div>
 
@@ -468,6 +472,7 @@ function EditClassModal({
       name: cls.name,
       teacher: cls.teacher,
       time: cls.time,
+      endTime: cls.endTime ?? "",
       startDate: cls.startDate,
       endDate: cls.endDate || undefined,
       description: cls.description || "",
@@ -477,12 +482,18 @@ function EditClassModal({
   const onSubmit = async (data: InsertClass) => {
     setIsSubmitting(true);
     try {
+      // Store NULL when the end time was cleared (column is nullable).
+      const payload: InsertClass = {
+        ...data,
+        endTime: data.endTime ? data.endTime : null,
+      };
+
       const response = await fetch(`/api/classes/${cls.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -493,7 +504,7 @@ function EditClassModal({
       // Optimistically update the cache
       queryClient.setQueryData<Class[]>(["/api/classes"], (oldClasses) =>
         oldClasses
-          ? oldClasses.map((c) => (c.id === cls.id ? { ...c, ...data } : c))
+          ? oldClasses.map((c) => (c.id === cls.id ? { ...c, ...payload } : c))
           : []
       );
 
@@ -617,19 +628,8 @@ function EditClassModal({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Time *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Select time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Start Time / End Time + duration */}
+                <ClassTimeFields />
               <div className="flex flex-col gap-4 sm:flex-row">
                 <FormField
                   control={form.control}
@@ -920,7 +920,9 @@ function ClassCard({
             <p className="text-xs font-medium text-muted-foreground">
               Schedule
             </p>
-            <p className="mt-0.5 truncate text-sm font-semibold">{cls.time}</p>
+            <p className="mt-0.5 truncate text-sm font-semibold">
+              {formatTimeRange(cls.time, cls.endTime)}
+            </p>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "./search-input";
 import { HourFilter } from "./hour-filter";
@@ -35,8 +35,7 @@ import type { InsertClass } from "@/lib/schema";
 import { BookOpen, Plus, Loader2, Paintbrush } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { humanizeError } from "@/lib/humanizeError";
-import { TimepickerUI } from "timepicker-ui";
-import "timepicker-ui/index.css";
+import { ClassTimeFields } from "@/components/class-time-fields";
 import {
   Select,
   SelectContent,
@@ -66,9 +65,6 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const timepickerRef = useRef<TimepickerUI | null>(null);
-  const [selectedTime, setSelectedTime] = useState("");
 
   const form = useForm<InsertClass>({
     resolver: zodResolver(insertClassSchema),
@@ -76,34 +72,12 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
       name: "",
       teacher: "",
       time: "",
+      endTime: "",
       startDate: "",
       endDate: "",
       description: "",
     },
   });
-
-  useEffect(() => {
-    if (!open || !inputRef.current) return;
-    const picker = new TimepickerUI(inputRef.current, {
-      ui: {
-        theme: "ai",
-        appendModalSelector: ".create-class-dialog",
-      },
-      callbacks: {
-        onConfirm: (data) => {
-          const time = `${data.hour}:${data.minutes}${data.type ? " " + data.type : ""}`;
-          setSelectedTime(time);
-          form.setValue("time", time);
-        },
-      },
-    });
-    picker.create();
-    timepickerRef.current = picker;
-    return () => {
-      picker.destroy();
-      timepickerRef.current = null;
-    };
-  }, [form, open]);
 
   const onSubmit = async (data: InsertClass) => {
     setIsSubmitting(true);
@@ -112,6 +86,8 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
         ...data,
         startDate: new Date(data.startDate),
         endDate: data.endDate ? new Date(data.endDate) : undefined,
+        // Store NULL when no end time was chosen (column is nullable).
+        endTime: data.endTime ? data.endTime : null,
       };
       const response = await fetch("/api/classes", {
         method: "POST",
@@ -136,7 +112,6 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
       toast.success("Class created successfully");
 
       form.reset();
-      setSelectedTime("");
       setOpen(false);
       onSuccess();
     } catch (error) {
@@ -154,7 +129,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
           Add Class
         </Button>
       </DialogTrigger>
-      <DialogContent className="create-class-dialog sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span
@@ -233,29 +208,8 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Time *</FormLabel>
-                      <FormControl>
-                        <Input
-                          ref={(node) => {
-                            inputRef.current = node;
-                            field.ref(node);
-                          }}
-                          type="text"
-                          placeholder="Select time"
-                          value={selectedTime}
-                          onClick={() => timepickerRef.current?.open()}
-                          readOnly
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Start Time / End Time + duration */}
+                <ClassTimeFields />
 
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <FormField
