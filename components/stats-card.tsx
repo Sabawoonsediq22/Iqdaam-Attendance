@@ -47,7 +47,7 @@ export function StatsCard({
   return (
     <Card
       data-testid={`stats-${testId}`}
-      className={cn("bg-card", className)}
+      className={cn("bg-card shadow", className)}
     >
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">

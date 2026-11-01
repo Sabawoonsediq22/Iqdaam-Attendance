@@ -538,7 +538,7 @@ function EditClassModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      {/* Split form dialog: standard width scale (sm:max-w-xl) */}
+      {/* Edit form dialog: standard width scale (sm:max-w-xl) */}
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -557,7 +557,7 @@ function EditClassModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="border bg-muted/30 p-4 rounded shadow">
+            <div className="rounded-lg border bg-muted/30 p-4">
               {/* Form */}
               <div className="space-y-4">
                 <FormField

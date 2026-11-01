@@ -167,7 +167,7 @@ export default function StudentsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {classStudents.map((student) => (
                       <div
                         key={`${cls.id}-${student.id}`}

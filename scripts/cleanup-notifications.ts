@@ -27,7 +27,10 @@ async function cleanupNotifications() {
       .delete(notifications)
       .where(lt(notifications.createdAt, sevenDaysAgo));
 
-    console.log(`Deleted ${result.rowCount} old notifications`);
+    // postgres-js results expose the affected-row count as `count`
+    const deleted = (result as { count?: number }).count ?? 0;
+
+    console.log(`Deleted ${deleted} old notifications`);
     console.log('Notification cleanup completed!');
   } catch (error) {
     console.error('Error during notification cleanup:', error);

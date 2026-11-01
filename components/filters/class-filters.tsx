@@ -67,6 +67,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+  const timepickerRef = useRef<TimepickerUI | null>(null);
   const [selectedTime, setSelectedTime] = useState("");
 
   const form = useForm<InsertClass>({
@@ -84,7 +85,10 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
   useEffect(() => {
     if (!open || !inputRef.current) return;
     const picker = new TimepickerUI(inputRef.current, {
-      ui: { theme: "ai" },
+      ui: {
+        theme: "ai",
+        appendModalSelector: ".create-class-dialog",
+      },
       callbacks: {
         onConfirm: (data) => {
           const time = `${data.hour}:${data.minutes}${data.type ? " " + data.type : ""}`;
@@ -94,7 +98,11 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
       },
     });
     picker.create();
-    return () => picker.destroy();
+    timepickerRef.current = picker;
+    return () => {
+      picker.destroy();
+      timepickerRef.current = null;
+    };
   }, [form, open]);
 
   const onSubmit = async (data: InsertClass) => {
@@ -146,7 +154,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
           Add Class
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="create-class-dialog sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span
@@ -164,7 +172,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="border bg-muted/30 p-4 rounded shadow">
+            <div className="rounded-lg border bg-muted/30 p-4">
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -240,6 +248,7 @@ function AddClassFormContent({ onSuccess }: { onSuccess: () => void }) {
                           type="text"
                           placeholder="Select time"
                           value={selectedTime}
+                          onClick={() => timepickerRef.current?.open()}
                           readOnly
                         />
                       </FormControl>

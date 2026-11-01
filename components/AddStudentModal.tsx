@@ -49,11 +49,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  BookOpen,
   Calendar,
   Check,
   ChevronDown,
-  ClipboardList,
   Clock,
   Info,
   Loader2,

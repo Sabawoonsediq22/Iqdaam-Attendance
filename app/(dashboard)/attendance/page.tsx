@@ -345,7 +345,7 @@ function AttendancePageContent() {
         </div>
 
         {selectedClass && selectedClassData ? (
-          <Card>
+          <Card className="shadow">
             <CardHeader>
               <div className="flex sm:items-center justify-between gap-3">
                 <div className="min-w-0">
@@ -437,7 +437,7 @@ function AttendancePageContent() {
               </CardContent>
             ) : (
               <CardContent>
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                   {students.map((student) => {
                     const studentAttendance = getStudentAttendance(student.id);
                     return (

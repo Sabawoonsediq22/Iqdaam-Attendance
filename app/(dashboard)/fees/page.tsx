@@ -230,7 +230,7 @@ export default function FeesPage() {
           <div className="text-end mr-2">
             <Badge variant="secondary">Total {filteredFees.length} fees</Badge>
           </div>
-          <div className="space-y-4">
+          <div className="space-y- grid lg:grid-cols-2 gap-4">
             {filteredFees.map((fee) => (
               <Card
                 key={fee.id}

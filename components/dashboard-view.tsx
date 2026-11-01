@@ -348,7 +348,7 @@ export default function DashboardView() {
 
       {/* Key Metrics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card data-testid="stats-students" className="relative bg-card">
+        <Card data-testid="stats-students" className="relative bg-card shadow">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Students
@@ -382,7 +382,7 @@ export default function DashboardView() {
 
         <Card
           data-testid="stats-today's-attendance"
-          className={cn("relative bg-card", todayCardBg)}
+          className={cn("relative bg-card shadow", todayCardBg)}
         >
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -414,7 +414,7 @@ export default function DashboardView() {
 
         <Card
           data-testid="stats-this-week"
-          className={cn("relative bg-card", weekCardBg)}
+          className={cn("relative bg-card shadow", weekCardBg)}
         >
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -444,7 +444,7 @@ export default function DashboardView() {
           </CardContent>
         </Card>
 
-        <Card data-testid="stats-absent-today" className="flex flex-col bg-card">
+        <Card data-testid="stats-absent-today" className="flex flex-col bg-card shadow">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Absent Today
@@ -488,7 +488,7 @@ export default function DashboardView() {
       {/* Charts and Activity Grid */}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Attendance Trends Chart */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 shadow">
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="min-w-0 flex-1">
@@ -554,7 +554,7 @@ export default function DashboardView() {
         </Card>
 
         {/* Attendance Distribution Pie Chart */}
-        <Card>
+        <Card className="shadow">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary shrink-0" />
@@ -608,7 +608,7 @@ export default function DashboardView() {
       {/* Bottom Section */}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Recent Activity */}
-        <Card>
+        <Card className="shadow">
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="min-w-0 flex-1">
@@ -682,7 +682,7 @@ export default function DashboardView() {
         {/* Quick Actions & System Status */}
         <div className="space-y-6">
           {/* Quick Actions */}
-          <Card>
+          <Card className="shadow">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary shrink-0" />
@@ -778,7 +778,7 @@ export default function DashboardView() {
           </Card>
 
           {/* System Status */}
-          <Card>
+          <Card className="shadow">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-success" />
